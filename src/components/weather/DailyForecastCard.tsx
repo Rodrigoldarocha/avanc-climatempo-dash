@@ -23,7 +23,10 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
     return <DailyForecastSkeleton />;
   }
 
-  if (error || !data?.data) {
+  const forecastData = Array.isArray(data?.data) ? data.data : [];
+  const hasData = forecastData.length > 0;
+
+  if (error || !hasData) {
     return (
       <div className="weather-card p-6 animate-fade-in">
         <div className="flex items-center gap-2 mb-4">
@@ -60,9 +63,9 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
       </div>
 
       <div className="space-y-3">
-        {data.data.map((day, index) => (
+        {forecastData.map((day, index) => (
           <div
-            key={day.date}
+            key={day.date || index}
             className="flex items-center justify-between p-4 rounded-xl bg-secondary/20 border border-border/20 hover:bg-secondary/40 transition-colors"
           >
             {/* Day & Icon */}
@@ -85,11 +88,11 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-blue-400 text-sm">
-                  {formatTemperature(day.temperature.min)}
+                  {formatTemperature(day.temperature?.min ?? 0)}
                 </span>
                 <div className="w-16 h-2 rounded-full bg-gradient-to-r from-blue-400 via-yellow-400 to-orange-400 opacity-60" />
                 <span className="text-orange-400 text-sm font-medium">
-                  {formatTemperature(day.temperature.max)}
+                  {formatTemperature(day.temperature?.max ?? 0)}
                 </span>
               </div>
             </div>
@@ -100,17 +103,17 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
                 <Droplets className="h-4 w-4 text-blue-400" />
                 <div className="text-sm">
                   <span className="font-medium">
-                    {day.rain?.probability || 0}%
+                    {day.rain?.probability ?? 0}%
                   </span>
                   <span className="text-muted-foreground text-xs ml-1">
-                    ({day.rain?.precipitation || 0}mm)
+                    ({day.rain?.precipitation ?? 0}mm)
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Wind className="h-4 w-4 text-slate-400" />
                 <span className="text-sm">
-                  {day.wind?.velocity_max || 0} km/h
+                  {day.wind?.velocity_max ?? 0} km/h
                 </span>
               </div>
             </div>
