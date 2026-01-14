@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCurrentWeather, formatTemperature } from "@/services/climatempo";
-import { WeatherIcon, WeatherStat } from "./WeatherIcon";
+import { WeatherIcon } from "./WeatherIcon";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Thermometer, Droplets, Wind, Gauge } from "lucide-react";
+import { Thermometer, Droplets, Wind, Gauge } from "lucide-react";
 import type { Location } from "@/data/locations";
 
 interface CurrentWeatherCardProps {
@@ -13,7 +13,7 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["currentWeather", location.climaTempoCod],
     queryFn: () => getCurrentWeather(location.climaTempoCod),
-    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+    refetchInterval: 5 * 60 * 1000,
     retry: 2,
   });
 
@@ -23,14 +23,9 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
 
   if (error || !data) {
     return (
-      <div className="weather-card p-6 animate-fade-in">
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">
-            Não foi possível carregar os dados do clima.
-          </p>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Verifique sua conexão e tente novamente.
-          </p>
+      <div className="weather-card p-4 animate-fade-in">
+        <div className="text-center py-6">
+          <p className="text-muted-foreground text-sm">Dados indisponíveis</p>
         </div>
       </div>
     );
@@ -39,107 +34,66 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
   const weather = data.data;
 
   return (
-    <div className="weather-card p-6 animate-fade-in">
-      {/* Location Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <MapPin className="h-5 w-5 text-primary" />
-        <div>
-          <h2 className="text-xl font-display font-semibold">
-            {location.city}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {location.state} • Agora
-          </p>
-        </div>
-      </div>
-
-      {/* Main Temperature Display */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <WeatherIcon condition={weather.icon} size="xl" />
+    <div className="weather-card p-4 animate-fade-in">
+      {/* Main Temperature */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <WeatherIcon condition={weather.icon} size="lg" />
           <div>
-            <div className="temperature-display text-6xl">
+            <div className="temperature-display text-3xl">
               {formatTemperature(weather.temperature)}
             </div>
-            <p className="text-muted-foreground capitalize mt-1">
+            <p className="text-[10px] text-muted-foreground capitalize">
               {weather.condition}
             </p>
           </div>
         </div>
         <div className="text-right">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Thermometer className="h-4 w-4" />
+          <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
+            <Thermometer className="h-3 w-3" />
             <span>Sensação</span>
           </div>
-          <div className="text-2xl font-semibold">
+          <div className="text-lg font-semibold font-display">
             {formatTemperature(weather.sensation)}
           </div>
         </div>
       </div>
 
-      {/* Weather Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-1">
-            <Droplets className="h-4 w-4 text-blue-400" />
-            <span className="text-xs text-muted-foreground">Umidade</span>
-          </div>
-          <div className="text-lg font-semibold">{weather.humidity}%</div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-1">
-            <Wind className="h-4 w-4 text-slate-400" />
-            <span className="text-xs text-muted-foreground">Vento</span>
-          </div>
-          <div className="text-lg font-semibold">
-            {weather.wind_velocity} km/h
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {weather.wind_direction}
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-1">
-            <Gauge className="h-4 w-4 text-green-400" />
-            <span className="text-xs text-muted-foreground">Pressão</span>
-          </div>
-          <div className="text-lg font-semibold">{weather.pressure} hPa</div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-1">
-            <Thermometer className="h-4 w-4 text-orange-400" />
-            <span className="text-xs text-muted-foreground">Sensação</span>
-          </div>
-          <div className="text-lg font-semibold">
-            {formatTemperature(weather.sensation)}
-          </div>
-        </div>
+      {/* Compact Stats */}
+      <div className="grid grid-cols-4 gap-1.5">
+        <StatItem icon={<Droplets className="h-3 w-3 text-sky-400" />} label="Umid" value={`${weather.humidity}%`} />
+        <StatItem icon={<Wind className="h-3 w-3 text-slate-400" />} label="Vento" value={`${weather.wind_velocity}`} />
+        <StatItem icon={<Gauge className="h-3 w-3 text-emerald-400" />} label="Press" value={`${weather.pressure}`} />
+        <StatItem icon={<span className="text-[8px] font-medium">{weather.wind_direction}</span>} label="Dir" value="" />
       </div>
     </div>
   );
 };
 
-const CurrentWeatherSkeleton = () => (
-  <div className="weather-card p-6">
-    <div className="flex items-center gap-2 mb-6">
-      <Skeleton className="h-5 w-5 rounded-full" />
-      <div>
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-4 w-24 mt-1" />
-      </div>
+const StatItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+  <div className="p-1.5 rounded-md bg-secondary/20 border border-border/15">
+    <div className="flex items-center gap-1 mb-0.5">
+      {icon}
+      <span className="text-[8px] text-muted-foreground">{label}</span>
     </div>
-    <div className="flex items-center justify-between mb-8">
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-24 w-24 rounded-full" />
+    {value && <div className="text-[10px] font-semibold">{value}</div>}
+  </div>
+);
+
+const CurrentWeatherSkeleton = () => (
+  <div className="weather-card p-4">
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-12 w-12 rounded-full" />
         <div>
-          <Skeleton className="h-16 w-32" />
-          <Skeleton className="h-4 w-24 mt-2" />
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-2.5 w-14 mt-1" />
         </div>
       </div>
     </div>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-4 gap-1.5">
       {[...Array(4)].map((_, i) => (
-        <Skeleton key={i} className="h-20 rounded-xl" />
+        <Skeleton key={i} className="h-10 rounded-md" />
       ))}
     </div>
   </div>

@@ -3,7 +3,7 @@ import { get72HourForecast, formatTemperature } from "@/services/climatempo";
 import { WeatherIcon } from "./WeatherIcon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Clock, Droplets, Wind } from "lucide-react";
+import { Clock, Droplets, AlertCircle } from "lucide-react";
 import type { Location } from "@/data/locations";
 
 interface HourlyForecastCardProps {
@@ -11,134 +11,136 @@ interface HourlyForecastCardProps {
 }
 
 export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["hourlyForecast", location.climaTempoCod],
     queryFn: () => get72HourForecast(location.climaTempoCod),
     retry: 2,
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 30 * 60 * 1000,
   });
 
   if (isLoading) {
     return <HourlyForecastSkeleton />;
   }
 
-  // Safely extract hourly data with null checks
-  const forecastData = data?.data || [];
-  const hasData = Array.isArray(forecastData) && forecastData.length > 0;
+  // Handle different API response structures
+  let forecastData: Array<{ date?: string; date_br?: string; hour_to_hour?: any[]; hourly?: any[] }> = [];
+  
+  if (data?.data) {
+    if (Array.isArray(data.data)) {
+      forecastData = data.data;
+    } else if (typeof data.data === 'object') {
+      const dataObj = data.data as { hour_to_hour?: any[] };
+      if (dataObj.hour_to_hour) {
+        forecastData = [data.data as typeof forecastData[0]];
+      }
+    }
+  }
 
-  // Flatten all hourly data with safety checks
-  const allHours = hasData
-    ? forecastData.flatMap((day) =>
-        Array.isArray(day?.hour_to_hour)
-          ? day.hour_to_hour.map((hour) => ({
-              ...hour,
-              date: day.date,
-              date_br: day.date_br,
-            }))
-          : []
-      )
-    : [];
+  // Extract hourly data
+  const allHours = forecastData.flatMap((day: any) => {
+    if (!day) return [];
+    const hours = day.hour_to_hour || day.hourly || [];
+    if (!Array.isArray(hours)) return [];
+    return hours.map((hour: any) => ({
+      ...hour,
+      date: day.date,
+      date_br: day.date_br,
+    }));
+  });
 
-  if (error || !hasData || allHours.length === 0) {
+  const hasData = allHours.length > 0;
+
+  if (error || !hasData) {
     return (
-      <div className="weather-card p-6 animate-fade-in">
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-display font-semibold">Previsão 72h</h3>
+      <div className="weather-card p-4 animate-fade-in">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-display font-semibold">Previsão 72h</h3>
+          </div>
+          <button 
+            onClick={() => refetch()}
+            className="text-xs text-primary hover:underline"
+          >
+            Tentar novamente
+          </button>
         </div>
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">
-            Não foi possível carregar a previsão horária.
-          </p>
+        <div className="flex items-center gap-3 py-6 justify-center text-muted-foreground">
+          <AlertCircle className="h-5 w-5" />
+          <p className="text-sm">Previsão horária indisponível para esta localidade</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="weather-card p-6 animate-fade-in">
-      <div className="flex items-center gap-2 mb-4">
-        <Clock className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-display font-semibold">Próximas 72 Horas</h3>
+    <div className="weather-card p-4 animate-fade-in">
+      <div className="flex items-center gap-2 mb-3">
+        <Clock className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-display font-semibold">Próximas Horas</h3>
+        <span className="text-[10px] text-muted-foreground ml-auto">
+          {allHours.length}h disponíveis
+        </span>
       </div>
 
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-3 pb-4">
-          {allHours.slice(0, 24).map((hour, index) => (
+      <ScrollArea className="w-full">
+        <div className="flex gap-2 pb-2">
+          {allHours.slice(0, 24).map((hour: any, index: number) => (
             <div
-              key={`${hour.date}-${hour.hour}-${index}`}
-              className="flex flex-col items-center p-3 rounded-xl bg-secondary/30 border border-border/30 min-w-[80px] hover:bg-secondary/50 transition-colors"
+              key={`${hour.date}-${hour.hour || index}-${index}`}
+              className="flex flex-col items-center p-2 rounded-lg bg-secondary/20 border border-border/20 min-w-[56px] hover:bg-secondary/40 transition-colors"
             >
-              <span className="text-xs text-muted-foreground font-medium">
-                {hour.hour}
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {hour.hour || `${index}h`}
               </span>
-              <WeatherIcon condition={hour.icon} size="sm" className="my-2" />
-              <span className="font-semibold text-sm">
-                {formatTemperature(hour.temp)}
+              <WeatherIcon condition={hour.icon || "1"} size="xs" className="my-1" />
+              <span className="font-semibold text-xs tabular-nums">
+                {Math.round(hour.temp || 0)}°
               </span>
-              <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                <Droplets className="h-3 w-3 text-blue-400" />
-                <span>{hour.rain}mm</span>
-              </div>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Wind className="h-3 w-3" />
-                <span>{hour.wind_velocity}</span>
-              </div>
+              {(hour.rain !== undefined && hour.rain > 0) && (
+                <div className="flex items-center gap-0.5 mt-1 text-[9px] text-sky-400">
+                  <Droplets className="h-2.5 w-2.5" />
+                  <span>{hour.rain}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* Daily Summary */}
-      {forecastData.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-border/30">
-          <h4 className="text-sm font-medium text-muted-foreground mb-3">
-            Resumo por Dia
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {forecastData
-              .filter((day) => Array.isArray(day?.hour_to_hour) && day.hour_to_hour.length > 0)
-              .map((day, index) => {
-                const temps = day.hour_to_hour.map((h) => h.temp || 0);
-                const minTemp = temps.length > 0 ? Math.min(...temps) : 0;
-                const maxTemp = temps.length > 0 ? Math.max(...temps) : 0;
-                const totalRain = day.hour_to_hour.reduce(
-                  (sum, h) => sum + (h.rain || 0),
-                  0
-                );
+      {/* Daily Summary - Compact */}
+      {forecastData.length > 1 && (
+        <div className="mt-3 pt-3 border-t border-border/20">
+          <div className="grid grid-cols-3 gap-2">
+            {forecastData.slice(0, 3).map((day: any, index: number) => {
+              const hours = day?.hour_to_hour || [];
+              if (!Array.isArray(hours) || hours.length === 0) return null;
+              
+              const temps = hours.map((h: any) => h.temp || 0);
+              const minTemp = Math.min(...temps);
+              const maxTemp = Math.max(...temps);
 
-                return (
-                  <div
-                    key={day.date || index}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <WeatherIcon
-                        condition={day.hour_to_hour[12]?.icon || day.hour_to_hour[0]?.icon || "1"}
-                        size="sm"
-                      />
-                      <div>
-                        <div className="font-medium text-sm">
-                          {index === 0
-                            ? "Hoje"
-                            : index === 1
-                            ? "Amanhã"
-                            : day.date_br || day.date}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {formatTemperature(minTemp)} /{" "}
-                          {formatTemperature(maxTemp)}
-                        </div>
-                      </div>
+              return (
+                <div
+                  key={day.date || index}
+                  className="flex items-center gap-2 p-2 rounded-md bg-muted/30"
+                >
+                  <WeatherIcon
+                    condition={hours[12]?.icon || hours[0]?.icon || "1"}
+                    size="xs"
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-medium truncate">
+                      {index === 0 ? "Hoje" : index === 1 ? "Amanhã" : day.date_br?.slice(0, 5)}
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-blue-400">
-                      <Droplets className="h-3 w-3" />
-                      <span>{totalRain.toFixed(1)}mm</span>
+                    <div className="text-[9px] text-muted-foreground">
+                      {Math.round(minTemp)}° / {Math.round(maxTemp)}°
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -147,14 +149,14 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
 };
 
 const HourlyForecastSkeleton = () => (
-  <div className="weather-card p-6">
-    <div className="flex items-center gap-2 mb-4">
-      <Skeleton className="h-5 w-5 rounded-full" />
-      <Skeleton className="h-6 w-40" />
+  <div className="weather-card p-4">
+    <div className="flex items-center gap-2 mb-3">
+      <Skeleton className="h-4 w-4 rounded" />
+      <Skeleton className="h-4 w-28" />
     </div>
-    <div className="flex gap-3 overflow-hidden">
-      {[...Array(8)].map((_, i) => (
-        <Skeleton key={i} className="h-32 w-20 rounded-xl flex-shrink-0" />
+    <div className="flex gap-2 overflow-hidden">
+      {[...Array(6)].map((_, i) => (
+        <Skeleton key={i} className="h-20 w-14 rounded-lg flex-shrink-0" />
       ))}
     </div>
   </div>

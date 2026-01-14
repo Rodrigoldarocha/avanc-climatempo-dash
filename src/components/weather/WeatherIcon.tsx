@@ -15,15 +15,16 @@ import { cn } from "@/lib/utils";
 
 interface WeatherIconProps {
   condition: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
 }
 
 const sizeClasses = {
-  sm: "h-6 w-6",
-  md: "h-10 w-10",
-  lg: "h-16 w-16",
-  xl: "h-24 w-24",
+  xs: "h-4 w-4",
+  sm: "h-5 w-5",
+  md: "h-8 w-8",
+  lg: "h-12 w-12",
+  xl: "h-16 w-16",
 };
 
 export const WeatherIcon = ({ condition, size = "md", className }: WeatherIconProps) => {
@@ -64,11 +65,7 @@ export const WeatherIcon = ({ condition, size = "md", className }: WeatherIconPr
     return <Sun className={cn(iconClass, "text-yellow-400")} />;
   };
 
-  return (
-    <div className="flex items-center justify-center animate-fade-in">
-      {getIcon()}
-    </div>
-  );
+  return <div className="flex items-center justify-center">{getIcon()}</div>;
 };
 
 interface WeatherStatProps {
