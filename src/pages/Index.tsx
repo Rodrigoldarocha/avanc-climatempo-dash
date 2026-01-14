@@ -8,7 +8,7 @@ import { HourlyForecastCard } from "@/components/weather/HourlyForecastCard";
 import { DailyForecastCard } from "@/components/weather/DailyForecastCard";
 import { HistoricalChart } from "@/components/weather/HistoricalChart";
 import { locations, type Location } from "@/data/locations";
-import { MapPin, RefreshCw, ArrowLeft, Home } from "lucide-react";
+import { MapPin, RefreshCw, ArrowLeft, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -31,9 +31,7 @@ const Index = () => {
   };
 
   const handleRefresh = () => {
-    if (selectedLocation) {
-      queryClient.invalidateQueries();
-    }
+    queryClient.invalidateQueries();
   };
 
   const renderDetailContent = () => {
@@ -42,7 +40,7 @@ const Index = () => {
     switch (activeTab) {
       case "current":
         return (
-          <div className="space-y-6 animate-fade-in">
+          <div className="grid gap-4 lg:grid-cols-2">
             <CurrentWeatherCard location={selectedLocation} />
             <HourlyForecastCard location={selectedLocation} />
           </div>
@@ -60,77 +58,68 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed inset-0 weather-gradient-bg opacity-50 pointer-events-none" />
+      <div className="fixed inset-0 weather-gradient-bg opacity-40 pointer-events-none" />
 
       <div className="relative z-10">
         <Header />
 
-        <main className="container px-4 md:px-6 py-6 max-w-7xl mx-auto">
+        <main className="container px-4 md:px-6 py-4 max-w-7xl mx-auto">
           {viewMode === "grid" ? (
-            /* Grid View - All Locations */
             <LocationGrid 
               onLocationSelect={handleLocationSelect}
               selectedLocation={selectedLocation}
             />
           ) : (
-            /* Detail View - Single Location */
             <>
-              {/* Top Controls */}
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
+              {/* Compact Controls */}
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2">
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={handleBackToGrid}
-                    className="gap-2"
+                    className="gap-1.5 h-8 px-2"
                   >
-                    <ArrowLeft className="h-4 w-4" />
-                    <Home className="h-4 w-4" />
-                    Todas Cidades
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <Grid3X3 className="h-3.5 w-3.5" />
                   </Button>
                   <LocationSelector
                     selectedLocation={selectedLocation}
                     onLocationChange={handleLocationSelect}
+                    className="hidden sm:block"
                   />
-                  <Button variant="outline" size="icon" onClick={handleRefresh} title="Atualizar">
-                    <RefreshCw className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8">
+                    <RefreshCw className="h-3.5 w-3.5" />
                   </Button>
                 </div>
                 <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
               </div>
 
-              {/* Location Info Bar */}
+              {/* Compact Location Bar */}
               {selectedLocation && (
-                <div className="flex items-center gap-4 mb-6 p-4 rounded-xl bg-secondary/20 border border-border/30">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <div>
-                    <h2 className="font-display font-semibold text-lg">
+                <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-secondary/15 border border-border/20">
+                  <MapPin className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <h2 className="font-display font-semibold text-sm truncate">
                       {selectedLocation.city}, {selectedLocation.state}
                     </h2>
-                    <p className="text-sm text-muted-foreground">{selectedLocation.local}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{selectedLocation.local}</p>
                   </div>
                 </div>
               )}
 
-              {/* Main Content */}
               {renderDetailContent()}
             </>
           )}
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-border/30 mt-12 py-6">
-          <div className="container px-4 text-center text-sm text-muted-foreground">
-            <p>
-              Dados por{" "}
-              <a href="https://www.climatempo.com.br" target="_blank" className="text-primary hover:underline">
-                Climatempo
-              </a>{" "}
-              • © {new Date().getFullYear()}{" "}
-              <a href="https://www.grupoavanco.com.br" target="_blank" className="text-primary hover:underline">
-                Grupo Avanço
-              </a>
-            </p>
+        {/* Compact Footer */}
+        <footer className="border-t border-border/20 mt-8 py-4">
+          <div className="container px-4 text-center text-[10px] text-muted-foreground">
+            <a href="https://www.climatempo.com.br" target="_blank" className="hover:text-primary">Climatempo</a>
+            {" • "}
+            <a href="https://www.grupoavanco.com.br" target="_blank" className="hover:text-primary">Grupo Avanço</a>
+            {" • "}{new Date().getFullYear()}
           </div>
         </footer>
       </div>

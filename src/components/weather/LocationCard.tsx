@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getCurrentWeather, formatTemperature } from "@/services/climatempo";
 import { WeatherIcon } from "./WeatherIcon";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin } from "lucide-react";
 import type { Location } from "@/data/locations";
 import { cn } from "@/lib/utils";
 
@@ -16,16 +15,18 @@ export const LocationCard = ({ location, onClick, isSelected }: LocationCardProp
   const { data, isLoading, error } = useQuery({
     queryKey: ["currentWeather", location.climaTempoCod],
     queryFn: () => getCurrentWeather(location.climaTempoCod),
-    refetchInterval: 10 * 60 * 1000, // Refresh every 10 minutes
+    refetchInterval: 10 * 60 * 1000,
     retry: 1,
     staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {
     return (
-      <div className="p-4 rounded-xl bg-card border border-border/30 animate-pulse">
-        <Skeleton className="h-4 w-24 mb-2" />
-        <Skeleton className="h-8 w-16" />
+      <div className="p-2.5 rounded-lg bg-card/60 border border-border/20 animate-pulse">
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-3.5 w-16" />
+          <Skeleton className="h-5 w-10" />
+        </div>
       </div>
     );
   }
@@ -37,44 +38,34 @@ export const LocationCard = ({ location, onClick, isSelected }: LocationCardProp
     <button
       onClick={onClick}
       className={cn(
-        "w-full p-4 rounded-xl border transition-all duration-200 text-left group",
-        "hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10",
+        "w-full p-2.5 rounded-lg border transition-all duration-150 text-left group",
+        "hover:scale-[1.02] active:scale-[0.98]",
         isSelected 
-          ? "bg-primary/20 border-primary shadow-lg shadow-primary/20" 
-          : "bg-card/80 border-border/30 hover:border-primary/50 hover:bg-card"
+          ? "bg-primary/15 border-primary/60 shadow-sm shadow-primary/20" 
+          : "bg-card/50 border-border/20 hover:border-primary/40 hover:bg-card/80"
       )}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            <MapPin className="h-3 w-3 text-primary shrink-0" />
-            <h3 className="font-semibold text-sm truncate">{location.city}</h3>
-          </div>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+          <h3 className="font-medium text-xs truncate leading-tight">{location.city}</h3>
+          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">
             {location.state}
-          </p>
+          </span>
         </div>
         
         {!hasError && weather && (
-          <div className="flex items-center gap-2">
-            <WeatherIcon condition={weather.icon} size="sm" />
-            <span className="text-xl font-bold font-display">
-              {formatTemperature(weather.temperature)}
+          <div className="flex items-center gap-1.5">
+            <WeatherIcon condition={weather.icon} size="xs" />
+            <span className="text-sm font-bold font-display tabular-nums">
+              {Math.round(weather.temperature)}°
             </span>
           </div>
         )}
         
         {hasError && (
-          <span className="text-xs text-muted-foreground">--°C</span>
+          <span className="text-[10px] text-muted-foreground/60">--°</span>
         )}
       </div>
-      
-      {!hasError && weather && (
-        <div className="mt-2 pt-2 border-t border-border/20 flex items-center gap-3 text-[10px] text-muted-foreground">
-          <span>💧 {weather.humidity}%</span>
-          <span>💨 {weather.wind_velocity} km/h</span>
-        </div>
-      )}
     </button>
   );
 };
