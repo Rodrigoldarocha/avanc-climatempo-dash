@@ -3,8 +3,10 @@ import { locations, getAllStates, type Location } from "@/data/locations";
 import { LocationCard } from "./LocationCard";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Thermometer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, MapPin, Thermometer, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface LocationGridProps {
   onLocationSelect: (location: Location) => void;
@@ -14,8 +16,16 @@ interface LocationGridProps {
 export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGridProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   
   const states = getAllStates();
+  
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ["currentWeather"] });
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
   
   const filteredLocations = useMemo(() => {
     return locations.filter((loc) => {
@@ -40,29 +50,43 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
 
   return (
     <div className="space-y-4">
-      {/* Compact Header */}
+      {/* Header with Refresh */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <Thermometer className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-display font-bold">Estações</h2>
+          <h2 className="text-lg font-display font-bold">Estações Meteorológicas</h2>
           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
             {locations.length}
           </Badge>
         </div>
         
-        {/* Compact Search */}
-        <div className="relative w-full sm:w-48">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            placeholder="Buscar..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 text-sm bg-card/50 border-border/40"
-          />
+        <div className="flex items-center gap-2">
+          {/* Refresh Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="h-8 gap-1.5 text-xs"
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+            Atualizar
+          </Button>
+          
+          {/* Search */}
+          <div className="relative w-full sm:w-48">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Buscar cidade..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 h-8 text-sm bg-card/50 border-border/40"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Compact State Filter */}
+      {/* State Filter */}
       <div className="flex flex-wrap gap-1.5">
         <Badge
           variant={selectedState === null ? "default" : "outline"}
@@ -89,8 +113,8 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
         ))}
       </div>
 
-      {/* Compact Grid by State */}
-      <div className="space-y-4">
+      {/* Grid by State */}
+      <div className="space-y-5">
         {Object.entries(locationsByState).map(([state, locs]) => (
           <div key={state}>
             <div className="flex items-center gap-1.5 mb-2">
