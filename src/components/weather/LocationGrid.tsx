@@ -4,9 +4,9 @@ import { LocationCard } from "./LocationCard";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Thermometer, RefreshCw } from "lucide-react";
+import { Search, MapPin, Thermometer, RefreshCw, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useIsFetching } from "@tanstack/react-query";
 
 interface LocationGridProps {
   onLocationSelect: (location: Location) => void;
@@ -17,14 +17,17 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
   const queryClient = useQueryClient();
+  const isFetching = useIsFetching({ queryKey: ["currentWeather"] });
   
   const states = getAllStates();
   
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["currentWeather"] });
-    setTimeout(() => setIsRefreshing(false), 1000);
+    setLastRefreshTime(new Date());
+    setTimeout(() => setIsRefreshing(false), 1500);
   };
   
   const filteredLocations = useMemo(() => {
@@ -48,6 +51,8 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
     return grouped;
   }, [filteredLocations]);
 
+  const isCurrentlyFetching = isFetching > 0 || isRefreshing;
+
   return (
     <div className="space-y-4">
       {/* Header with Refresh */}
@@ -60,17 +65,25 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
           </Badge>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Last Updated Time */}
+          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>
+              Atualizado: {lastRefreshTime.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} às {lastRefreshTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
+          
           {/* Refresh Button */}
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            disabled={isRefreshing}
+            disabled={isCurrentlyFetching}
             className="h-8 gap-1.5 text-xs"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
-            Atualizar
+            <RefreshCw className={cn("h-3.5 w-3.5", isCurrentlyFetching && "animate-spin")} />
+            {isCurrentlyFetching ? "Atualizando..." : "Atualizar"}
           </Button>
           
           {/* Search */}

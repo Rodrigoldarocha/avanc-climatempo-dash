@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { get72HourForecast, formatTemperature } from "@/services/climatempo";
+import { get72HourForecast } from "@/services/climatempo";
 import { WeatherIcon } from "./WeatherIcon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Clock, Droplets, AlertCircle } from "lucide-react";
+import { Clock, Droplets, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Location } from "@/data/locations";
 
 interface HourlyForecastCardProps {
@@ -11,7 +12,7 @@ interface HourlyForecastCardProps {
 }
 
 export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["hourlyForecast", location.climaTempoCod],
     queryFn: () => get72HourForecast(location.climaTempoCod),
     retry: 2,
@@ -22,33 +23,57 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
     return <HourlyForecastSkeleton />;
   }
 
-  // Handle different API response structures
-  let forecastData: Array<{ date?: string; date_br?: string; hour_to_hour?: any[]; hourly?: any[] }> = [];
-  
-  if (data?.data) {
-    if (Array.isArray(data.data)) {
-      forecastData = data.data;
-    } else if (typeof data.data === 'object') {
-      const dataObj = data.data as { hour_to_hour?: any[] };
-      if (dataObj.hour_to_hour) {
-        forecastData = [data.data as typeof forecastData[0]];
-      }
+  // Parse the API response - it can come in different formats
+  let allHours: Array<{
+    date: string;
+    date_br: string;
+    hour: string;
+    temp: number;
+    humidity: number;
+    rain: number;
+    wind_direction: string;
+    wind_velocity: number;
+  }> = [];
+
+  if (data?.data && Array.isArray(data.data)) {
+    // New format: flat array with nested objects
+    allHours = data.data.map((item: any) => {
+      const date = item.date || "";
+      const dateBr = item.date_br || "";
+      // Extract hour from date string like "2026-01-19 14:00:00"
+      const hourMatch = date.match(/(\d{2}):\d{2}:\d{2}$/);
+      const hour = hourMatch ? `${hourMatch[1]}h` : "";
+      
+      return {
+        date,
+        date_br: dateBr,
+        hour,
+        temp: item.temperature?.temperature ?? item.temp ?? 0,
+        humidity: item.humidity?.humidity ?? item.humidity ?? 0,
+        rain: item.rain?.precipitation ?? item.rain ?? 0,
+        wind_direction: item.wind?.direction ?? item.wind_direction ?? "",
+        wind_velocity: item.wind?.velocity ?? item.wind_velocity ?? 0,
+      };
+    });
+  } else if (data?.data && typeof data.data === 'object') {
+    // Old format: object with hour_to_hour array
+    const dataObj = data.data as { hour_to_hour?: any[]; date?: string; date_br?: string };
+    if (dataObj.hour_to_hour && Array.isArray(dataObj.hour_to_hour)) {
+      allHours = dataObj.hour_to_hour.map((hour: any) => ({
+        date: dataObj.date || "",
+        date_br: dataObj.date_br || "",
+        hour: hour.hour || "",
+        temp: hour.temp ?? 0,
+        humidity: hour.humidity ?? 0,
+        rain: hour.rain ?? 0,
+        wind_direction: hour.wind_direction ?? "",
+        wind_velocity: hour.wind_velocity ?? 0,
+      }));
     }
   }
 
-  // Extract hourly data
-  const allHours = forecastData.flatMap((day: any) => {
-    if (!day) return [];
-    const hours = day.hour_to_hour || day.hourly || [];
-    if (!Array.isArray(hours)) return [];
-    return hours.map((hour: any) => ({
-      ...hour,
-      date: day.date,
-      date_br: day.date_br,
-    }));
-  });
-
   const hasData = allHours.length > 0;
+  const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
 
   if (error || !hasData) {
     return (
@@ -58,12 +83,15 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
             <Clock className="h-4 w-4 text-primary" />
             <h3 className="text-sm font-display font-semibold">Previsão 72h</h3>
           </div>
-          <button 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => refetch()}
-            className="text-xs text-primary hover:underline"
+            className="h-6 text-xs gap-1"
           >
+            <RefreshCw className="h-3 w-3" />
             Tentar novamente
-          </button>
+          </Button>
         </div>
         <div className="flex items-center gap-3 py-6 justify-center text-muted-foreground">
           <AlertCircle className="h-5 w-5" />
@@ -73,34 +101,55 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
     );
   }
 
+  // Group hours by day for the summary
+  const hoursByDay: Record<string, typeof allHours> = {};
+  allHours.forEach((hour) => {
+    const dayKey = hour.date.split(" ")[0];
+    if (!hoursByDay[dayKey]) hoursByDay[dayKey] = [];
+    hoursByDay[dayKey].push(hour);
+  });
+  const days = Object.entries(hoursByDay).slice(0, 3);
+
   return (
     <div className="weather-card p-4 animate-fade-in">
-      <div className="flex items-center gap-2 mb-3">
-        <Clock className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-display font-semibold">Próximas Horas</h3>
-        <span className="text-[10px] text-muted-foreground ml-auto">
-          {allHours.length}h disponíveis
-        </span>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-display font-semibold">Próximas Horas</h3>
+          <span className="text-[10px] text-muted-foreground">
+            {allHours.length}h disponíveis
+          </span>
+        </div>
+        {lastUpdated && (
+          <span className="text-[10px] text-muted-foreground">
+            Atualizado: {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        )}
       </div>
 
       <ScrollArea className="w-full">
         <div className="flex gap-2 pb-2">
-          {allHours.slice(0, 24).map((hour: any, index: number) => (
+          {allHours.slice(0, 24).map((hour, index) => (
             <div
-              key={`${hour.date}-${hour.hour || index}-${index}`}
+              key={`${hour.date}-${index}`}
               className="flex flex-col items-center p-2 rounded-lg bg-secondary/20 border border-border/20 min-w-[56px] hover:bg-secondary/40 transition-colors"
             >
               <span className="text-[10px] text-muted-foreground font-medium">
                 {hour.hour || `${index}h`}
               </span>
-              <WeatherIcon condition={hour.icon || "1"} size="xs" className="my-1" />
-              <span className="font-semibold text-xs tabular-nums">
-                {Math.round(hour.temp || 0)}°
+              <span className="font-semibold text-sm tabular-nums my-1">
+                {Math.round(hour.temp)}°
               </span>
-              {(hour.rain !== undefined && hour.rain > 0) && (
-                <div className="flex items-center gap-0.5 mt-1 text-[9px] text-sky-400">
+              {hour.rain > 0 && (
+                <div className="flex items-center gap-0.5 text-[9px] text-sky-400">
                   <Droplets className="h-2.5 w-2.5" />
-                  <span>{hour.rain}</span>
+                  <span>{hour.rain.toFixed(1)}</span>
+                </div>
+              )}
+              {hour.rain === 0 && (
+                <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
+                  <Droplets className="h-2.5 w-2.5" />
+                  <span>{Math.round(hour.humidity)}%</span>
                 </div>
               )}
             </div>
@@ -109,30 +158,25 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* Daily Summary - Compact */}
-      {forecastData.length > 1 && (
+      {/* Daily Summary */}
+      {days.length > 1 && (
         <div className="mt-3 pt-3 border-t border-border/20">
           <div className="grid grid-cols-3 gap-2">
-            {forecastData.slice(0, 3).map((day: any, index: number) => {
-              const hours = day?.hour_to_hour || [];
-              if (!Array.isArray(hours) || hours.length === 0) return null;
-              
-              const temps = hours.map((h: any) => h.temp || 0);
+            {days.map(([dayKey, hours], index) => {
+              const temps = hours.map((h) => h.temp);
               const minTemp = Math.min(...temps);
               const maxTemp = Math.max(...temps);
+              const dateParts = dayKey.split("-");
+              const dayLabel = index === 0 ? "Hoje" : index === 1 ? "Amanhã" : `${dateParts[2]}/${dateParts[1]}`;
 
               return (
                 <div
-                  key={day.date || index}
+                  key={dayKey}
                   className="flex items-center gap-2 p-2 rounded-md bg-muted/30"
                 >
-                  <WeatherIcon
-                    condition={hours[12]?.icon || hours[0]?.icon || "1"}
-                    size="xs"
-                  />
                   <div className="min-w-0">
                     <div className="text-[10px] font-medium truncate">
-                      {index === 0 ? "Hoje" : index === 1 ? "Amanhã" : day.date_br?.slice(0, 5)}
+                      {dayLabel}
                     </div>
                     <div className="text-[9px] text-muted-foreground">
                       {Math.round(minTemp)}° / {Math.round(maxTemp)}°
