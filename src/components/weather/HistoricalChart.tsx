@@ -59,21 +59,21 @@ export const HistoricalChart = ({ location }: HistoricalChartProps) => {
   const chartData = data.data.map((day) => ({
     date: day.date,
     dateLabel: format(parseISO(day.date), "dd/MM", { locale: ptBR }),
-    min: day.temperature_min,
-    max: day.temperature_max,
-    rain: day.rain,
-    humidityMin: day.humidity_min,
-    humidityMax: day.humidity_max,
+    min: day.temperature_min ?? 0,
+    max: day.temperature_max ?? 0,
+    rain: day.rain ?? 0,
+    humidityMin: day.humidity_min ?? 0,
+    humidityMax: day.humidity_max ?? 0,
   }));
 
-  // Calculate stats
+  // Calculate stats with safe number handling
   const avgMax =
-    chartData.reduce((sum, d) => sum + d.max, 0) / chartData.length;
+    chartData.reduce((sum, d) => sum + (Number(d.max) || 0), 0) / chartData.length;
   const avgMin =
-    chartData.reduce((sum, d) => sum + d.min, 0) / chartData.length;
-  const totalRain = chartData.reduce((sum, d) => sum + d.rain, 0);
-  const maxTemp = Math.max(...chartData.map((d) => d.max));
-  const minTemp = Math.min(...chartData.map((d) => d.min));
+    chartData.reduce((sum, d) => sum + (Number(d.min) || 0), 0) / chartData.length;
+  const totalRain = chartData.reduce((sum, d) => sum + (Number(d.rain) || 0), 0);
+  const maxTemp = Math.max(...chartData.map((d) => Number(d.max) || 0));
+  const minTemp = Math.min(...chartData.map((d) => Number(d.min) || 0));
 
   return (
     <div className="weather-card p-6 animate-fade-in">
