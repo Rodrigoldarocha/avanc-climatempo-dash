@@ -56,24 +56,31 @@ export const HistoricalChart = ({ location }: HistoricalChartProps) => {
     );
   }
 
-  const chartData = data.data.map((day) => ({
-    date: day.date,
-    dateLabel: format(parseISO(day.date), "dd/MM", { locale: ptBR }),
-    min: day.temperature_min ?? 0,
-    max: day.temperature_max ?? 0,
-    rain: day.rain ?? 0,
-    humidityMin: day.humidity_min ?? 0,
-    humidityMax: day.humidity_max ?? 0,
-  }));
+  const chartData = data.data.map((day) => {
+    // Handle rain which might be an object {precipitation, source} or a number
+    const rainValue = typeof day.rain === 'object' && day.rain !== null 
+      ? (day.rain as { precipitation?: number }).precipitation ?? 0
+      : (day.rain ?? 0);
+    
+    return {
+      date: day.date,
+      dateLabel: format(parseISO(day.date), "dd/MM", { locale: ptBR }),
+      min: Number(day.temperature_min) || 0,
+      max: Number(day.temperature_max) || 0,
+      rain: Number(rainValue) || 0,
+      humidityMin: Number(day.humidity_min) || 0,
+      humidityMax: Number(day.humidity_max) || 0,
+    };
+  });
 
   // Calculate stats with safe number handling
   const avgMax =
-    chartData.reduce((sum, d) => sum + (Number(d.max) || 0), 0) / chartData.length;
+    chartData.reduce((sum, d) => sum + d.max, 0) / chartData.length;
   const avgMin =
-    chartData.reduce((sum, d) => sum + (Number(d.min) || 0), 0) / chartData.length;
-  const totalRain = chartData.reduce((sum, d) => sum + (Number(d.rain) || 0), 0);
-  const maxTemp = Math.max(...chartData.map((d) => Number(d.max) || 0));
-  const minTemp = Math.min(...chartData.map((d) => Number(d.min) || 0));
+    chartData.reduce((sum, d) => sum + d.min, 0) / chartData.length;
+  const totalRain = chartData.reduce((sum, d) => sum + d.rain, 0);
+  const maxTemp = Math.max(...chartData.map((d) => d.max));
+  const minTemp = Math.min(...chartData.map((d) => d.min));
 
   return (
     <div className="weather-card p-6 animate-fade-in">
