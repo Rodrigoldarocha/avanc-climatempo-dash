@@ -111,17 +111,17 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
   const days = Object.entries(hoursByDay).slice(0, 3);
 
   return (
-    <div className="weather-card p-4 animate-fade-in">
-      <div className="flex items-center justify-between mb-3">
+    <div className="weather-card p-4 sm:p-5 animate-fade-in">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-display font-semibold">Próximas Horas</h3>
-          <span className="text-[10px] text-muted-foreground">
+          <Clock className="h-5 w-5 text-primary" />
+          <h3 className="text-base font-display font-semibold">Próximas Horas</h3>
+          <span className="text-xs text-muted-foreground">
             {allHours.length}h disponíveis
           </span>
         </div>
         {lastUpdated && (
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             Atualizado: {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
           </span>
         )}
@@ -132,23 +132,23 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
           {allHours.slice(0, 24).map((hour, index) => (
             <div
               key={`${hour.date}-${index}`}
-              className="flex flex-col items-center p-2 rounded-lg bg-secondary/20 border border-border/20 min-w-[56px] hover:bg-secondary/40 transition-colors"
+              className="flex flex-col items-center p-2.5 rounded-lg bg-secondary/20 border border-border/20 min-w-[64px] hover:bg-secondary/40 transition-colors"
             >
-              <span className="text-[10px] text-muted-foreground font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 {hour.hour || `${index}h`}
               </span>
-              <span className="font-semibold text-sm tabular-nums my-1">
+              <span className="font-semibold text-base tabular-nums my-1">
                 {Math.round(hour.temp)}°
               </span>
               {hour.rain > 0 && (
-                <div className="flex items-center gap-0.5 text-[9px] text-sky-400">
-                  <Droplets className="h-2.5 w-2.5" />
+                <div className="flex items-center gap-0.5 text-xs text-sky-400">
+                  <Droplets className="h-3 w-3" />
                   <span>{hour.rain.toFixed(1)}</span>
                 </div>
               )}
               {hour.rain === 0 && (
-                <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
-                  <Droplets className="h-2.5 w-2.5" />
+                <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                  <Droplets className="h-3 w-3" />
                   <span>{Math.round(hour.humidity)}%</span>
                 </div>
               )}
@@ -160,7 +160,7 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
 
       {/* Daily Summary */}
       {days.length > 1 && (
-        <div className="mt-3 pt-3 border-t border-border/20">
+        <div className="mt-4 pt-4 border-t border-border/20">
           <div className="grid grid-cols-3 gap-2">
             {days.map(([dayKey, hours], index) => {
               const temps = hours.map((h) => h.temp);
@@ -172,13 +172,13 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
               return (
                 <div
                   key={dayKey}
-                  className="flex items-center gap-2 p-2 rounded-md bg-muted/30"
+                  className="flex items-center gap-2 p-2.5 rounded-md bg-muted/30"
                 >
                   <div className="min-w-0">
-                    <div className="text-[10px] font-medium truncate">
+                    <div className="text-sm font-medium truncate">
                       {dayLabel}
                     </div>
-                    <div className="text-[9px] text-muted-foreground">
+                    <div className="text-xs text-muted-foreground">
                       {Math.round(minTemp)}° / {Math.round(maxTemp)}°
                     </div>
                   </div>

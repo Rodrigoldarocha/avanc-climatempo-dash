@@ -57,14 +57,14 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
   };
 
   return (
-    <div className="weather-card p-4 animate-fade-in">
-      <div className="flex items-center gap-2 mb-3">
-        <Calendar className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-display font-semibold">Próximos 15 Dias</h3>
-        <span className="text-[10px] text-muted-foreground ml-auto">{forecastData.length}d</span>
+    <div className="weather-card p-4 sm:p-5 animate-fade-in">
+      <div className="flex items-center gap-2 mb-4">
+        <Calendar className="h-5 w-5 text-primary" />
+        <h3 className="text-base font-display font-semibold">Próximos 15 Dias</h3>
+        <span className="text-xs text-muted-foreground ml-auto">{forecastData.length} dias</span>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {forecastData.map((day, index) => {
           const minTemp = day.temperature?.min ?? 0;
           const maxTemp = day.temperature?.max ?? 0;
@@ -75,26 +75,26 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
           return (
             <div
               key={day.date || index}
-              className="flex items-center gap-2 p-2 rounded-md bg-secondary/15 border border-border/10 hover:bg-secondary/25 transition-colors"
+              className="flex items-center gap-2 sm:gap-3 p-2.5 rounded-md bg-secondary/15 border border-border/10 hover:bg-secondary/25 transition-colors"
             >
-              <WeatherIcon condition={icon} size="xs" />
+              <WeatherIcon condition={icon} size="sm" />
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-medium capitalize truncate">
+                <div className="text-sm font-medium capitalize truncate">
                   {getDayLabel(day.date, index)}
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-[9px] text-sky-400 tabular-nums">{Math.round(minTemp)}°</span>
-                <div className="w-8 h-0.5 rounded-full bg-gradient-to-r from-sky-400 to-orange-400 opacity-50" />
-                <span className="text-[9px] text-orange-400 font-medium tabular-nums">{Math.round(maxTemp)}°</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-sky-400 tabular-nums">{Math.round(minTemp)}°</span>
+                <div className="w-10 h-1 rounded-full bg-gradient-to-r from-sky-400 to-orange-400 opacity-50" />
+                <span className="text-xs text-orange-400 font-medium tabular-nums">{Math.round(maxTemp)}°</span>
               </div>
-              <div className="flex items-center gap-0.5 min-w-[32px]">
-                <Droplets className="h-2.5 w-2.5 text-sky-400" />
-                <span className="text-[9px] text-muted-foreground tabular-nums">{rainProb}%</span>
+              <div className="flex items-center gap-1 min-w-[40px]">
+                <Droplets className="h-3.5 w-3.5 text-sky-400" />
+                <span className="text-xs text-muted-foreground tabular-nums">{rainProb}%</span>
               </div>
-              <div className="hidden sm:flex items-center gap-0.5 min-w-[36px]">
-                <Wind className="h-2.5 w-2.5 text-slate-400" />
-                <span className="text-[9px] text-muted-foreground tabular-nums">{windMax}</span>
+              <div className="hidden sm:flex items-center gap-1 min-w-[44px]">
+                <Wind className="h-3.5 w-3.5 text-slate-400" />
+                <span className="text-xs text-muted-foreground tabular-nums">{windMax}</span>
               </div>
             </div>
           );
