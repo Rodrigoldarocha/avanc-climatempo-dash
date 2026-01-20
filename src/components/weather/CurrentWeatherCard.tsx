@@ -34,49 +34,49 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
   const weather = data.data;
 
   return (
-    <div className="weather-card p-4 animate-fade-in">
+    <div className="weather-card p-4 sm:p-5 animate-fade-in">
       {/* Main Temperature */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <WeatherIcon condition={weather.icon} size="lg" />
           <div>
-            <div className="temperature-display text-3xl">
+            <div className="temperature-display text-4xl sm:text-5xl">
               {formatTemperature(weather.temperature)}
             </div>
-            <p className="text-[10px] text-muted-foreground capitalize">
+            <p className="text-sm text-muted-foreground capitalize">
               {weather.condition}
             </p>
           </div>
         </div>
         <div className="text-right">
-          <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
-            <Thermometer className="h-3 w-3" />
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Thermometer className="h-3.5 w-3.5" />
             <span>Sensação</span>
           </div>
-          <div className="text-lg font-semibold font-display">
+          <div className="text-xl sm:text-2xl font-semibold font-display">
             {formatTemperature(weather.sensation)}
           </div>
         </div>
       </div>
 
       {/* Compact Stats */}
-      <div className="grid grid-cols-4 gap-1.5">
-        <StatItem icon={<Droplets className="h-3 w-3 text-sky-400" />} label="Umid" value={`${weather.humidity}%`} />
-        <StatItem icon={<Wind className="h-3 w-3 text-slate-400" />} label="Vento" value={`${weather.wind_velocity}`} />
-        <StatItem icon={<Gauge className="h-3 w-3 text-emerald-400" />} label="Press" value={`${weather.pressure}`} />
-        <StatItem icon={<span className="text-[8px] font-medium">{weather.wind_direction}</span>} label="Dir" value="" />
+      <div className="grid grid-cols-4 gap-2">
+        <StatItem icon={<Droplets className="h-4 w-4 text-sky-400" />} label="Umidade" value={`${weather.humidity}%`} />
+        <StatItem icon={<Wind className="h-4 w-4 text-slate-400" />} label="Vento" value={`${weather.wind_velocity}`} />
+        <StatItem icon={<Gauge className="h-4 w-4 text-emerald-400" />} label="Pressão" value={`${weather.pressure}`} />
+        <StatItem icon={<span className="text-xs font-medium">{weather.wind_direction}</span>} label="Direção" value="" />
       </div>
     </div>
   );
 };
 
 const StatItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="p-1.5 rounded-md bg-secondary/20 border border-border/15">
-    <div className="flex items-center gap-1 mb-0.5">
+  <div className="p-2 rounded-md bg-secondary/20 border border-border/15">
+    <div className="flex items-center gap-1.5 mb-1">
       {icon}
-      <span className="text-[8px] text-muted-foreground">{label}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
     </div>
-    {value && <div className="text-[10px] font-semibold">{value}</div>}
+    {value && <div className="text-sm font-semibold">{value}</div>}
   </div>
 );
 

@@ -48,9 +48,9 @@ export const LocationCard = ({ location, onClick, isSelected }: LocationCardProp
       )}
     >
       {/* City & State */}
-      <div className="flex items-center justify-between gap-1 mb-1">
-        <h3 className="font-medium text-xs truncate leading-tight flex-1">{location.city}</h3>
-        <span className="text-[9px] text-muted-foreground uppercase tracking-wide shrink-0">
+      <div className="flex items-center justify-between gap-1 mb-1.5">
+        <h3 className="font-semibold text-sm truncate leading-tight flex-1">{location.city}</h3>
+        <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">
           {location.state}
         </span>
       </div>
@@ -61,36 +61,36 @@ export const LocationCard = ({ location, onClick, isSelected }: LocationCardProp
           <div className="flex items-center gap-2 mb-2">
             <WeatherIcon condition={weather.icon} size="sm" />
             <div>
-              <span className="text-xl font-bold font-display tabular-nums">
+              <span className="text-2xl font-bold font-display tabular-nums">
                 {Math.round(weather.temperature)}°
               </span>
-              <span className="text-[10px] text-muted-foreground ml-1">
+              <span className="text-xs text-muted-foreground ml-1">
                 ST {Math.round(weather.sensation)}°
               </span>
             </div>
           </div>
           
           {/* Stats Row */}
-          <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Droplets className="h-3 w-3 text-blue-400" />
+              <Droplets className="h-3.5 w-3.5 text-blue-400" />
               <span>{weather.humidity}%</span>
             </div>
             <div className="flex items-center gap-1">
-              <Wind className="h-3 w-3 text-cyan-400" />
+              <Wind className="h-3.5 w-3.5 text-cyan-400" />
               <span>{weather.wind_velocity} km/h</span>
             </div>
           </div>
           
           {/* Condition */}
-          <p className="text-[9px] text-muted-foreground/80 mt-1.5 truncate">
+          <p className="text-xs text-muted-foreground/80 mt-1.5 truncate">
             {weather.condition}
           </p>
         </>
       ) : (
         <div className="py-2 text-center">
-          <span className="text-lg text-muted-foreground/40">--°</span>
-          <p className="text-[9px] text-muted-foreground/50 mt-1">Indisponível</p>
+          <span className="text-xl text-muted-foreground/40">--°</span>
+          <p className="text-xs text-muted-foreground/50 mt-1">Indisponível</p>
         </div>
       )}
     </button>
