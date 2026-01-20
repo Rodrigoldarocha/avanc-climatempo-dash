@@ -55,39 +55,33 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
 
   return (
     <div className="space-y-4">
-      {/* Header with Refresh */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Thermometer className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-display font-bold">Estações Meteorológicas</h2>
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-            {locations.length}
-          </Badge>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Last Updated Time */}
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            <span>
-              Atualizado: {lastRefreshTime.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} às {lastRefreshTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-            </span>
+      {/* Header with Refresh - Mobile Optimized */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Thermometer className="h-5 w-5 text-primary shrink-0" />
+            <h2 className="text-base sm:text-lg font-display font-bold truncate">Estações Meteorológicas</h2>
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+              {locations.length}
+            </Badge>
           </div>
           
-          {/* Refresh Button */}
+          {/* Refresh Button - Always Visible */}
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={isCurrentlyFetching}
-            className="h-8 gap-1.5 text-xs"
+            className="h-8 gap-1.5 text-xs shrink-0"
           >
             <RefreshCw className={cn("h-3.5 w-3.5", isCurrentlyFetching && "animate-spin")} />
-            {isCurrentlyFetching ? "Atualizando..." : "Atualizar"}
+            <span className="hidden sm:inline">{isCurrentlyFetching ? "Atualizando..." : "Atualizar"}</span>
           </Button>
-          
-          {/* Search */}
-          <div className="relative w-full sm:w-48">
+        </div>
+        
+        {/* Search and Time - Mobile Stack */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar cidade..."
@@ -96,11 +90,20 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
               className="pl-8 h-8 text-sm bg-card/50 border-border/40"
             />
           </div>
+          
+          {/* Last Updated Time */}
+          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>
+              Atualizado: {lastRefreshTime.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} às {lastRefreshTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* State Filter */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* State Filter - Horizontal Scroll */}
+      <div className="overflow-x-auto pb-1 -mx-4 px-4">
+        <div className="flex gap-1.5 min-w-max">
         <Badge
           variant={selectedState === null ? "default" : "outline"}
           className={cn(
@@ -124,6 +127,7 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
             {state}
           </Badge>
         ))}
+        </div>
       </div>
 
       {/* Grid by State */}
@@ -137,7 +141,7 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
               </span>
               <span className="text-[9px] text-muted-foreground/60">({locs.length})</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               {locs.map((location) => (
                 <LocationCard
                   key={location.climaTempoCod}
