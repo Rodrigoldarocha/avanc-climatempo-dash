@@ -7,6 +7,7 @@ import { CurrentWeatherCard } from "@/components/weather/CurrentWeatherCard";
 import { HourlyForecastCard } from "@/components/weather/HourlyForecastCard";
 import { DailyForecastCard } from "@/components/weather/DailyForecastCard";
 import { HistoricalChart } from "@/components/weather/HistoricalChart";
+import { ExportPdfButton } from "@/components/weather/ExportPdfButton";
 import { locations, type Location } from "@/data/locations";
 import { MapPin, RefreshCw, ArrowLeft, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ const Index = () => {
     switch (activeTab) {
       case "current":
         return (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="space-y-4">
             <CurrentWeatherCard location={selectedLocation} />
             <HourlyForecastCard location={selectedLocation} />
           </div>
@@ -71,42 +72,44 @@ const Index = () => {
             />
           ) : (
             <>
-              {/* Compact Controls */}
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              {/* Compact Controls - Mobile First */}
+              <div className="flex flex-col gap-3 mb-4">
+                {/* Top Row - Back + Location + Actions */}
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleBackToGrid}
-                    className="gap-1.5 h-8 px-2"
+                    className="gap-1 h-8 px-2 shrink-0"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
-                    <Grid3X3 className="h-3.5 w-3.5" />
+                    <Grid3X3 className="h-3.5 w-3.5 hidden sm:block" />
                   </Button>
-                  <LocationSelector
-                    selectedLocation={selectedLocation}
-                    onLocationChange={handleLocationSelect}
-                    className="hidden sm:block"
-                  />
-                  <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8">
-                    <RefreshCw className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-                <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-              </div>
-
-              {/* Compact Location Bar */}
-              {selectedLocation && (
-                <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-secondary/15 border border-border/20">
-                  <MapPin className="h-4 w-4 text-primary shrink-0" />
-                  <div className="min-w-0">
-                    <h2 className="font-display font-semibold text-sm truncate">
-                      {selectedLocation.city}, {selectedLocation.state}
-                    </h2>
-                    <p className="text-[10px] text-muted-foreground truncate">{selectedLocation.local}</p>
+                  
+                  {/* Location Info - Mobile Inline */}
+                  {selectedLocation && (
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span className="font-display font-semibold text-sm truncate">
+                        {selectedLocation.city}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                        {selectedLocation.state}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-1 ml-auto shrink-0">
+                    {selectedLocation && <ExportPdfButton location={selectedLocation} />}
+                    <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8">
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-              )}
+                
+                {/* Navigation - Full Width on Mobile */}
+                <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+              </div>
 
               {renderDetailContent()}
             </>
