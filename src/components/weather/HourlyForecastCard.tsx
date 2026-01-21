@@ -44,13 +44,29 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
       const hourMatch = date.match(/(\d{2}):\d{2}:\d{2}$/);
       const hour = hourMatch ? `${hourMatch[1]}h` : "";
       
+      // Handle rain which can be object or number
+      let rainValue = 0;
+      if (typeof item.rain === 'object' && item.rain !== null) {
+        rainValue = item.rain.precipitation ?? 0;
+      } else if (typeof item.rain === 'number') {
+        rainValue = item.rain;
+      }
+      
+      // Handle humidity which can be object or number
+      let humidityValue = 0;
+      if (typeof item.humidity === 'object' && item.humidity !== null) {
+        humidityValue = item.humidity.humidity ?? 0;
+      } else if (typeof item.humidity === 'number') {
+        humidityValue = item.humidity;
+      }
+      
       return {
         date,
         date_br: dateBr,
         hour,
         temp: item.temperature?.temperature ?? item.temp ?? 0,
-        humidity: item.humidity?.humidity ?? item.humidity ?? 0,
-        rain: item.rain?.precipitation ?? item.rain ?? 0,
+        humidity: humidityValue,
+        rain: rainValue,
         wind_direction: item.wind?.direction ?? item.wind_direction ?? "",
         wind_velocity: item.wind?.velocity ?? item.wind_velocity ?? 0,
       };
@@ -140,16 +156,15 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
               <span className="font-semibold text-base tabular-nums my-1">
                 {Math.round(hour.temp)}°
               </span>
-              {hour.rain > 0 && (
+              {Number(hour.rain) > 0 ? (
                 <div className="flex items-center gap-0.5 text-xs text-sky-400">
                   <Droplets className="h-3 w-3" />
-                  <span>{hour.rain.toFixed(1)}</span>
+                  <span>{Number(hour.rain).toFixed(1)}</span>
                 </div>
-              )}
-              {hour.rain === 0 && (
+              ) : (
                 <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                   <Droplets className="h-3 w-3" />
-                  <span>{Math.round(hour.humidity)}%</span>
+                  <span>{Math.round(Number(hour.humidity) || 0)}%</span>
                 </div>
               )}
             </div>
