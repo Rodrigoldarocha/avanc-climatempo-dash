@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Cloud, Clock, Calendar, History } from "lucide-react";
+import { Cloud, Clock, Calendar, History, Siren } from "lucide-react";
 
-export type TabType = "current" | "hourly" | "daily" | "historical";
+export type TabType = "current" | "hourly" | "daily" | "historical" | "alerts";
 
 interface NavigationProps {
   activeTab: TabType;
@@ -12,6 +12,7 @@ const tabs = [
   { id: "current" as TabType, label: "Agora", icon: Cloud },
   { id: "hourly" as TabType, label: "72h", icon: Clock },
   { id: "daily" as TabType, label: "15d", icon: Calendar },
+  { id: "alerts" as TabType, label: "Alertas", icon: Siren },
   { id: "historical" as TabType, label: "Hist", icon: History },
 ];
 
