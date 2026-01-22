@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Navigation, type TabType } from "@/components/layout/Navigation";
-import { LocationSelector } from "@/components/weather/LocationSelector";
 import { LocationGrid } from "@/components/weather/LocationGrid";
 import { CurrentWeatherCard } from "@/components/weather/CurrentWeatherCard";
 import { HourlyForecastCard } from "@/components/weather/HourlyForecastCard";
 import { DailyForecastCard } from "@/components/weather/DailyForecastCard";
 import { HistoricalChart } from "@/components/weather/HistoricalChart";
 import { ExportPdfButton } from "@/components/weather/ExportPdfButton";
-import { locations, type Location } from "@/data/locations";
-import { MapPin, RefreshCw, ArrowLeft, Grid3X3 } from "lucide-react";
+import { AlertsPanel } from "@/components/weather/AlertsPanel";
+import { type Location } from "@/data/locations";
+import { MapPin, RefreshCw, ArrowLeft, Grid3X3, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -27,6 +27,12 @@ const Index = () => {
     setActiveTab("current");
   };
 
+  const handleOpenAlerts = () => {
+    setSelectedLocation(null);
+    setViewMode("detail");
+    setActiveTab("alerts");
+  };
+
   const handleBackToGrid = () => {
     setViewMode("grid");
   };
@@ -36,10 +42,11 @@ const Index = () => {
   };
 
   const renderDetailContent = () => {
-    if (!selectedLocation) return null;
-
     switch (activeTab) {
+      case "alerts":
+        return <AlertsPanel selectedLocation={selectedLocation} />;
       case "current":
+        if (!selectedLocation) return null;
         return (
           <div className="space-y-4">
             <CurrentWeatherCard location={selectedLocation} />
@@ -47,10 +54,13 @@ const Index = () => {
           </div>
         );
       case "hourly":
+        if (!selectedLocation) return null;
         return <HourlyForecastCard location={selectedLocation} />;
       case "daily":
+        if (!selectedLocation) return null;
         return <DailyForecastCard location={selectedLocation} />;
       case "historical":
+        if (!selectedLocation) return null;
         return <HistoricalChart location={selectedLocation} />;
       default:
         return null;
@@ -66,10 +76,19 @@ const Index = () => {
 
         <main className="container px-4 md:px-6 py-4 max-w-7xl mx-auto">
           {viewMode === "grid" ? (
-            <LocationGrid 
-              onLocationSelect={handleLocationSelect}
-              selectedLocation={selectedLocation}
-            />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-sm font-medium">Locais monitorados</div>
+                <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
+                  <Siren className="h-4 w-4" />
+                  Ver alertas (7d)
+                </Button>
+              </div>
+              <LocationGrid 
+                onLocationSelect={handleLocationSelect}
+                selectedLocation={selectedLocation}
+              />
+            </div>
           ) : (
             <>
               {/* Compact Controls - Mobile First */}
@@ -87,7 +106,7 @@ const Index = () => {
                   </Button>
                   
                   {/* Location Info - Mobile Inline */}
-                  {selectedLocation && (
+                  {selectedLocation && activeTab !== "alerts" && (
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span className="font-display font-semibold text-sm truncate">
@@ -100,7 +119,7 @@ const Index = () => {
                   )}
                   
                   <div className="flex items-center gap-1 ml-auto shrink-0">
-                    {selectedLocation && <ExportPdfButton location={selectedLocation} />}
+                    {selectedLocation && activeTab !== "alerts" && <ExportPdfButton location={selectedLocation} />}
                     <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8">
                       <RefreshCw className="h-3.5 w-3.5" />
                     </Button>
