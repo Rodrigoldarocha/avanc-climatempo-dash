@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ExportAlertsPdfButton } from "@/components/weather/ExportAlertsPdfButton";
 import {
   Table,
   TableBody,
@@ -265,16 +266,24 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
           </Badge>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          onClick={() => query.refetch()}
-          disabled={query.isFetching}
-        >
-          <RefreshCw className={cn("h-4 w-4", query.isFetching && "animate-spin")} />
-          Atualizar
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportAlertsPdfButton
+            alerts={sortedAlerts}
+            rainMmhThreshold={RAIN_MM_H_THRESHOLD}
+            rainProbThreshold={RAIN_PROB_THRESHOLD}
+            daysWindow={DAYS_WINDOW}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => query.refetch()}
+            disabled={query.isFetching}
+          >
+            <RefreshCw className={cn("h-4 w-4", query.isFetching && "animate-spin")} />
+            Atualizar
+          </Button>
+        </div>
       </div>
 
       <div className="text-xs text-muted-foreground">
