@@ -245,7 +245,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
     return [...list].sort((a, b) => {
       const da = safeParseToDate(a.dateTimeIso)?.getTime() ?? 0;
       const db = safeParseToDate(b.dateTimeIso)?.getTime() ?? 0;
-      return db - da; // mais recentes primeiro
+      return da - db; // ordem crescente (mais próximos primeiro)
     });
   }, [query.data]);
 
