@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { AlertTriangle, Droplets, Percent, RefreshCw } from "lucide-react";
+import { AlertTriangle, Droplets, Percent, RefreshCw, ChevronRight } from "lucide-react";
 
 import type { Location } from "@/data/locations";
 import { locations } from "@/data/locations";
@@ -17,14 +17,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExportAlertsPdfButton } from "@/components/weather/ExportAlertsPdfButton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 type TriggerType = "rain_mm_h" | "rain_probability";
 type Severity = "high" | "moderate";
@@ -54,19 +46,14 @@ const RAIN_PROB_THRESHOLD = 70;
 const DAYS_WINDOW = 7;
 
 const toIso = (date: string, hour?: string) => {
-  // Defensive parsing: the API may return different formats.
-  // Prefer ISO if it already looks like one.
   if (!hour) return date;
-
   const safeHour = hour.includes(":") ? hour : `${hour}:00`;
-  // If date already contains time, keep it.
   if (date.includes("T") || date.includes(" ")) return date;
   return `${date}T${safeHour}`;
 };
 
 const safeParseToDate = (isoLike: string): Date | null => {
   try {
-    // parseISO expects ISO; if it's not, Date fallback.
     const d = isoLike.includes("T") ? parseISO(isoLike) : new Date(isoLike);
     return Number.isNaN(d.getTime()) ? null : d;
   } catch {
@@ -77,10 +64,6 @@ const safeParseToDate = (isoLike: string): Date | null => {
 const severityFromTriggers = (triggers: WeatherAlert["triggers"]): Severity => {
   const prob = triggers.find((t) => t.type === "rain_probability")?.value;
   const mmh = triggers.find((t) => t.type === "rain_mm_h")?.value;
-
-  // Regra simples e visual:
-  // - high: prob >= 90% OU chuva >= 40 mm/h
-  // - moderate: acima dos limiares base
   if ((prob ?? 0) >= 90 || (mmh ?? 0) >= 40) return "high";
   return "moderate";
 };
@@ -96,7 +79,6 @@ const runWithConcurrency = async <T, R>(
   const runners = Array.from({ length: Math.min(limit, items.length) }).map(async () => {
     while (idx < items.length) {
       const current = items[idx++];
-      // eslint-disable-next-line no-await-in-loop
       const res = await worker(current);
       results.push(res);
     }
@@ -118,7 +100,6 @@ const buildAlertsForLocation = async (location: Location): Promise<WeatherAlert[
 
   const byKey = new Map<string, WeatherAlert>();
 
-  // Daily probability alerts (7 days)
   const dailyDays = (daily.data ?? []).slice(0, DAYS_WINDOW);
   dailyDays.forEach((d, i) => {
     const prob = d?.rain?.probability;
@@ -163,7 +144,6 @@ const buildAlertsForLocation = async (location: Location): Promise<WeatherAlert[
     });
   });
 
-  // Hourly rain volume alerts (72h subset within 7 days)
   const hourBlocks = (hourly.data ?? []).flatMap((d) => {
     const date = d?.date;
     const hours = d?.hour_to_hour ?? [];
@@ -225,14 +205,68 @@ const mergeTriggers = (
 const formatDateTime = (isoLike: string) => {
   const d = safeParseToDate(isoLike);
   if (!d) return isoLike;
+  return format(d, "dd/MM HH:mm");
+};
+
+const formatDateTimeFull = (isoLike: string) => {
+  const d = safeParseToDate(isoLike);
+  if (!d) return isoLike;
   return format(d, "dd/MM/yyyy HH:mm");
+};
+
+// Mobile-first Alert Card Component
+const AlertCard = ({ alert }: { alert: WeatherAlert }) => {
+  const isHigh = alert.severity === "high";
+  
+  return (
+    <div className={cn(
+      "p-3 rounded-lg border transition-colors",
+      isHigh 
+        ? "bg-destructive/10 border-destructive/30" 
+        : "bg-amber-500/10 border-amber-500/30"
+    )}>
+      {/* Header Row */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="font-medium text-sm truncate">{alert.location.local}</div>
+          <div className="text-xs text-muted-foreground">
+            {alert.location.city}/{alert.location.state}
+          </div>
+        </div>
+        <Badge variant={isHigh ? "destructive" : "default"} className="shrink-0 text-[10px]">
+          {isHigh ? "Alta" : "Moderada"}
+        </Badge>
+      </div>
+      
+      {/* Date/Time */}
+      <div className="text-xs text-muted-foreground mb-2">
+        📅 {formatDateTime(alert.dateTimeIso)}
+      </div>
+      
+      {/* Triggers */}
+      <div className="flex flex-wrap gap-2">
+        {alert.triggers.map((t) => (
+          <div 
+            key={t.type} 
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-background/50 text-xs"
+          >
+            {t.type === "rain_mm_h" ? (
+              <Droplets className="h-3 w-3 text-sky-400" />
+            ) : (
+              <Percent className="h-3 w-3 text-amber-400" />
+            )}
+            <span className="font-semibold">{t.value}{t.unit}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location | null }) => {
   const query = useQuery({
     queryKey: ["alerts", "7d", RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD],
     queryFn: async () => {
-      // 55 locais => limitar concorrência para não estourar rate-limit.
       const perLocation = await runWithConcurrency(locations, 6, buildAlertsForLocation);
       return perLocation.flat();
     },
@@ -245,188 +279,142 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
     return [...list].sort((a, b) => {
       const da = safeParseToDate(a.dateTimeIso)?.getTime() ?? 0;
       const db = safeParseToDate(b.dateTimeIso)?.getTime() ?? 0;
-      return da - db; // ordem crescente (mais próximos primeiro)
+      return da - db;
     });
   }, [query.data]);
 
   const total = sortedAlerts.length;
-
+  const highCount = sortedAlerts.filter(a => a.severity === "high").length;
+  const modCount = sortedAlerts.filter(a => a.severity === "moderate").length;
   const isLoading = query.isLoading;
 
   return (
     <section className="space-y-3">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
-        <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-foreground" />
-            <h2 className="font-display font-semibold">Resumo de alertas (próximos 7 dias)</h2>
+      {/* Header - Mobile Optimized */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="h-4 w-4 text-foreground shrink-0" />
+            <h2 className="font-display font-semibold text-sm sm:text-base truncate">
+              Alertas (7 dias)
+            </h2>
+            <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0">
+              {total}
+            </Badge>
           </div>
-          <Badge variant={total > 0 ? "destructive" : "secondary"} className="ml-1">
-            {total} alerta{total === 1 ? "" : "s"}
-          </Badge>
+          
+          <div className="flex items-center gap-1.5">
+            <ExportAlertsPdfButton
+              alerts={sortedAlerts}
+              rainMmhThreshold={RAIN_MM_H_THRESHOLD}
+              rainProbThreshold={RAIN_PROB_THRESHOLD}
+              daysWindow={DAYS_WINDOW}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-2"
+              onClick={() => query.refetch()}
+              disabled={query.isFetching}
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", query.isFetching && "animate-spin")} />
+              <span className="hidden sm:inline text-xs">Atualizar</span>
+            </Button>
+          </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <ExportAlertsPdfButton
-            alerts={sortedAlerts}
-            rainMmhThreshold={RAIN_MM_H_THRESHOLD}
-            rainProbThreshold={RAIN_PROB_THRESHOLD}
-            daysWindow={DAYS_WINDOW}
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => query.refetch()}
-            disabled={query.isFetching}
-          >
-            <RefreshCw className={cn("h-4 w-4", query.isFetching && "animate-spin")} />
-            Atualizar
-          </Button>
+        
+        {/* Summary Stats - Mobile Optimized */}
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <span>Chuva &gt;{RAIN_MM_H_THRESHOLD}mm/h</span>
+          <span>•</span>
+          <span>Prob &gt;{RAIN_PROB_THRESHOLD}%</span>
+          {total > 0 && (
+            <>
+              <span className="hidden sm:inline">•</span>
+              <span className="hidden sm:inline text-destructive">{highCount} alta</span>
+              <span className="hidden sm:inline text-amber-500">{modCount} moderada</span>
+            </>
+          )}
         </div>
-      </div>
-
-      <div className="text-xs text-muted-foreground">
-        Critérios: chuva &gt; {RAIN_MM_H_THRESHOLD} mm/h (janela 72h) <span className="mx-1">OU</span> probabilidade &gt; {RAIN_PROB_THRESHOLD}% (7 dias).
       </div>
 
       {isLoading ? (
-        <div className="text-sm text-muted-foreground">Carregando alertas para todos os locais…</div>
-      ) : query.isError ? (
-        <div className="text-sm text-destructive">Falha ao carregar alertas. Tente novamente.</div>
-      ) : total === 0 ? (
-        <div className="text-sm text-muted-foreground">Nenhum alerta crítico encontrado no período.</div>
-      ) : (
-        <div className="rounded-lg border border-border/30 bg-card/30 overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[160px]">Data/Hora</TableHead>
-                <TableHead>Local</TableHead>
-                <TableHead>Parâmetro(s)</TableHead>
-                <TableHead className="w-[150px]">Valor(es)</TableHead>
-                <TableHead className="w-[120px]">Severidade</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedAlerts.slice(0, 250).map((alert) => {
-                const isHigh = alert.severity === "high";
-                const badgeVariant = isHigh ? "destructive" : "default";
-
-                return (
-                  <TableRow key={alert.id} className="align-top">
-                    <TableCell className="font-medium whitespace-nowrap">
-                      {formatDateTime(alert.dateTimeIso)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium leading-tight">{alert.location.local}</div>
-                      <div className="text-[11px] text-muted-foreground">{alert.location.city} • {alert.location.state}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {alert.triggers.map((t) => (
-                          <Badge key={t.type} variant="outline" className="gap-1">
-                            {t.type === "rain_mm_h" ? (
-                              <Droplets className="h-3 w-3" />
-                            ) : (
-                              <Percent className="h-3 w-3" />
-                            )}
-                            <span>
-                              {t.type === "rain_mm_h" ? "Chuva" : "Prob."}
-                            </span>
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {alert.triggers.map((t) => (
-                          <div key={t.type} className="text-sm font-semibold">
-                            {t.value}{t.unit}
-                          </div>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={badgeVariant}>
-                        {isHigh ? "Alta" : "Moderada"}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+        <div className="text-sm text-muted-foreground py-8 text-center">
+          Carregando alertas...
         </div>
-      )}
+      ) : query.isError ? (
+        <div className="text-sm text-destructive py-8 text-center">
+          Falha ao carregar. Tente novamente.
+        </div>
+      ) : total === 0 ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">
+          ✅ Nenhum alerta crítico no período.
+        </div>
+      ) : (
+        <>
+          {/* Mobile Cards View */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {sortedAlerts.slice(0, 30).map((alert) => (
+              <AlertCard key={alert.id} alert={alert} />
+            ))}
+          </div>
+          
+          {sortedAlerts.length > 30 && (
+            <p className="text-xs text-muted-foreground text-center py-2">
+              + {sortedAlerts.length - 30} alertas adicionais
+            </p>
+          )}
 
-      {/* Detalhes expansíveis (visão resumida + contexto) */}
-      {total > 0 && (
-        <Accordion type="single" collapsible className="rounded-lg border border-border/30">
-          {sortedAlerts.slice(0, 50).map((alert) => (
-            <AccordionItem key={`${alert.id}-details`} value={alert.id}>
-              <AccordionTrigger className="px-4">
-                <div className="flex w-full items-center justify-between gap-3">
-                  <div className="text-left">
-                    <div className="font-medium">
-                      {alert.location.local} — {formatDateTime(alert.dateTimeIso)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {alert.location.city}/{alert.location.state} • disparo por {alert.triggers.map((t) => (t.type === "rain_mm_h" ? "chuva" : "probabilidade")).join(" + ")}
-                    </div>
-                  </div>
-                  <Badge variant={alert.severity === "high" ? "destructive" : "default"} className="shrink-0">
-                    {alert.severity === "high" ? "Alta" : "Moderada"}
-                  </Badge>
-                </div>
+          {/* Expandable Details */}
+          <Accordion type="single" collapsible className="rounded-lg border border-border/30 mt-4">
+            <AccordionItem value="details">
+              <AccordionTrigger className="px-4 text-sm">
+                <span className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4" />
+                  Ver detalhes expandidos
+                </span>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                  <div className="rounded-md border border-border/30 p-3">
-                    <div className="text-xs text-muted-foreground mb-1">Identificação</div>
-                    <div className="font-medium">Uniorg: {alert.location.uniorg}</div>
-                    <div className="text-muted-foreground text-xs">ID Climatempo: {alert.location.climaTempoCod}</div>
-                  </div>
-
-                  <div className="rounded-md border border-border/30 p-3">
-                    <div className="text-xs text-muted-foreground mb-1">Disparo</div>
-                    <div className="space-y-1">
-                      {alert.triggers.map((t) => (
-                        <div key={t.type} className="flex items-center justify-between gap-2">
-                          <span className="text-muted-foreground">
-                            {t.type === "rain_mm_h" ? "Chuva (mm/h)" : "Probabilidade (%)"}
-                          </span>
-                          <span className="font-semibold">{t.value}{t.unit}</span>
+                <div className="space-y-3">
+                  {sortedAlerts.slice(0, 20).map((alert) => (
+                    <div key={`${alert.id}-detail`} className="p-3 rounded-md bg-secondary/20 border border-border/20">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <div className="font-medium text-sm">{alert.location.local}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {alert.location.city}/{alert.location.state} • {formatDateTimeFull(alert.dateTimeIso)}
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-md border border-border/30 p-3">
-                    <div className="text-xs text-muted-foreground mb-1">Contexto</div>
-                    <div className="text-xs text-muted-foreground">
-                      {alert.context?.confidence ?? "Previsão diária (7 dias)"}
-                    </div>
-                    <div className="mt-2 space-y-1">
-                      {alert.context?.adjacent?.prev && (
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-muted-foreground">{alert.context.adjacent.prev.label}</span>
-                          <span className="font-medium">{alert.context.adjacent.prev.value}{alert.context.adjacent.prev.unit}</span>
+                        <Badge variant={alert.severity === "high" ? "destructive" : "default"} className="text-[10px]">
+                          {alert.severity === "high" ? "Alta" : "Moderada"}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                        <div className="p-2 rounded bg-background/50">
+                          <div className="text-muted-foreground mb-1">Uniorg</div>
+                          <div className="font-medium">{alert.location.uniorg}</div>
                         </div>
-                      )}
-                      {alert.context?.adjacent?.next && (
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-muted-foreground">{alert.context.adjacent.next.label}</span>
-                          <span className="font-medium">{alert.context.adjacent.next.value}{alert.context.adjacent.next.unit}</span>
+                        <div className="p-2 rounded bg-background/50">
+                          <div className="text-muted-foreground mb-1">Disparos</div>
+                          {alert.triggers.map((t) => (
+                            <div key={t.type} className="font-medium">
+                              {t.type === "rain_mm_h" ? "Chuva" : "Prob."}: {t.value}{t.unit}
+                            </div>
+                          ))}
                         </div>
-                      )}
+                        <div className="p-2 rounded bg-background/50">
+                          <div className="text-muted-foreground mb-1">Fonte</div>
+                          <div className="font-medium">{alert.context?.confidence ?? "Diária (7d)"}</div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </AccordionContent>
             </AccordionItem>
-          ))}
-        </Accordion>
+          </Accordion>
+        </>
       )}
     </section>
   );

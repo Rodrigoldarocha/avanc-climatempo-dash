@@ -21,13 +21,12 @@ const formatPtBr = (isoLike: string) => {
   return d.toLocaleString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
-    year: "numeric",
+    year: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   });
 };
 
-// Convert image to base64 for jsPDF
 const loadImageAsBase64 = async (src: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -62,7 +61,7 @@ export const ExportAlertsPdfButton = ({
     return [...alerts].sort((a, b) => {
       const da = new Date(a.dateTimeIso).getTime();
       const db = new Date(b.dateTimeIso).getTime();
-      return db - da;
+      return da - db; // ordem crescente
     });
   }, [alerts]);
 
@@ -70,18 +69,17 @@ export const ExportAlertsPdfButton = ({
     setIsGenerating(true);
     try {
       const pdf = new jsPDF({
-        orientation: "landscape", // Landscape para mais espaço horizontal
+        orientation: "landscape",
         unit: "mm",
         format: "a4",
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
+      const margin = 8;
       const contentWidth = pageWidth - margin * 2;
       let y = margin;
 
-      // PDF colors (branding / legibilidade)
       const darkColor = "#1E2B33";
       const primaryColor = "#D4E300";
       const textColor = "#2D3E4A";
@@ -90,12 +88,11 @@ export const ExportAlertsPdfButton = ({
       const danger = "#EF4444";
       const warn = "#F59E0B";
 
-      // Load logo
       let logoBase64: string | null = null;
       try {
         logoBase64 = await loadImageAsBase64(logoAvanco);
       } catch (e) {
-        console.warn("Could not load logo for PDF:", e);
+        console.warn("Could not load logo:", e);
       }
 
       const drawRoundedRect = (
@@ -112,196 +109,169 @@ export const ExportAlertsPdfButton = ({
         pdf.roundedRect(x, yy, w, h, r, r, fill && stroke ? "FD" : fill ? "F" : "S");
       };
 
-      const addHeader = (pageNumber: number, totalPages: number) => {
+      // Calculate pages first
+      const rowH = 5;
+      const headerH = 6;
+      const usableHeight = pageHeight - 45; // header + footer space
+      const rowsPerPage = Math.floor(usableHeight / rowH);
+      const totalPages = Math.max(1, Math.ceil(sorted.length / rowsPerPage));
+      let pageNumber = 1;
+
+      const addHeader = () => {
         y = margin;
         
-        // Header background
-        drawRoundedRect(margin, y, contentWidth, 28, 3, darkColor);
+        drawRoundedRect(margin, y, contentWidth, 22, 2, darkColor);
 
-        // Logo (large on the left)
         if (logoBase64) {
-          const logoHeight = 18;
-          const logoWidth = logoHeight * 3.5; // Aspect ratio aprox
-          pdf.addImage(logoBase64, "PNG", margin + 6, y + 5, logoWidth, logoHeight);
+          const logoHeight = 14;
+          const logoWidth = logoHeight * 3.5;
+          pdf.addImage(logoBase64, "PNG", margin + 4, y + 4, logoWidth, logoHeight);
         }
 
-        // Title centered
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(14);
+        pdf.setFontSize(12);
         pdf.setTextColor(primaryColor);
-        pdf.text("RELATÓRIO DE ALERTAS METEOROLÓGICOS", pageWidth / 2 + 20, y + 10, { align: "center" });
+        pdf.text("RELATÓRIO DE ALERTAS METEOROLÓGICOS", pageWidth / 2 + 15, y + 8, { align: "center" });
 
         pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(8);
+        pdf.setFontSize(7);
         pdf.setTextColor("#FFFFFF");
         pdf.text(
-          `Critérios: chuva > ${rainMmhThreshold} mm/h OU probabilidade > ${rainProbThreshold}% • Período: ${daysWindow} dias`,
-          pageWidth / 2 + 20,
-          y + 17,
+          `Chuva > ${rainMmhThreshold} mm/h OU Probabilidade > ${rainProbThreshold}% • Período: ${daysWindow} dias`,
+          pageWidth / 2 + 15,
+          y + 14,
           { align: "center" },
         );
 
         pdf.setTextColor(mediumGray);
-        pdf.setFontSize(7);
+        pdf.setFontSize(6);
         pdf.text(
-          `Gerado em: ${new Date().toLocaleString("pt-BR", { 
+          `Gerado: ${new Date().toLocaleString("pt-BR", { 
             hour: "2-digit", 
             minute: "2-digit", 
             day: "2-digit", 
             month: "2-digit", 
             year: "numeric" 
-          })} • ${getTotalLocations()} locais monitorados`,
-          pageWidth / 2 + 20,
-          y + 22,
+          })} • ${getTotalLocations()} locais • Pág ${pageNumber}/${totalPages}`,
+          pageWidth / 2 + 15,
+          y + 18,
           { align: "center" },
         );
 
-        // Page indicator (right side)
-        pdf.setTextColor(mediumGray);
-        pdf.setFontSize(7);
-        pdf.text(`Página ${pageNumber} de ${totalPages}`, pageWidth - margin - 4, y + 25, { align: "right" });
-
-        y += 32;
+        y += 26;
       };
 
-      const addFooter = () => {
-        const footerY = pageHeight - 8;
-        pdf.setDrawColor(darkColor);
-        pdf.setLineWidth(0.25);
-        pdf.line(margin, footerY - 3, pageWidth - margin, footerY - 3);
-
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(6);
-        pdf.setTextColor(mediumGray);
-        pdf.text("Dados fornecidos pela API Climatempo", margin, footerY);
-        pdf.text("Grupo Avanço • Sistema de Monitoramento de Alertas", pageWidth / 2, footerY, { align: "center" });
-        pdf.text("www.grupoavanco.com.br", pageWidth - margin, footerY, { align: "right" });
-      };
-
-      // Summary box on first page
       const addSummary = () => {
-        drawRoundedRect(margin, y, contentWidth, 14, 2, lightGray);
+        drawRoundedRect(margin, y, contentWidth, 10, 1.5, lightGray);
         
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(9);
-        pdf.setTextColor(textColor);
-        pdf.text("RESUMO DO PERÍODO", margin + 4, y + 5);
-        
-        pdf.setFont("helvetica", "normal");
         pdf.setFontSize(8);
         pdf.setTextColor(textColor);
+        pdf.text("RESUMO", margin + 4, y + 4);
+        
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(7);
         
         const highCount = sorted.filter(a => a.severity === "high").length;
         const modCount = sorted.filter(a => a.severity === "moderate").length;
         
-        pdf.text(`Total de alertas: ${sorted.length}`, margin + 4, y + 10);
+        pdf.text(`Total: ${sorted.length}`, margin + 30, y + 4);
         pdf.setTextColor(danger);
-        pdf.text(`Severidade Alta: ${highCount}`, margin + 50, y + 10);
+        pdf.text(`Alta: ${highCount}`, margin + 55, y + 4);
         pdf.setTextColor(warn);
-        pdf.text(`Severidade Moderada: ${modCount}`, margin + 100, y + 10);
+        pdf.text(`Moderada: ${modCount}`, margin + 80, y + 4);
         
-        y += 18;
+        y += 14;
       };
 
-      // Table setup - Landscape mode with better column distribution
-      const rowH = 5.5;
-      const headerH = 6.5;
-      const maxY = pageHeight - 14;
+      const addFooter = () => {
+        const footerY = pageHeight - 6;
+        pdf.setDrawColor(darkColor);
+        pdf.setLineWidth(0.2);
+        pdf.line(margin, footerY - 2, pageWidth - margin, footerY - 2);
 
-      // Column positions (landscape A4: 297mm width, using ~277mm content)
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(5);
+        pdf.setTextColor(mediumGray);
+        pdf.text("Dados: API Climatempo", margin, footerY);
+        pdf.text("Grupo Avanço • Sistema de Monitoramento", pageWidth / 2, footerY, { align: "center" });
+        pdf.text("www.grupoavanco.com.br", pageWidth - margin, footerY, { align: "right" });
+      };
+
+      // Column positions - optimized for landscape
       const col = {
         dt: margin + 2,
-        local: margin + 38,
-        city: margin + 95,
-        trig: margin + 145,
-        val: margin + 190,
-        sev: margin + 230,
-      };
-
-      const colWidth = {
-        dt: 34,
-        local: 55,
-        city: 48,
-        trig: 43,
-        val: 38,
-        sev: 40,
+        local: margin + 32,
+        city: margin + 82,
+        trig: margin + 125,
+        val: margin + 168,
+        sev: margin + 205,
       };
 
       const drawTableHeader = () => {
-        drawRoundedRect(margin, y, contentWidth, headerH, 1.5, darkColor);
+        drawRoundedRect(margin, y, contentWidth, headerH, 1, darkColor);
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(7);
+        pdf.setFontSize(6);
         pdf.setTextColor("#FFFFFF");
-        pdf.text("Data/Hora", col.dt, y + 4.2);
-        pdf.text("Local", col.local, y + 4.2);
-        pdf.text("Cidade/UF", col.city, y + 4.2);
-        pdf.text("Parâmetro", col.trig, y + 4.2);
-        pdf.text("Valor", col.val, y + 4.2);
-        pdf.text("Severidade", col.sev, y + 4.2);
-        y += headerH + 0.5;
+        pdf.text("Data/Hora", col.dt, y + 4);
+        pdf.text("Local", col.local, y + 4);
+        pdf.text("Cidade/UF", col.city, y + 4);
+        pdf.text("Parâmetro", col.trig, y + 4);
+        pdf.text("Valor", col.val, y + 4);
+        pdf.text("Severidade", col.sev, y + 4);
+        y += headerH + 1;
       };
 
-      // Calculate total pages
-      const rowsPerPage = Math.floor((maxY - 50) / rowH);
-      const totalPages = Math.max(1, Math.ceil(sorted.length / rowsPerPage) + 1);
-      let pageNumber = 1;
-
-      // Build first page
-      addHeader(pageNumber, totalPages);
+      // First page
+      addHeader();
       addSummary();
       drawTableHeader();
 
       pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(6.5);
+      pdf.setFontSize(6);
+
+      const maxY = pageHeight - 12;
 
       for (let i = 0; i < sorted.length; i++) {
         const a = sorted[i];
+        
         if (y + rowH > maxY) {
           addFooter();
           pdf.addPage();
           pageNumber += 1;
-          addHeader(pageNumber, totalPages);
+          addHeader();
           drawTableHeader();
         }
 
         // Zebra striping
-        if (i % 2 === 0) {
-          drawRoundedRect(margin, y - 3.8, contentWidth, rowH, 0.5, "#FFFFFF");
-        } else {
-          drawRoundedRect(margin, y - 3.8, contentWidth, rowH, 0.5, lightGray);
+        if (i % 2 === 1) {
+          drawRoundedRect(margin, y - 3.5, contentWidth, rowH, 0.5, lightGray);
         }
 
-        // Format trigger and values
         const params = a.triggers
-          .map((t) => (t.type === "rain_mm_h" ? "Chuva (mm/h)" : "Prob. (%)"))
+          .map((t) => (t.type === "rain_mm_h" ? "Chuva" : "Prob."))
           .join(" + ");
         const values = a.triggers.map((t) => `${t.value}${t.unit}`).join(" | ");
         const sevLabel = a.severity === "high" ? "ALTA" : "MODERADA";
         const sevColor = a.severity === "high" ? danger : warn;
 
-        // Date/Time
         pdf.setTextColor(textColor);
         pdf.text(formatPtBr(a.dateTimeIso), col.dt, y);
 
-        // Local (truncate if too long)
         const localText = a.location.local || "";
-        const localTruncated = localText.length > 28 ? localText.substring(0, 26) + "..." : localText;
+        const localTruncated = localText.length > 26 ? localText.substring(0, 24) + "..." : localText;
         pdf.text(localTruncated, col.local, y);
 
-        // City/State
         const cityState = `${a.location.city}/${a.location.state}`;
-        const cityTruncated = cityState.length > 24 ? cityState.substring(0, 22) + "..." : cityState;
+        const cityTruncated = cityState.length > 22 ? cityState.substring(0, 20) + "..." : cityState;
         pdf.text(cityTruncated, col.city, y);
 
-        // Parameter
         pdf.text(params, col.trig, y);
 
-        // Value
         pdf.setFont("helvetica", "bold");
         pdf.text(values, col.val, y);
         pdf.setFont("helvetica", "normal");
 
-        // Severity with color badge
         pdf.setTextColor(sevColor);
         pdf.setFont("helvetica", "bold");
         pdf.text(sevLabel, col.sev, y);
@@ -312,20 +282,20 @@ export const ExportAlertsPdfButton = ({
 
       addFooter();
 
-      const fileName = `relatorio-alertas-${daysWindow}d-${new Date().toISOString().split("T")[0]}.pdf`;
+      const fileName = `alertas-${daysWindow}d-${new Date().toISOString().split("T")[0]}.pdf`;
       pdf.save(fileName);
 
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
       toast({
-        title: "PDF gerado com sucesso!",
-        description: `Relatório de alertas (${daysWindow} dias) foi baixado.`,
+        title: "PDF gerado!",
+        description: `Relatório de alertas baixado.`,
       });
     } catch (e) {
-      console.error("Erro ao gerar PDF de alertas:", e);
+      console.error("Erro ao gerar PDF:", e);
       toast({
         title: "Erro ao gerar PDF",
-        description: "Tente novamente em alguns instantes.",
+        description: "Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -339,8 +309,8 @@ export const ExportAlertsPdfButton = ({
       size="sm"
       onClick={generatePdf}
       disabled={isGenerating || sorted.length === 0}
-      className="h-8 gap-1.5 text-xs transition-all"
-      title={sorted.length === 0 ? "Sem alertas para exportar" : "Baixar relatório de alertas (PDF)"}
+      className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-1.5 transition-all"
+      title={sorted.length === 0 ? "Sem alertas" : "Baixar PDF"}
     >
       {isGenerating ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -349,7 +319,7 @@ export const ExportAlertsPdfButton = ({
       ) : (
         <FileDown className="h-3.5 w-3.5" />
       )}
-      <span className="hidden sm:inline">{showSuccess ? "Baixado!" : "PDF"}</span>
+      <span className="hidden sm:inline text-xs">{showSuccess ? "OK!" : "PDF"}</span>
     </Button>
   );
 };
