@@ -122,24 +122,26 @@ export const ExportAlertsPdfButton = ({
         
         drawRoundedRect(margin, y, contentWidth, 22, 2, darkColor);
 
+        // Logo positioned with proper margin
         if (logoBase64) {
-          const logoHeight = 14;
+          const logoHeight = 12;
           const logoWidth = logoHeight * 3.5;
-          pdf.addImage(logoBase64, "PNG", margin + 4, y + 4, logoWidth, logoHeight);
+          pdf.addImage(logoBase64, "PNG", margin + 6, y + 5, logoWidth, logoHeight);
         }
 
+        // Title centered in the page
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(12);
+        pdf.setFontSize(11);
         pdf.setTextColor(primaryColor);
-        pdf.text("RELATÓRIO DE ALERTAS METEOROLÓGICOS", pageWidth / 2 + 15, y + 8, { align: "center" });
+        pdf.text("RELATÓRIO DE ALERTAS METEOROLÓGICOS", pageWidth / 2, y + 8, { align: "center" });
 
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(7);
         pdf.setTextColor("#FFFFFF");
         pdf.text(
           `Chuva > ${rainMmhThreshold} mm/h OU Probabilidade > ${rainProbThreshold}% • Período: ${daysWindow} dias`,
-          pageWidth / 2 + 15,
-          y + 14,
+          pageWidth / 2,
+          y + 13,
           { align: "center" },
         );
 
@@ -153,7 +155,7 @@ export const ExportAlertsPdfButton = ({
             month: "2-digit", 
             year: "numeric" 
           })} • ${getTotalLocations()} locais • Pág ${pageNumber}/${totalPages}`,
-          pageWidth / 2 + 15,
+          pageWidth / 2,
           y + 18,
           { align: "center" },
         );
