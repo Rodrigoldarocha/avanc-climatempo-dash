@@ -1,4 +1,5 @@
 import logoAvanco from "@/assets/logo-avanco.png";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export const Header = () => {
   return (
@@ -9,10 +10,13 @@ export const Header = () => {
           alt="Grupo Avanço" 
           className="h-20 sm:h-24 md:h-28 w-auto flex-shrink-0"
         />
-        <h1 className="text-[10px] sm:text-xs md:text-sm font-semibold tracking-wider md:tracking-widest text-secondary-foreground uppercase text-right leading-tight">
-          Dashboard Previsão<br className="sm:hidden" />
-          <span className="hidden sm:inline"> - </span>Clima Tempo
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-[10px] sm:text-xs md:text-sm font-semibold tracking-wider md:tracking-widest text-secondary-foreground uppercase text-right leading-tight">
+            Dashboard Previsão<br className="sm:hidden" />
+            <span className="hidden sm:inline"> - </span>Clima Tempo
+          </h1>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
