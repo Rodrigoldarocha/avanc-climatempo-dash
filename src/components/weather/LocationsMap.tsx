@@ -1,16 +1,14 @@
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { Icon, LatLngBounds } from "leaflet";
+import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { locations, type Location } from "@/data/locations";
 import { getCurrentWeather, formatTemperature } from "@/services/climatempo";
-import { WeatherIcon } from "./WeatherIcon";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Thermometer, Droplets, Wind, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
-// Custom marker icon
-const customIcon = new Icon({
+// Fix default marker icons
+const defaultIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -24,93 +22,83 @@ interface LocationsMapProps {
   onLocationSelect?: (location: Location) => void;
 }
 
-// Component to fit bounds to all markers
-function FitBounds({ locations }: { locations: Location[] }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (locations.length > 0) {
-      const bounds = new LatLngBounds(
-        locations.map(loc => [loc.latitude, loc.longitude])
-      );
-      map.fitBounds(bounds, { padding: [20, 20] });
-    }
-  }, [locations, map]);
-  
-  return null;
-}
-
-// Weather popup content component
-function LocationPopup({ location, onSelect }: { location: Location; onSelect?: (loc: Location) => void }) {
+function PopupContent({ location, onSelect }: { location: Location; onSelect?: (loc: Location) => void }) {
   const { data, isLoading } = useQuery({
     queryKey: ["currentWeather", location.climaTempoCod],
     queryFn: () => getCurrentWeather(location.climaTempoCod),
     staleTime: 5 * 60 * 1000,
   });
 
-  if (isLoading) {
-    return (
-      <div className="p-2 min-w-[180px]">
-        <Skeleton className="h-4 w-24 mb-2" />
-        <Skeleton className="h-8 w-16" />
-      </div>
-    );
-  }
+  if (isLoading) return "<div style='min-width:180px;padding:8px'>Carregando...</div>";
 
   const weather = data?.data;
+  if (!weather) return "<div style='min-width:180px;padding:8px'>Dados indisponíveis</div>";
 
-  return (
-    <div className="min-w-[200px]">
-      <div className="flex items-center gap-1 mb-2">
-        <MapPin className="h-3.5 w-3.5 text-primary" />
-        <span className="font-semibold text-sm">{location.city}</span>
-        <span className="text-xs text-muted-foreground">- {location.state}</span>
+  return `
+    <div style="min-width:200px;font-family:system-ui,sans-serif">
+      <div style="font-weight:600;font-size:14px;margin-bottom:6px">${location.city} - ${location.state}</div>
+      <div style="font-size:24px;font-weight:700;margin-bottom:6px">${formatTemperature(weather.temperature)}</div>
+      <div style="font-size:12px;color:#666;line-height:1.6">
+        Sensação: ${formatTemperature(weather.sensation)}<br/>
+        Umidade: ${weather.humidity}%<br/>
+        Vento: ${weather.wind_velocity} ${weather.wind_direction}
       </div>
-      
-      {weather ? (
-        <>
-          <div className="flex items-center gap-2 mb-2">
-            <WeatherIcon condition={weather.icon} size="sm" />
-            <span className="text-2xl font-bold">{formatTemperature(weather.temperature)}</span>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-1.5 text-xs mb-2">
-            <div className="flex items-center gap-1">
-              <Thermometer className="h-3 w-3 text-destructive" />
-              <span>Sens: {formatTemperature(weather.sensation)}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Droplets className="h-3 w-3 text-primary" />
-              <span>{weather.humidity}%</span>
-            </div>
-            <div className="flex items-center gap-1 col-span-2">
-              <Wind className="h-3 w-3 text-muted-foreground" />
-              <span>{weather.wind_velocity} {weather.wind_direction}</span>
-            </div>
-          </div>
-          
-          {onSelect && (
-            <button
-              onClick={() => onSelect(location)}
-              className="w-full text-xs bg-primary text-primary-foreground py-1.5 px-2 rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Ver detalhes
-            </button>
-          )}
-        </>
-      ) : (
-        <p className="text-xs text-muted-foreground">Dados indisponíveis</p>
-      )}
     </div>
-  );
+  `;
 }
 
 export function LocationsMap({ onLocationSelect }: LocationsMapProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!isMounted || !mapRef.current || mapInstanceRef.current) return;
+
+    const map = L.map(mapRef.current).setView([-14.235, -51.925], 4);
+    mapInstanceRef.current = map;
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    const bounds = L.latLngBounds(
+      locations.map((loc) => [loc.latitude, loc.longitude] as L.LatLngTuple)
+    );
+
+    const markers = locations.map((location) => {
+      const marker = L.marker([location.latitude, location.longitude], { icon: defaultIcon }).addTo(map);
+
+      marker.bindPopup(
+        `<div style="min-width:180px;font-family:system-ui,sans-serif">
+          <div style="font-weight:600;font-size:14px;margin-bottom:4px">${location.city} - ${location.state}</div>
+          <div style="font-size:12px;color:#666">Clique para ver detalhes</div>
+        </div>`
+      );
+
+      marker.on("click", () => {
+        if (onLocationSelect) {
+          onLocationSelect(location);
+        }
+      });
+
+      return marker;
+    });
+
+    map.fitBounds(bounds, { padding: [20, 20] });
+
+    // Force resize after mount
+    setTimeout(() => map.invalidateSize(), 100);
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [isMounted, onLocationSelect]);
 
   if (!isMounted) {
     return (
@@ -119,10 +107,6 @@ export function LocationsMap({ onLocationSelect }: LocationsMapProps) {
       </div>
     );
   }
-
-  // Center of Brazil
-  const centerLat = -14.235;
-  const centerLng = -51.925;
 
   return (
     <div className="weather-card overflow-hidden">
@@ -133,31 +117,7 @@ export function LocationsMap({ onLocationSelect }: LocationsMapProps) {
         </div>
         <span className="text-xs text-muted-foreground">{locations.length} locais</span>
       </div>
-      
-      <MapContainer
-        center={[centerLat, centerLng]}
-        zoom={4}
-        style={{ height: "400px", width: "100%" }}
-        className="z-0"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <FitBounds locations={locations} />
-        
-        {locations.map((location) => (
-          <Marker
-            key={location.climaTempoCod}
-            position={[location.latitude, location.longitude]}
-            icon={customIcon}
-          >
-            <Popup>
-              <LocationPopup location={location} onSelect={onLocationSelect} />
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+      <div ref={mapRef} style={{ height: "400px", width: "100%" }} className="z-0" />
     </div>
   );
 }
