@@ -90,18 +90,44 @@ export const ExportPdfButton = ({ location }: ExportPdfButtonProps) => {
         return false;
       };
 
-      // === HEADER ===
+      // === HEADER with logo ===
+      let logoBase64: string | null = null;
+      try {
+        const { default: logoSrc } = await import("@/assets/logo-avanco.png");
+        logoBase64 = await new Promise<string>((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) { reject(new Error("no ctx")); return; }
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/png"));
+          };
+          img.onerror = reject;
+          img.src = logoSrc;
+        });
+      } catch (e) {
+        console.warn("Could not load logo:", e);
+      }
+
       drawRoundedRect(pdf, margin, y, contentWidth, 30, 3, darkColor);
+
+      if (logoBase64) {
+        pdf.addImage(logoBase64, "PNG", margin + 4, y + 4, 22, 22);
+      }
       
       pdf.setFontSize(18);
       pdf.setFont("helvetica", "bold");
       pdf.setTextColor(primaryColor);
-      pdf.text("RELATÓRIO METEOROLÓGICO", pageWidth / 2, y + 12, { align: "center" });
+      pdf.text("RELATÓRIO METEOROLÓGICO", pageWidth / 2 + 10, y + 12, { align: "center" });
 
       pdf.setFontSize(11);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor("#FFFFFF");
-      pdf.text(`${location.city}, ${location.state}`, pageWidth / 2, y + 20, { align: "center" });
+      pdf.text(`${location.city}, ${location.state}`, pageWidth / 2 + 10, y + 20, { align: "center" });
 
       pdf.setFontSize(7);
       pdf.setTextColor(mediumGray);
@@ -112,7 +138,7 @@ export const ExportPdfButton = ({ location }: ExportPdfButtonProps) => {
         hour: "2-digit",
         minute: "2-digit",
       });
-      pdf.text(`Gerado em: ${generatedDate}`, pageWidth / 2, y + 27, { align: "center" });
+      pdf.text(`Gerado em: ${generatedDate}`, pageWidth / 2 + 10, y + 27, { align: "center" });
 
       y += 36;
 

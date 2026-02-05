@@ -124,9 +124,8 @@ export const ExportAlertsPdfButton = ({
 
         // Logo positioned with proper margin
         if (logoBase64) {
-          const logoHeight = 12;
-          const logoWidth = logoHeight * 3.5;
-          pdf.addImage(logoBase64, "PNG", margin + 6, y + 5, logoWidth, logoHeight);
+          const logoSize = 14;
+          pdf.addImage(logoBase64, "PNG", margin + 4, y + 4, logoSize, logoSize);
         }
 
         // Title centered in the page
