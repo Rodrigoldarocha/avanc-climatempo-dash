@@ -102,31 +102,33 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
       </div>
 
       {/* State Filter - Horizontal Scroll */}
-      <div className="overflow-x-auto pb-1 -mx-4 px-4">
-        <div className="flex gap-1.5 min-w-max">
-        <Badge
-          variant={selectedState === null ? "default" : "outline"}
-          className={cn(
-            "cursor-pointer text-[10px] px-2 py-0.5 transition-all",
-            selectedState === null && "bg-primary text-primary-foreground"
-          )}
-          onClick={() => setSelectedState(null)}
-        >
-          Todos
-        </Badge>
-        {states.map((state) => (
-          <Badge
-            key={state}
-            variant={selectedState === state ? "default" : "outline"}
+      <div className="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-thin">
+        <div className="flex gap-1 min-w-max bg-card/80 backdrop-blur-sm border border-border/40 rounded-xl p-1 shadow-sm">
+          <button
+            onClick={() => setSelectedState(null)}
             className={cn(
-              "cursor-pointer text-[10px] px-2 py-0.5 transition-all",
-              selectedState === state && "bg-primary text-primary-foreground"
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap",
+              selectedState === null
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
             )}
-            onClick={() => setSelectedState(selectedState === state ? null : state)}
           >
-            {state}
-          </Badge>
-        ))}
+            Todos
+          </button>
+          {states.map((state) => (
+            <button
+              key={state}
+              onClick={() => setSelectedState(selectedState === state ? null : state)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap",
+                selectedState === state
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
+              )}
+            >
+              {state}
+            </button>
+          ))}
         </div>
       </div>
 
