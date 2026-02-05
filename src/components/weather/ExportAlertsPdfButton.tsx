@@ -200,27 +200,22 @@ export const ExportAlertsPdfButton = ({
         pdf.text("www.grupoavanco.com.br", pageWidth - margin, footerY, { align: "right" });
       };
 
-      // Column positions - optimized for landscape
-      const col = {
-        dt: margin + 2,
-        local: margin + 32,
-        city: margin + 82,
-        trig: margin + 125,
-        val: margin + 168,
-        sev: margin + 205,
-      };
+      // Column widths as percentages of contentWidth
+      const colWidths = [0.12, 0.20, 0.18, 0.18, 0.16, 0.16];
+      const colX: number[] = [];
+      let accX = margin + 2;
+      for (const w of colWidths) {
+        colX.push(accX);
+        accX += contentWidth * w;
+      }
 
       const drawTableHeader = () => {
         drawRoundedRect(margin, y, contentWidth, headerH, 1, darkColor);
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(6);
         pdf.setTextColor("#FFFFFF");
-        pdf.text("Data/Hora", col.dt, y + 4);
-        pdf.text("Local", col.local, y + 4);
-        pdf.text("Cidade/UF", col.city, y + 4);
-        pdf.text("Parâmetro", col.trig, y + 4);
-        pdf.text("Valor", col.val, y + 4);
-        pdf.text("Severidade", col.sev, y + 4);
+        const headers = ["Data/Hora", "Local", "Cidade/UF", "Parâmetro", "Valor", "Severidade"];
+        headers.forEach((h, i) => pdf.text(h, colX[i], y + 4));
         y += headerH + 1;
       };
 
@@ -234,6 +229,12 @@ export const ExportAlertsPdfButton = ({
 
       const maxY = pageHeight - 12;
 
+      // Max chars per column to prevent overflow
+      const maxChars = [16, 26, 22, 18, 16, 12];
+
+      const truncate = (text: string, max: number) =>
+        text.length > max ? text.substring(0, max - 2) + ".." : text;
+
       for (let i = 0; i < sorted.length; i++) {
         const a = sorted[i];
         
@@ -245,9 +246,10 @@ export const ExportAlertsPdfButton = ({
           drawTableHeader();
         }
 
-        // Zebra striping
+        // Zebra striping - aligned to text baseline
         if (i % 2 === 1) {
-          drawRoundedRect(margin, y - 3.5, contentWidth, rowH, 0.5, lightGray);
+          pdf.setFillColor(lightGray);
+          pdf.rect(margin, y - 3, contentWidth, rowH, "F");
         }
 
         const params = a.triggers
@@ -258,25 +260,17 @@ export const ExportAlertsPdfButton = ({
         const sevColor = a.severity === "high" ? danger : warn;
 
         pdf.setTextColor(textColor);
-        pdf.text(formatPtBr(a.dateTimeIso), col.dt, y);
-
-        const localText = a.location.local || "";
-        const localTruncated = localText.length > 26 ? localText.substring(0, 24) + "..." : localText;
-        pdf.text(localTruncated, col.local, y);
-
-        const cityState = `${a.location.city}/${a.location.state}`;
-        const cityTruncated = cityState.length > 22 ? cityState.substring(0, 20) + "..." : cityState;
-        pdf.text(cityTruncated, col.city, y);
-
-        pdf.text(params, col.trig, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(truncate(formatPtBr(a.dateTimeIso), maxChars[0]), colX[0], y);
+        pdf.text(truncate(a.location.local || "", maxChars[1]), colX[1], y);
+        pdf.text(truncate(`${a.location.city}/${a.location.state}`, maxChars[2]), colX[2], y);
+        pdf.text(truncate(params, maxChars[3]), colX[3], y);
 
         pdf.setFont("helvetica", "bold");
-        pdf.text(values, col.val, y);
-        pdf.setFont("helvetica", "normal");
+        pdf.text(truncate(values, maxChars[4]), colX[4], y);
 
         pdf.setTextColor(sevColor);
-        pdf.setFont("helvetica", "bold");
-        pdf.text(sevLabel, col.sev, y);
+        pdf.text(sevLabel, colX[5], y);
         pdf.setFont("helvetica", "normal");
 
         y += rowH;
