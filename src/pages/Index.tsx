@@ -79,9 +79,6 @@ const Index = () => {
       case "daily":
         if (!selectedLocation) return null;
         return <DailyForecastCard location={selectedLocation} />;
-      case "historical":
-        if (!selectedLocation) return null;
-        return <HistoricalChart location={selectedLocation} />;
       default:
         return null;
     }
