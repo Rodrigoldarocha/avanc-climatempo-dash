@@ -12,7 +12,7 @@ export const Header = () => {
         />
         <div className="flex items-center gap-3">
           <h1 className="text-[10px] sm:text-xs md:text-sm font-semibold tracking-wider md:tracking-widest text-secondary-foreground uppercase text-right leading-tight">
-            Dashboard Previsão<br className="sm:hidden" />
+            Base<br className="sm:hidden" />
             <span className="hidden sm:inline"> - </span>Clima Tempo
           </h1>
           <ThemeToggle />
