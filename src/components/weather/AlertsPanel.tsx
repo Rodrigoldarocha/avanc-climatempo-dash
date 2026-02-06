@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExportAlertsPdfButton } from "@/components/weather/ExportAlertsPdfButton";
+import { ExportAlertsDataButton } from "@/components/weather/ExportAlertsDataButton";
 
 type TriggerType = "rain_mm_h" | "rain_probability";
 type Severity = "high" | "moderate";
@@ -304,6 +305,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
           </div>
           
           <div className="flex items-center gap-1.5">
+            <ExportAlertsDataButton alerts={sortedAlerts} />
             <ExportAlertsPdfButton
               alerts={sortedAlerts}
               rainMmhThreshold={RAIN_MM_H_THRESHOLD}
