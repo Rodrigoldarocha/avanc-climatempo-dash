@@ -3,19 +3,18 @@ import { Header } from "@/components/layout/Header";
 import { Navigation, type TabType } from "@/components/layout/Navigation";
 import { ForecastMenu, type MenuOption } from "@/components/layout/ForecastMenu";
 import { LocationGrid } from "@/components/weather/LocationGrid";
-import { LocationsMap } from "@/components/weather/LocationsMap";
 import { CurrentWeatherCard } from "@/components/weather/CurrentWeatherCard";
 import { HourlyForecastCard } from "@/components/weather/HourlyForecastCard";
 import { DailyForecastCard } from "@/components/weather/DailyForecastCard";
-import { HistoricalChart } from "@/components/weather/HistoricalChart";
 import { ExportPdfButton } from "@/components/weather/ExportPdfButton";
+import { ExportDataButton } from "@/components/weather/ExportDataButton";
 import { AlertsPanel } from "@/components/weather/AlertsPanel";
 import { type Location } from "@/data/locations";
-import { MapPin, RefreshCw, ArrowLeft, Grid3X3, Siren, Map } from "lucide-react";
+import { MapPin, RefreshCw, ArrowLeft, Grid3X3, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 
-type ViewMode = "grid" | "detail" | "map";
+type ViewMode = "grid" | "detail";
 
 const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -35,24 +34,22 @@ const Index = () => {
     setActiveTab("alerts");
   };
 
-  const handleOpenMap = () => {
-    setViewMode("map");
-  };
-
   const handleBackToGrid = () => {
     setViewMode("grid");
     setSelectedLocation(null);
   };
 
   const handleMenuSelect = (option: MenuOption) => {
-    if (option === "map") {
-      handleOpenMap();
-    } else if (option === "alerts") {
+    if (option === "alerts") {
       handleOpenAlerts();
     } else {
+      // For current/hourly/daily, if no location selected go to alerts view
       if (selectedLocation) {
         setActiveTab(option as TabType);
         setViewMode("detail");
+      } else {
+        // Select first available — prompt user via grid
+        setViewMode("grid");
       }
     }
   };
@@ -100,10 +97,6 @@ const Index = () => {
                   <ForecastMenu onSelect={handleMenuSelect} />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" className="gap-2" onClick={handleOpenMap}>
-                    <Map className="h-4 w-4" />
-                    <span className="hidden sm:inline">Mapa</span>
-                  </Button>
                   <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
                     <Siren className="h-4 w-4" />
                     <span className="hidden sm:inline">Alertas</span>
@@ -114,25 +107,6 @@ const Index = () => {
                 onLocationSelect={handleLocationSelect}
                 selectedLocation={selectedLocation}
               />
-            </div>
-          ) : viewMode === "map" ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleBackToGrid}
-                  className="gap-1 h-8 px-2 shrink-0"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  <Grid3X3 className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline ml-1">Voltar</span>
-                </Button>
-                <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8">
-                  <RefreshCw className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <LocationsMap onLocationSelect={handleLocationSelect} />
             </div>
           ) : (
             <>
@@ -164,7 +138,12 @@ const Index = () => {
                   )}
                   
                   <div className="flex items-center gap-1 ml-auto shrink-0">
-                    {selectedLocation && activeTab !== "alerts" && <ExportPdfButton location={selectedLocation} />}
+                    {selectedLocation && activeTab !== "alerts" && (
+                      <>
+                        <ExportDataButton location={selectedLocation} />
+                        <ExportPdfButton location={selectedLocation} />
+                      </>
+                    )}
                     <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8">
                       <RefreshCw className="h-3.5 w-3.5" />
                     </Button>

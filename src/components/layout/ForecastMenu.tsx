@@ -7,9 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Cloud, Clock, Calendar, Siren, Map, ChevronDown } from "lucide-react";
+import { Cloud, Clock, Calendar, Siren, ChevronDown } from "lucide-react";
 
-export type MenuOption = "current" | "hourly" | "daily" | "alerts" | "map";
+export type MenuOption = "current" | "hourly" | "daily" | "alerts";
 
 interface ForecastMenuProps {
   onSelect: (option: MenuOption) => void;
@@ -21,7 +21,6 @@ const menuItems = [
   { id: "hourly" as MenuOption, label: "Previsão 72h", icon: Clock, description: "Próximas 72 horas" },
   { id: "daily" as MenuOption, label: "Previsão 15 dias", icon: Calendar, description: "Próximos 15 dias" },
   { id: "alerts" as MenuOption, label: "Alertas", icon: Siren, description: "Alertas meteorológicos" },
-  { id: "map" as MenuOption, label: "Mapa", icon: Map, description: "Visualização geográfica" },
 ];
 
 export function ForecastMenu({ onSelect, currentOption }: ForecastMenuProps) {
