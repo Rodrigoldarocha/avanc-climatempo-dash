@@ -267,6 +267,7 @@ const AlertCard = ({ alert }: { alert: WeatherAlert }) => {
 export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location | null }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [selectedSeverity, setSelectedSeverity] = useState<Severity | null>(null);
 
   const query = useQuery({
     queryKey: ["alerts", "7d", RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD],
@@ -286,14 +287,19 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
           a.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
           a.location.local.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesState = !selectedState || a.location.state === selectedState;
-        return matchesSearch && matchesState;
+        const matchesSeverity = !selectedSeverity || a.severity === selectedSeverity;
+        return matchesSearch && matchesState && matchesSeverity;
       })
       .sort((a, b) => {
+        // Sort by severity first (high before moderate), then by date
+        const sevOrder = { high: 0, moderate: 1 };
+        const sevDiff = sevOrder[a.severity] - sevOrder[b.severity];
+        if (sevDiff !== 0) return sevDiff;
         const da = safeParseToDate(a.dateTimeIso)?.getTime() ?? 0;
         const db = safeParseToDate(b.dateTimeIso)?.getTime() ?? 0;
         return da - db;
       });
-  }, [query.data, searchQuery, selectedState]);
+  }, [query.data, searchQuery, selectedState, selectedSeverity]);
 
   const total = sortedAlerts.length;
   const highCount = sortedAlerts.filter(a => a.severity === "high").length;
@@ -348,6 +354,28 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
               <span className="hidden sm:inline text-amber-500">{modCount} moderada</span>
             </>
           )}
+        </div>
+
+        {/* Severity Filter */}
+        <div className="flex gap-1.5">
+          {([null, "high", "moderate"] as const).map((sev) => (
+            <button
+              key={sev ?? "all"}
+              onClick={() => setSelectedSeverity(sev)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap",
+                selectedSeverity === sev
+                  ? sev === "high"
+                    ? "bg-destructive text-destructive-foreground shadow-md"
+                    : sev === "moderate"
+                    ? "bg-amber-500 text-white shadow-md"
+                    : "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
+              )}
+            >
+              {sev === null ? "Todas" : sev === "high" ? "🔴 Alta" : "🟡 Moderada"}
+            </button>
+          ))}
         </div>
 
         {/* Filters */}
