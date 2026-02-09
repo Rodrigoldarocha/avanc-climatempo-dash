@@ -10,6 +10,7 @@ import { ExportPdfButton } from "@/components/weather/ExportPdfButton";
 import { ExportDataButton } from "@/components/weather/ExportDataButton";
 import { AlertsPanel } from "@/components/weather/AlertsPanel";
 import { type Location, locations } from "@/data/locations";
+import { LocationPicker } from "@/components/weather/LocationPicker";
 import { MapPin, RefreshCw, ArrowLeft, Grid3X3, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -121,17 +122,12 @@ const Index = () => {
                     <Grid3X3 className="h-3.5 w-3.5 hidden sm:block" />
                   </Button>
                   
-                  {/* Location Info - Mobile Inline */}
+                  {/* Location Picker - replaces static info */}
                   {selectedLocation && activeTab !== "alerts" && (
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                      <span className="font-display font-semibold text-sm truncate">
-                        {selectedLocation.city}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                        {selectedLocation.state}
-                      </span>
-                    </div>
+                    <LocationPicker
+                      selectedLocation={selectedLocation}
+                      onLocationChange={(loc) => setSelectedLocation(loc)}
+                    />
                   )}
                   
                   <div className="flex items-center gap-1 ml-auto shrink-0">

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { AlertTriangle, Droplets, Percent, RefreshCw, ChevronRight } from "lucide-react";
@@ -7,7 +7,7 @@ import type { Location } from "@/data/locations";
 import { locations } from "@/data/locations";
 import { get15DayForecast, get72HourForecast } from "@/services/climatempo";
 import { cn } from "@/lib/utils";
-
+import { LocationFilter } from "./LocationFilter";
 import {
   Accordion,
   AccordionContent,
@@ -265,6 +265,9 @@ const AlertCard = ({ alert }: { alert: WeatherAlert }) => {
 };
 
 export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location | null }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+
   const query = useQuery({
     queryKey: ["alerts", "7d", RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD],
     queryFn: async () => {
@@ -277,12 +280,20 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
 
   const sortedAlerts = useMemo(() => {
     const list = query.data ?? [];
-    return [...list].sort((a, b) => {
-      const da = safeParseToDate(a.dateTimeIso)?.getTime() ?? 0;
-      const db = safeParseToDate(b.dateTimeIso)?.getTime() ?? 0;
-      return da - db;
-    });
-  }, [query.data]);
+    return [...list]
+      .filter((a) => {
+        const matchesSearch = !searchQuery ||
+          a.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          a.location.local.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesState = !selectedState || a.location.state === selectedState;
+        return matchesSearch && matchesState;
+      })
+      .sort((a, b) => {
+        const da = safeParseToDate(a.dateTimeIso)?.getTime() ?? 0;
+        const db = safeParseToDate(b.dateTimeIso)?.getTime() ?? 0;
+        return da - db;
+      });
+  }, [query.data, searchQuery, selectedState]);
 
   const total = sortedAlerts.length;
   const highCount = sortedAlerts.filter(a => a.severity === "high").length;
@@ -338,6 +349,15 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
             </>
           )}
         </div>
+
+        {/* Filters */}
+        <LocationFilter
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedState={selectedState}
+          onStateChange={setSelectedState}
+          searchPlaceholder="Buscar local nos alertas..."
+        />
       </div>
 
       {isLoading ? (
