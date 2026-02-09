@@ -9,7 +9,7 @@ import { DailyForecastCard } from "@/components/weather/DailyForecastCard";
 import { ExportPdfButton } from "@/components/weather/ExportPdfButton";
 import { ExportDataButton } from "@/components/weather/ExportDataButton";
 import { AlertsPanel } from "@/components/weather/AlertsPanel";
-import { type Location } from "@/data/locations";
+import { type Location, locations } from "@/data/locations";
 import { MapPin, RefreshCw, ArrowLeft, Grid3X3, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -43,14 +43,11 @@ const Index = () => {
     if (option === "alerts") {
       handleOpenAlerts();
     } else {
-      // For current/hourly/daily, if no location selected go to alerts view
-      if (selectedLocation) {
-        setActiveTab(option as TabType);
-        setViewMode("detail");
-      } else {
-        // Select first available — prompt user via grid
-        setViewMode("grid");
-      }
+      // Auto-select first location if none selected
+      const loc = selectedLocation || locations[0];
+      setSelectedLocation(loc);
+      setActiveTab(option as TabType);
+      setViewMode("detail");
     }
   };
 
