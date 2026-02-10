@@ -304,6 +304,21 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
   const total = sortedAlerts.length;
   const highCount = sortedAlerts.filter(a => a.severity === "high").length;
   const modCount = sortedAlerts.filter(a => a.severity === "moderate").length;
+
+  // Counts before severity filter (for button labels)
+  const preFilterAlerts = useMemo(() => {
+    const list = query.data ?? [];
+    return list.filter((a) => {
+      const matchesSearch = !searchQuery ||
+        a.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.location.local.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesState = !selectedState || a.location.state === selectedState;
+      return matchesSearch && matchesState;
+    });
+  }, [query.data, searchQuery, selectedState]);
+  const totalCount = preFilterAlerts.length;
+  const highTotal = preFilterAlerts.filter(a => a.severity === "high").length;
+  const modTotal = preFilterAlerts.filter(a => a.severity === "moderate").length;
   const isLoading = query.isLoading;
 
   return (
@@ -373,7 +388,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
               )}
             >
-              {sev === null ? "Todas" : sev === "high" ? "🔴 Alta" : "🟡 Moderada"}
+              {sev === null ? `Todas (${totalCount})` : sev === "high" ? `🔴 Alta (${highTotal})` : `🟡 Moderada (${modTotal})`}
             </button>
           ))}
         </div>

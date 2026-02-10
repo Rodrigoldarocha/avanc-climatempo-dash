@@ -18,8 +18,8 @@ import { useQueryClient } from "@tanstack/react-query";
 type ViewMode = "grid" | "detail";
 
 const Index = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [activeTab, setActiveTab] = useState<TabType>("current");
+  const [viewMode, setViewMode] = useState<ViewMode>("detail");
+  const [activeTab, setActiveTab] = useState<TabType>("alerts");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const queryClient = useQueryClient();
 
