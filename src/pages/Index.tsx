@@ -6,19 +6,20 @@ import { LocationGrid } from "@/components/weather/LocationGrid";
 import { CurrentWeatherCard } from "@/components/weather/CurrentWeatherCard";
 import { HourlyForecastCard } from "@/components/weather/HourlyForecastCard";
 import { DailyForecastCard } from "@/components/weather/DailyForecastCard";
+import { DashboardSummary } from "@/components/weather/DashboardSummary";
 import { ExportPdfButton } from "@/components/weather/ExportPdfButton";
 import { ExportDataButton } from "@/components/weather/ExportDataButton";
 import { AlertsPanel } from "@/components/weather/AlertsPanel";
 import { type Location, locations } from "@/data/locations";
 import { LocationPicker } from "@/components/weather/LocationPicker";
-import { MapPin, RefreshCw, ArrowLeft, Grid3X3, Siren } from "lucide-react";
+import { RefreshCw, ArrowLeft, Grid3X3, Siren, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 
-type ViewMode = "grid" | "detail";
+type ViewMode = "dashboard" | "grid" | "detail";
 
 const Index = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("detail");
+  const [viewMode, setViewMode] = useState<ViewMode>("dashboard");
   const [activeTab, setActiveTab] = useState<TabType>("alerts");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const queryClient = useQueryClient();
@@ -44,7 +45,6 @@ const Index = () => {
     if (option === "alerts") {
       handleOpenAlerts();
     } else {
-      // Auto-select first location if none selected
       const loc = selectedLocation || locations[0];
       setSelectedLocation(loc);
       setActiveTab(option as TabType);
@@ -84,13 +84,39 @@ const Index = () => {
       <div className="fixed inset-0 weather-gradient-bg opacity-40 pointer-events-none" />
 
       <div className="relative z-10">
-        <Header />
+        <Header onOpenAlerts={handleOpenAlerts} onRefresh={handleRefresh} />
 
         <main className="container px-4 md:px-6 py-4 max-w-7xl mx-auto">
-          {viewMode === "grid" ? (
+          {viewMode === "dashboard" ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Painel</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" className="gap-2" onClick={() => setViewMode("grid")}>
+                    <Grid3X3 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Locais</span>
+                  </Button>
+                  <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
+                    <Siren className="h-4 w-4" />
+                    <span className="hidden sm:inline">Alertas</span>
+                  </Button>
+                </div>
+              </div>
+              <DashboardSummary
+                onOpenAlerts={handleOpenAlerts}
+                onLocationSelect={handleLocationSelect}
+              />
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="ghost" className="gap-1 h-8 px-2" onClick={() => setViewMode("dashboard")}>
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <LayoutDashboard className="h-3.5 w-3.5 hidden sm:block" />
+                  </Button>
                   <span className="text-sm font-medium">Locais monitorados</span>
                   <ForecastMenu onSelect={handleMenuSelect} />
                 </div>
@@ -101,7 +127,7 @@ const Index = () => {
                   </Button>
                 </div>
               </div>
-              <LocationGrid 
+              <LocationGrid
                 onLocationSelect={handleLocationSelect}
                 selectedLocation={selectedLocation}
               />
@@ -110,7 +136,6 @@ const Index = () => {
             <>
               {/* Compact Controls - Mobile First */}
               <div className="flex flex-col gap-3 mb-4">
-                {/* Top Row - Back + Location + Actions */}
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
@@ -121,15 +146,14 @@ const Index = () => {
                     <ArrowLeft className="h-3.5 w-3.5" />
                     <Grid3X3 className="h-3.5 w-3.5 hidden sm:block" />
                   </Button>
-                  
-                  {/* Location Picker - replaces static info */}
+
                   {selectedLocation && activeTab !== "alerts" && (
                     <LocationPicker
                       selectedLocation={selectedLocation}
                       onLocationChange={(loc) => setSelectedLocation(loc)}
                     />
                   )}
-                  
+
                   <div className="flex items-center gap-1 ml-auto shrink-0">
                     {selectedLocation && activeTab !== "alerts" && (
                       <>
@@ -142,8 +166,7 @@ const Index = () => {
                     </Button>
                   </div>
                 </div>
-                
-                {/* Navigation - Full Width on Mobile */}
+
                 <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
               </div>
 
