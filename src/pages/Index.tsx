@@ -88,7 +88,7 @@ const Index = () => {
 
         <main className="container px-4 md:px-6 py-4 max-w-7xl mx-auto">
           {viewMode === "dashboard" ? (
-            <div className="space-y-3">
+            <div className="space-y-3 animate-fade-in" key="dashboard">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Painel</span>
@@ -110,7 +110,7 @@ const Index = () => {
               />
             </div>
           ) : viewMode === "grid" ? (
-            <div className="space-y-3">
+            <div className="space-y-3 animate-fade-in" key="grid">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="ghost" className="gap-1 h-8 px-2" onClick={() => setViewMode("dashboard")}>
@@ -133,7 +133,7 @@ const Index = () => {
               />
             </div>
           ) : (
-            <>
+            <div className="animate-fade-in" key="detail">
               {/* Compact Controls - Mobile First */}
               <div className="flex flex-col gap-3 mb-4">
                 <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ const Index = () => {
               </div>
 
               {renderDetailContent()}
-            </>
+            </div>
           )}
         </main>
 
