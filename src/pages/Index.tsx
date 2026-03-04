@@ -12,9 +12,12 @@ import { ExportDataButton } from "@/components/weather/ExportDataButton";
 import { AlertsPanel } from "@/components/weather/AlertsPanel";
 import { type Location, locations } from "@/data/locations";
 import { LocationPicker } from "@/components/weather/LocationPicker";
+import { BottomNav, type BottomNavTab } from "@/components/layout/BottomNav";
 import { RefreshCw, ArrowLeft, Grid3X3, Siren, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAlertCount } from "@/hooks/useAlertCount";
 
 type ViewMode = "dashboard" | "grid" | "detail";
 
@@ -23,6 +26,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("alerts");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+  const { highCount } = useAlertCount();
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
@@ -56,6 +61,30 @@ const Index = () => {
     queryClient.invalidateQueries();
   };
 
+  const handleBottomNav = (tab: BottomNavTab) => {
+    if (tab === "dashboard") {
+      setViewMode("dashboard");
+      setSelectedLocation(null);
+    } else if (tab === "grid") {
+      setViewMode("grid");
+      setSelectedLocation(null);
+    } else if (tab === "alerts") {
+      handleOpenAlerts();
+    } else if (tab === "map") {
+      // Map view placeholder — navigates to grid for now
+      setViewMode("grid");
+    }
+  };
+
+  const currentBottomTab: BottomNavTab =
+    viewMode === "dashboard"
+      ? "dashboard"
+      : viewMode === "grid"
+      ? "grid"
+      : activeTab === "alerts"
+      ? "alerts"
+      : "grid";
+
   const renderDetailContent = () => {
     switch (activeTab) {
       case "alerts":
@@ -86,7 +115,7 @@ const Index = () => {
       <div className="relative z-10">
         <Header onOpenAlerts={handleOpenAlerts} onRefresh={handleRefresh} />
 
-        <main className="container px-4 md:px-6 py-4 max-w-7xl mx-auto">
+        <main className={`container px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-20" : ""}`}>
           {viewMode === "dashboard" ? (
             <div className="space-y-3 animate-fade-in" key="dashboard">
               <div className="flex items-center justify-between gap-2">
@@ -134,7 +163,6 @@ const Index = () => {
             </div>
           ) : (
             <div className="animate-fade-in" key="detail">
-              {/* Compact Controls - Mobile First */}
               <div className="flex flex-col gap-3 mb-4">
                 <div className="flex items-center gap-2">
                   <Button
@@ -175,15 +203,26 @@ const Index = () => {
           )}
         </main>
 
-        {/* Compact Footer */}
-        <footer className="border-t border-border/20 mt-8 py-4">
-          <div className="container px-4 text-center text-[10px] text-muted-foreground">
-            <a href="https://www.climatempo.com.br" target="_blank" className="hover:text-primary">Climatempo</a>
-            {" • "}
-            <a href="https://www.grupoavanco.com.br" target="_blank" className="hover:text-primary">Grupo Avanço</a>
-            {" • "}{new Date().getFullYear()}
-          </div>
-        </footer>
+        {/* Bottom Nav for Mobile */}
+        {isMobile && (
+          <BottomNav
+            activeTab={currentBottomTab}
+            onTabChange={handleBottomNav}
+            alertCount={highCount}
+          />
+        )}
+
+        {/* Footer - hidden on mobile (bottom nav replaces it) */}
+        {!isMobile && (
+          <footer className="border-t border-border/20 mt-8 py-4">
+            <div className="container px-4 text-center text-[10px] text-muted-foreground">
+              <a href="https://www.climatempo.com.br" target="_blank" className="hover:text-primary">Climatempo</a>
+              {" • "}
+              <a href="https://www.grupoavanco.com.br" target="_blank" className="hover:text-primary">Grupo Avanço</a>
+              {" • "}{new Date().getFullYear()}
+            </div>
+          </footer>
+        )}
       </div>
     </div>
   );
