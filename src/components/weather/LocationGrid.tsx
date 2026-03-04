@@ -100,12 +100,13 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
               <span className="text-[9px] text-muted-foreground/60">({locs.length})</span>
             </div>
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              {locs.map((location) => (
+              {locs.map((location, i) => (
                 <LocationCard
                   key={location.climaTempoCod}
                   location={location}
                   onClick={() => onLocationSelect(location)}
                   isSelected={selectedLocation?.climaTempoCod === location.climaTempoCod}
+                  index={i}
                 />
               ))}
             </div>

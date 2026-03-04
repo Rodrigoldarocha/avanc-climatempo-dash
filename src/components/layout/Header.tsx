@@ -20,7 +20,7 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
   const isMobile = useIsMobile();
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-secondary shadow-lg">
+    <header className="sticky top-0 z-50 w-full bg-secondary/80 backdrop-blur-xl shadow-lg border-b border-border/10">
       <div className="container flex h-16 md:h-20 items-center justify-between px-3 md:px-6 gap-2">
         {/* Logo */}
         <img
@@ -68,9 +68,10 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
               title={`${highCount} alertas de alta severidade`}
             >
               <AlertTriangle className="h-4 w-4 text-secondary-foreground" />
-              <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-4 px-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold animate-pulse">
+              <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-4 px-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
                 {highCount}
               </span>
+              <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-destructive animate-ping opacity-40" />
             </button>
           )}
 
