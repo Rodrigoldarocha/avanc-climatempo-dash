@@ -197,7 +197,12 @@ const Index = () => {
                   </div>
                 </div>
 
-                <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+                <Navigation activeTab={activeTab} onTabChange={(tab) => {
+                  setActiveTab(tab);
+                  if (tab !== "alerts" && !selectedLocation) {
+                    setSelectedLocation(locations[0]);
+                  }
+                }} />
               </div>
 
               {renderDetailContent()}
