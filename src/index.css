@@ -137,6 +137,44 @@
       hsl(var(--gradient-navy-end)) 50%,
       hsl(var(--background)) 100%
     );
+    transition: background 2s ease-in-out;
+  }
+
+  /* Time-of-day dynamic backgrounds */
+  .weather-gradient-bg.time-dawn {
+    background: linear-gradient(180deg, 
+      hsl(30 60% 25%) 0%, 
+      hsl(200 25% 20%) 50%,
+      hsl(var(--background)) 100%
+    );
+  }
+  .weather-gradient-bg.time-morning {
+    background: linear-gradient(180deg, 
+      hsl(200 40% 30%) 0%, 
+      hsl(200 25% 22%) 50%,
+      hsl(var(--background)) 100%
+    );
+  }
+  .weather-gradient-bg.time-afternoon {
+    background: linear-gradient(180deg, 
+      hsl(45 40% 25%) 0%, 
+      hsl(200 25% 20%) 50%,
+      hsl(var(--background)) 100%
+    );
+  }
+  .weather-gradient-bg.time-sunset {
+    background: linear-gradient(180deg, 
+      hsl(15 50% 25%) 0%, 
+      hsl(280 20% 18%) 50%,
+      hsl(var(--background)) 100%
+    );
+  }
+  .weather-gradient-bg.time-night {
+    background: linear-gradient(180deg, 
+      hsl(220 35% 10%) 0%, 
+      hsl(200 30% 12%) 50%,
+      hsl(var(--background)) 100%
+    );
   }
 
   .lime-glow {

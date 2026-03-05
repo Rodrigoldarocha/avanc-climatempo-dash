@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTimeOfDay } from "@/hooks/useTimeOfDay";
 import { Header } from "@/components/layout/Header";
 import { Navigation, type TabType } from "@/components/layout/Navigation";
 import { ForecastMenu, type MenuOption } from "@/components/layout/ForecastMenu";
@@ -22,12 +23,13 @@ import { useAlertCount } from "@/hooks/useAlertCount";
 type ViewMode = "dashboard" | "grid" | "detail";
 
 const Index = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("dashboard");
+  const [viewMode, setViewMode] = useState<ViewMode>("detail");
   const [activeTab, setActiveTab] = useState<TabType>("alerts");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const { highCount } = useAlertCount();
+  const timeOfDay = useTimeOfDay();
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
@@ -110,7 +112,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed inset-0 weather-gradient-bg opacity-40 pointer-events-none" />
+      <div className={`fixed inset-0 weather-gradient-bg time-${timeOfDay} opacity-40 pointer-events-none`} />
 
       <div className="relative z-10">
         <Header onOpenAlerts={handleOpenAlerts} onRefresh={handleRefresh} />
