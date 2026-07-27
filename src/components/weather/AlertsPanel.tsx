@@ -1,0 +1,505 @@
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { format, parseISO } from "date-fns";
+import { AlertTriangle, Droplets, Percent, RefreshCw, ChevronRight } from "lucide-react";
+
+import type { Location } from "@/data/locations";
+import { locations } from "@/data/locations";
+import { get15DayForecast, get72HourForecast } from "@/services/climatempo";
+import { cn } from "@/lib/utils";
+import { LocationFilter } from "./LocationFilter";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ExportAlertsPdfButton } from "@/components/weather/ExportAlertsPdfButton";
+import { ExportAlertsDataButton } from "@/components/weather/ExportAlertsDataButton";
+
+type TriggerType = "rain_mm_h" | "rain_probability";
+type Severity = "high" | "moderate";
+
+export type WeatherAlert = {
+  id: string;
+  dateTimeIso: string;
+  location: Location;
+  triggers: Array<{
+    type: TriggerType;
+    value: number;
+    unit: string;
+    source: "hourly" | "daily";
+  }>;
+  severity: Severity;
+  context?: {
+    adjacent?: {
+      prev?: { label: string; value: number; unit: string };
+      next?: { label: string; value: number; unit: string };
+    };
+    confidence?: string;
+  };
+};
+
+const RAIN_MM_H_THRESHOLD = 20;
+const RAIN_PROB_THRESHOLD = 70;
+const DAYS_WINDOW = 7;
+
+const toIso = (date: string, hour?: string) => {
+  if (!hour) return date;
+  const safeHour = hour.includes(":") ? hour : `${hour}:00`;
+  if (date.includes("T") || date.includes(" ")) return date;
+  return `${date}T${safeHour}`;
+};
+
+const safeParseToDate = (isoLike: string): Date | null => {
+  try {
+    const d = isoLike.includes("T") ? parseISO(isoLike) : new Date(isoLike);
+    return Number.isNaN(d.getTime()) ? null : d;
+  } catch {
+    return null;
+  }
+};
+
+const severityFromTriggers = (triggers: WeatherAlert["triggers"]): Severity => {
+  const prob = triggers.find((t) => t.type === "rain_probability")?.value;
+  const mmh = triggers.find((t) => t.type === "rain_mm_h")?.value;
+  if ((prob ?? 0) >= 90 || (mmh ?? 0) >= 40) return "high";
+  return "moderate";
+};
+
+const runWithConcurrency = async <T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<R>,
+): Promise<R[]> => {
+  const results: R[] = [];
+  let idx = 0;
+
+  const runners = Array.from({ length: Math.min(limit, items.length) }).map(async () => {
+    while (idx < items.length) {
+      const current = items[idx++];
+      const res = await worker(current);
+      results.push(res);
+    }
+  });
+
+  await Promise.all(runners);
+  return results;
+};
+
+const buildAlertsForLocation = async (location: Location): Promise<WeatherAlert[]> => {
+  const [daily, hourly] = await Promise.all([
+    get15DayForecast(location.climaTempoCod),
+    get72HourForecast(location.climaTempoCod),
+  ]);
+
+  const now = new Date();
+  const maxDate = new Date(now);
+  maxDate.setDate(maxDate.getDate() + DAYS_WINDOW);
+
+  const byKey = new Map<string, WeatherAlert>();
+
+  const dailyDays = (daily.data ?? []).slice(0, DAYS_WINDOW);
+  dailyDays.forEach((d, i) => {
+    const prob = d?.rain?.probability;
+    if (typeof prob !== "number") return;
+    if (prob <= RAIN_PROB_THRESHOLD) return;
+
+    const iso = toIso(d.date);
+    const dt = safeParseToDate(iso);
+    if (!dt) return;
+    if (dt < now || dt > maxDate) return;
+
+    const key = `${location.climaTempoCod}|${iso}`;
+    const existing = byKey.get(key);
+    const trigger = {
+      type: "rain_probability" as const,
+      value: prob,
+      unit: "%",
+      source: "daily" as const,
+    };
+
+    const prev = dailyDays[i - 1]?.rain?.probability;
+    const next = dailyDays[i + 1]?.rain?.probability;
+
+    if (existing) {
+      existing.triggers = mergeTriggers(existing.triggers, trigger);
+      existing.severity = severityFromTriggers(existing.triggers);
+      return;
+    }
+
+    byKey.set(key, {
+      id: key,
+      dateTimeIso: iso,
+      location,
+      triggers: [trigger],
+      severity: severityFromTriggers([trigger]),
+      context: {
+        adjacent: {
+          prev: typeof prev === "number" ? { label: "Dia anterior", value: prev, unit: "%" } : undefined,
+          next: typeof next === "number" ? { label: "Dia seguinte", value: next, unit: "%" } : undefined,
+        },
+      },
+    });
+  });
+
+  const hourBlocks = (hourly.data ?? []).flatMap((d) => {
+    const date = d?.date;
+    const hours = d?.hour_to_hour ?? [];
+    if (!date || !Array.isArray(hours)) return [];
+    return hours.map((h) => ({ date, hour: h?.hour, rain: h?.rain }));
+  });
+
+  hourBlocks.forEach((h) => {
+    const mmh = h?.rain;
+    if (typeof mmh !== "number") return;
+    if (mmh <= RAIN_MM_H_THRESHOLD) return;
+
+    const iso = toIso(h.date, h.hour);
+    const dt = safeParseToDate(iso);
+    if (!dt) return;
+    if (dt < now || dt > maxDate) return;
+
+    const key = `${location.climaTempoCod}|${iso}`;
+    const existing = byKey.get(key);
+    const trigger = {
+      type: "rain_mm_h" as const,
+      value: mmh,
+      unit: "mm/h",
+      source: "hourly" as const,
+    };
+
+    if (existing) {
+      existing.triggers = mergeTriggers(existing.triggers, trigger);
+      existing.severity = severityFromTriggers(existing.triggers);
+      return;
+    }
+
+    byKey.set(key, {
+      id: key,
+      dateTimeIso: iso,
+      location,
+      triggers: [trigger],
+      severity: severityFromTriggers([trigger]),
+      context: {
+        confidence: "Previsão horária (72h)",
+      },
+    });
+  });
+
+  return Array.from(byKey.values());
+};
+
+const mergeTriggers = (
+  current: WeatherAlert["triggers"],
+  incoming: WeatherAlert["triggers"][number],
+) => {
+  const exists = current.some((t) => t.type === incoming.type);
+  if (exists) {
+    return current.map((t) => (t.type === incoming.type ? incoming : t));
+  }
+  return [...current, incoming];
+};
+
+const formatDateTime = (isoLike: string) => {
+  const d = safeParseToDate(isoLike);
+  if (!d) return isoLike;
+  return format(d, "dd/MM HH:mm");
+};
+
+
+// Mobile-first Alert Card Component
+const AlertCard = ({ alert }: { alert: WeatherAlert }) => {
+  const isHigh = alert.severity === "high";
+  
+  return (
+    <div className={cn(
+      "p-3 rounded-lg border transition-colors",
+      isHigh 
+        ? "bg-destructive/10 border-destructive/30" 
+        : "bg-amber-500/10 border-amber-500/30"
+    )}>
+      {/* Header Row */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="font-medium text-sm truncate">{alert.location.local}</div>
+          <div className="text-xs text-muted-foreground">
+            {alert.location.city}/{alert.location.state}
+          </div>
+        </div>
+        <Badge variant={isHigh ? "destructive" : "default"} className="shrink-0 text-[10px]">
+          {isHigh ? "Alta" : "Moderada"}
+        </Badge>
+      </div>
+      
+      {/* Date/Time */}
+      <div className="text-xs text-muted-foreground mb-2">
+        📅 {formatDateTime(alert.dateTimeIso)}
+      </div>
+      
+      {/* Triggers */}
+      <div className="flex flex-wrap gap-2">
+        {alert.triggers.map((t) => (
+          <div 
+            key={t.type} 
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-background/50 text-xs"
+          >
+            {t.type === "rain_mm_h" ? (
+              <Droplets className="h-3 w-3 text-sky-400" />
+            ) : (
+              <Percent className="h-3 w-3 text-amber-400" />
+            )}
+            <span className="font-semibold">{t.value}{t.unit}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location | null }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [selectedSeverity, setSelectedSeverity] = useState<Severity | null>(null);
+
+  const query = useQuery({
+    queryKey: ["alerts", "7d", RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD],
+    queryFn: async () => {
+      const perLocation = await runWithConcurrency(locations, 6, buildAlertsForLocation);
+      return perLocation.flat();
+    },
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+  });
+
+  const sortedAlerts = useMemo(() => {
+    const list = query.data ?? [];
+    return [...list]
+      .filter((a) => {
+        const matchesSearch = !searchQuery ||
+          a.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          a.location.local.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesState = !selectedState || a.location.state === selectedState;
+        const matchesSeverity = !selectedSeverity || a.severity === selectedSeverity;
+        const matchesLocation = !selectedLocation || a.location.climaTempoCod === selectedLocation.climaTempoCod;
+        return matchesSearch && matchesState && matchesSeverity && matchesLocation;
+      })
+      .sort((a, b) => {
+        // Sort by severity first (high before moderate), then by date
+        const sevOrder = { high: 0, moderate: 1 };
+        const sevDiff = sevOrder[a.severity] - sevOrder[b.severity];
+        if (sevDiff !== 0) return sevDiff;
+        const da = safeParseToDate(a.dateTimeIso)?.getTime() ?? 0;
+        const db = safeParseToDate(b.dateTimeIso)?.getTime() ?? 0;
+        return da - db;
+      });
+  }, [query.data, searchQuery, selectedState, selectedSeverity, selectedLocation]);
+
+  const total = sortedAlerts.length;
+  const highCount = sortedAlerts.filter(a => a.severity === "high").length;
+  const modCount = sortedAlerts.filter(a => a.severity === "moderate").length;
+
+  // Counts before severity filter (for button labels)
+  const preFilterAlerts = useMemo(() => {
+    const list = query.data ?? [];
+    return list.filter((a) => {
+      const matchesSearch = !searchQuery ||
+        a.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.location.local.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesState = !selectedState || a.location.state === selectedState;
+      const matchesLocation = !selectedLocation || a.location.climaTempoCod === selectedLocation.climaTempoCod;
+      return matchesSearch && matchesState && matchesLocation;
+    });
+  }, [query.data, searchQuery, selectedState, selectedLocation]);
+  const totalCount = preFilterAlerts.length;
+  const highTotal = preFilterAlerts.filter(a => a.severity === "high").length;
+  const modTotal = preFilterAlerts.filter(a => a.severity === "moderate").length;
+  const isLoading = query.isLoading;
+
+  return (
+    <section className="space-y-3">
+      {/* Header - Mobile Optimized */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="h-4 w-4 text-foreground shrink-0" />
+            <h2 className="font-display font-semibold text-sm sm:text-base truncate">
+              Alertas (7 dias)
+            </h2>
+            {!isLoading && (
+              <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0">
+                {total}
+              </Badge>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-1.5">
+            <ExportAlertsDataButton alerts={sortedAlerts} />
+            <ExportAlertsPdfButton
+              alerts={sortedAlerts}
+              rainMmhThreshold={RAIN_MM_H_THRESHOLD}
+              rainProbThreshold={RAIN_PROB_THRESHOLD}
+              daysWindow={DAYS_WINDOW}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-2"
+              onClick={() => query.refetch()}
+              disabled={query.isFetching}
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", query.isFetching && "animate-spin")} />
+              <span className="hidden sm:inline text-xs">Atualizar</span>
+            </Button>
+          </div>
+        </div>
+        
+        {/* Summary Stats - Mobile Optimized */}
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <span>Chuva &gt;{RAIN_MM_H_THRESHOLD}mm/h</span>
+          <span>•</span>
+          <span>Prob &gt;{RAIN_PROB_THRESHOLD}%</span>
+          {total > 0 && (
+            <>
+              <span className="hidden sm:inline">•</span>
+              <span className="hidden sm:inline text-destructive">{highCount} alta</span>
+              <span className="hidden sm:inline text-amber-500">{modCount} moderada</span>
+            </>
+          )}
+        </div>
+
+        {/* Severity Filter */}
+        <div className="flex gap-1.5">
+          {([null, "high", "moderate"] as const).map((sev) => (
+            <button
+              key={sev ?? "all"}
+              onClick={() => setSelectedSeverity(sev)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap",
+                selectedSeverity === sev
+                  ? sev === "high"
+                    ? "bg-destructive text-destructive-foreground shadow-md"
+                    : sev === "moderate"
+                    ? "bg-amber-500 text-white shadow-md"
+                    : "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
+              )}
+            >
+              {sev === null ? `Todas (${totalCount})` : sev === "high" ? `Alta (${highTotal})` : `Moderada (${modTotal})`}
+            </button>
+          ))}
+        </div>
+
+        {/* Filters */}
+        <LocationFilter
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedState={selectedState}
+          onStateChange={setSelectedState}
+          searchPlaceholder="Buscar local nos alertas..."
+        />
+      </div>
+
+      {isLoading ? (
+        <div className="py-10 space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-3 rounded-lg border border-border/20 animate-pulse">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="space-y-1.5 flex-1">
+                  <div className="h-4 w-32 bg-muted/60 rounded" />
+                  <div className="h-3 w-20 bg-muted/40 rounded" />
+                </div>
+                <div className="h-5 w-14 bg-muted/50 rounded-full" />
+              </div>
+              <div className="h-3 w-24 bg-muted/30 rounded mt-2" />
+            </div>
+          ))}
+        </div>
+      ) : query.isError ? (
+        <div className="py-12 text-center space-y-2">
+          <AlertTriangle className="h-8 w-8 text-destructive/50 mx-auto" />
+          <p className="text-sm text-destructive font-medium">Falha ao carregar alertas</p>
+          <Button variant="outline" size="sm" onClick={() => query.refetch()} className="mt-2">
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            Tentar novamente
+          </Button>
+        </div>
+      ) : total === 0 ? (
+        <div className="py-12 text-center space-y-2">
+          <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto">
+            <span className="text-2xl">✅</span>
+          </div>
+          <p className="text-sm font-medium">Nenhum alerta no período</p>
+          <p className="text-xs text-muted-foreground">Todas as localidades dentro dos limites normais</p>
+        </div>
+      ) : (
+        <>
+          {/* Mobile Cards View */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {sortedAlerts.slice(0, 30).map((alert) => (
+              <AlertCard key={alert.id} alert={alert} />
+            ))}
+          </div>
+          
+          {sortedAlerts.length > 30 && (
+            <p className="text-xs text-muted-foreground text-center py-2">
+              + {sortedAlerts.length - 30} alertas adicionais
+            </p>
+          )}
+
+          {/* Expandable Details */}
+          <Accordion type="single" collapsible className="rounded-lg border border-border/30 mt-4">
+            <AccordionItem value="details">
+              <AccordionTrigger className="px-4 text-sm">
+                <span className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4" />
+                  Ver detalhes expandidos
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="space-y-3">
+                  {sortedAlerts.slice(0, 20).map((alert) => (
+                    <div key={`${alert.id}-detail`} className="p-3 rounded-md bg-secondary/20 border border-border/20">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <div className="font-medium text-sm">{alert.location.local}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {alert.location.city}/{alert.location.state} • {formatDateTime(alert.dateTimeIso)}
+                          </div>
+                        </div>
+                        <Badge variant={alert.severity === "high" ? "destructive" : "default"} className="text-[10px]">
+                          {alert.severity === "high" ? "Alta" : "Moderada"}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                        <div className="p-2 rounded bg-background/50">
+                          <div className="text-muted-foreground mb-1">Uniorg</div>
+                          <div className="font-medium">{alert.location.uniorg}</div>
+                        </div>
+                        <div className="p-2 rounded bg-background/50">
+                          <div className="text-muted-foreground mb-1">Disparos</div>
+                          {alert.triggers.map((t) => (
+                            <div key={t.type} className="font-medium">
+                              {t.type === "rain_mm_h" ? "Chuva" : "Prob."}: {t.value}{t.unit}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="p-2 rounded bg-background/50">
+                          <div className="text-muted-foreground mb-1">Fonte</div>
+                          <div className="font-medium">{alert.context?.confidence ?? "Diária (7d)"}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </>
+      )}
+    </section>
+  );
+};
