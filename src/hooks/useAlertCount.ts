@@ -1,14 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
+import { locations } from "@/data/locations";
+import { get15DayForecast, get72HourForecast } from "@/services/climatempo";
+import { buildAlertsForLocation, runWithConcurrency, RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD } from "@/lib/alerts";
 
 /**
- * Reads the cached alert count from the alerts query.
- * Does NOT trigger its own fetch — relies on AlertsPanel populating the cache.
+ * Fetches and caches the 7-day alerts globally so the badge count and the
+ * Alerts page load automatically as soon as the app mounts, and auto-refresh
+ * every 10 minutes even when the user is on another tab.
  */
 export function useAlertCount() {
   const { data } = useQuery<any[]>({
-    queryKey: ["alerts", "7d", 20, 70],
-    queryFn: () => Promise.resolve([]),
-    enabled: false,
+    queryKey: ["alerts", "7d", RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD],
+    queryFn: async () => {
+      const perLocation = await runWithConcurrency(locations, 6, buildAlertsForLocation);
+      return perLocation.flat();
+    },
+    staleTime: 1000 * 60 * 10,
+    refetchInterval: 1000 * 60 * 10,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: false,
     initialData: [],
   });
 
