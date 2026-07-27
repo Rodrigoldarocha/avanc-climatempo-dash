@@ -13,6 +13,8 @@ import { AlertsPanel } from "@/components/weather/AlertsPanel";
 import { type Location, locations } from "@/data/locations";
 import { LocationPicker } from "@/components/weather/LocationPicker";
 import { BottomNav, type BottomNavTab } from "@/components/layout/BottomNav";
+import { AppSidebar, type SidebarPage } from "@/components/layout/AppSidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { RefreshCw, ArrowLeft, Grid3X3, Siren, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -73,6 +75,30 @@ const Index = () => {
     }
   };
 
+  const handleSidebarSelect = (page: SidebarPage) => {
+    if (page === "dashboard") {
+      setViewMode("dashboard");
+      setSelectedLocation(null);
+    } else if (page === "grid") {
+      setViewMode("grid");
+      setSelectedLocation(null);
+    } else if (page === "alerts") {
+      handleOpenAlerts();
+    } else {
+      const loc = selectedLocation || locations[0];
+      setSelectedLocation(loc);
+      setActiveTab(page);
+      setViewMode("detail");
+    }
+  };
+
+  const currentSidebarPage: SidebarPage =
+    viewMode === "dashboard"
+      ? "dashboard"
+      : viewMode === "grid"
+      ? "grid"
+      : (activeTab as SidebarPage);
+
   const currentBottomTab: BottomNavTab =
     viewMode === "dashboard"
       ? "dashboard"
@@ -106,13 +132,27 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className={`fixed inset-0 weather-gradient-bg time-${timeOfDay} opacity-40 pointer-events-none`} />
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <div className={`fixed inset-0 weather-gradient-bg time-${timeOfDay} opacity-40 pointer-events-none`} />
 
-      <div className="relative z-10">
-        <Header onOpenAlerts={handleOpenAlerts} onRefresh={handleRefresh} />
+        {!isMobile && (
+          <AppSidebar
+            current={currentSidebarPage}
+            onSelect={handleSidebarSelect}
+            alertCount={highCount}
+          />
+        )}
 
-        <main className={`container px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-20" : ""}`}>
+        <div className="relative z-10 flex-1 flex flex-col min-w-0">
+          <div className="flex items-center gap-2 px-3 md:px-6 pt-3">
+            {!isMobile && <SidebarTrigger />}
+            <div className="flex-1 min-w-0">
+              <Header onOpenAlerts={handleOpenAlerts} onRefresh={handleRefresh} />
+            </div>
+          </div>
+
+          <main className={`container px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-20" : ""}`}>
           {viewMode === "dashboard" ? (
             <div className="space-y-3 animate-fade-in" key="dashboard">
               <div className="flex items-center justify-between gap-2">
@@ -194,7 +234,7 @@ const Index = () => {
               {renderDetailContent()}
             </div>
           )}
-        </main>
+          </main>
 
         {/* Bottom Nav for Mobile */}
         {isMobile && (
@@ -216,8 +256,9 @@ const Index = () => {
             </div>
           </footer>
         )}
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
