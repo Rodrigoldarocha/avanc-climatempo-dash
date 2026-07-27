@@ -20,16 +20,19 @@ export function useApiStatus() {
           q.queryKey[0] === "dailyForecast"
       );
 
+      let next: { isOnline: boolean; isLoading: boolean };
       if (weatherQueries.length === 0) {
-        // No queries yet — assume online until proven otherwise
-        setStatus({ isOnline: true, isLoading: true });
-        return;
+        next = { isOnline: true, isLoading: true };
+      } else {
+        const hasSuccess = weatherQueries.some((q) => q.state.status === "success");
+        const hasError = weatherQueries.some((q) => q.state.status === "error");
+        next = { isOnline: hasSuccess || !hasError, isLoading: false };
       }
-
-      const hasSuccess = weatherQueries.some((q) => q.state.status === "success");
-      const hasError = weatherQueries.some((q) => q.state.status === "error");
-
-      setStatus({ isOnline: hasSuccess || !hasError, isLoading: false });
+      setStatus((prev) =>
+        prev.isOnline === next.isOnline && prev.isLoading === next.isLoading
+          ? prev
+          : next
+      );
     });
 
     return () => unsubscribe();
