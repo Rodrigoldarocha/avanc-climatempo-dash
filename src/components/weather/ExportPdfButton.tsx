@@ -6,6 +6,7 @@ import { getCurrentWeather, get15DayForecast, get72HourForecast } from "@/servic
 import type { Location } from "@/data/locations";
 import jsPDF from "jspdf";
 import { toast } from "@/hooks/use-toast";
+import logoAvanco from "@/assets/logo-avanco.png";
 
 interface ExportPdfButtonProps {
   location: Location;
@@ -58,6 +59,27 @@ export const ExportPdfButton = ({ location }: ExportPdfButtonProps) => {
     return conditions[code] || "Variável";
   };
 
+  const loadImageAsBase64 = async (src: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Could not get canvas context"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
+
   const generatePdf = async () => {
     setIsGenerating(true);
 
@@ -96,22 +118,7 @@ export const ExportPdfButton = ({ location }: ExportPdfButtonProps) => {
       // === HEADER with logo ===
       let logoBase64: string | null = null;
       try {
-        const { default: logoSrc } = await import("@/assets/logo-avanco.png");
-        logoBase64 = await new Promise<string>((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            if (!ctx) { reject(new Error("no ctx")); return; }
-            ctx.drawImage(img, 0, 0);
-            resolve(canvas.toDataURL("image/png"));
-          };
-          img.onerror = reject;
-          img.src = logoSrc;
-        });
+        logoBase64 = await loadImageAsBase64(logoAvanco);
       } catch (e) {
         console.warn("Could not load logo:", e);
       }
