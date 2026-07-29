@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import App from "./App.tsx";
 
 // Renderizar algo 100% mínimo ANTES de carregar App
 // Se isso aparecer, o problema está em App ou seus imports
@@ -13,7 +14,6 @@ if (root) {
 
 // Carregar App dinamicamente para capturar erro de módulo
 try {
-  const App = (await import("./App.tsx")).default;
   const mountPoint = document.getElementById("app-mount-point") || root;
 
   createRoot(mountPoint!).render(<App />);
