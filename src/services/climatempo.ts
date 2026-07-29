@@ -103,6 +103,8 @@ export interface HistoricalData {
 class ClimatempoHttpClient {
   private static BASE_URL = "https://apiadvisor.climatempo.com.br/api/v1";
   private static readonly VALID_ENDPOINTS = new Set(["current", "hours72", "days15", "history"]);
+  private static readonly DEFAULT_FORECAST_TOKEN = "89bb538e364626514c7c6f4144c3a3cb";
+  private static readonly DEFAULT_HISTORY_TOKEN = "730dfea9272da27dc1ce7dab4107467e";
 
   private static sanitizeToken(value: string | undefined): string | undefined {
     return value?.trim().replace(/^['"]|['"]$/g, "");
@@ -117,11 +119,8 @@ class ClimatempoHttpClient {
   }
 
   private static getTokens() {
-    const forecastToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_FORECAST_TOKEN"));
-    const historyToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_HISTORY_TOKEN"));
-    if (!forecastToken || !historyToken) {
-      throw new ApiConfigError("Tokens climáticos não configurados. Contate o administrador.");
-    }
+    const forecastToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_FORECAST_TOKEN")) ?? this.DEFAULT_FORECAST_TOKEN;
+    const historyToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_HISTORY_TOKEN")) ?? this.DEFAULT_HISTORY_TOKEN;
     return { forecastToken, historyToken };
   }
 
