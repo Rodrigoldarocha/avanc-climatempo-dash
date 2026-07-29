@@ -197,7 +197,7 @@ const Index = () => {
                 onLocationSelect={handleLocationSelect}
                 selectedLocation={selectedLocation}
               />
-            </div>
+            </section>
           ) : (
             <div className="animate-fade-in" key="detail">
               <div className="flex items-center gap-2 mb-4">

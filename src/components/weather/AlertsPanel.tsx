@@ -323,7 +323,6 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
 
   return (
     <section className="space-y-3 panel-card p-4">
-      {/* Header - Mobile Optimized */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-center gap-2 min-w-0">
@@ -339,29 +338,27 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
             </Badge>
           )}
         </div>
-          
-          <div className="flex items-center gap-1.5">
-            <ExportAlertsDataButton alerts={sortedAlerts} />
-            <ExportAlertsPdfButton
-              alerts={sortedAlerts}
-              rainMmhThreshold={RAIN_MM_H_THRESHOLD}
-              rainProbThreshold={RAIN_PROB_THRESHOLD}
-              daysWindow={DAYS_WINDOW}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-2"
-              onClick={() => query.refetch()}
-              disabled={query.isFetching}
-            >
-              <RefreshCw className={cn("h-3.5 w-3.5", query.isFetching && "animate-spin")} />
-              <span className="hidden sm:inline text-xs">Atualizar</span>
-            </Button>
-          </div>
+
+        <div className="flex items-center gap-1.5">
+          <ExportAlertsDataButton alerts={sortedAlerts} />
+          <ExportAlertsPdfButton
+            alerts={sortedAlerts}
+            rainMmhThreshold={RAIN_MM_H_THRESHOLD}
+            rainProbThreshold={RAIN_PROB_THRESHOLD}
+            daysWindow={DAYS_WINDOW}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-2"
+            onClick={() => query.refetch()}
+            disabled={query.isFetching}
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5", query.isFetching && "animate-spin")} />
+            <span className="hidden sm:inline text-xs">Atualizar</span>
+          </Button>
         </div>
-        
-        {/* Summary Stats - Mobile Optimized */}
+
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
           <span>Chuva &gt;{RAIN_MM_H_THRESHOLD}mm/h</span>
           <span>•</span>
@@ -375,7 +372,6 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
           )}
         </div>
 
-        {/* Severity Filter */}
         <div className="flex gap-1.5">
           {([null, "high", "moderate"] as const).map((sev) => (
             <button
@@ -397,7 +393,6 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
           ))}
         </div>
 
-        {/* Filters */}
         <LocationFilter
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -441,20 +436,18 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
         </div>
       ) : (
         <>
-          {/* Mobile Cards View */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {sortedAlerts.slice(0, 30).map((alert) => (
               <AlertCard key={alert.id} alert={alert} />
             ))}
           </div>
-          
+
           {sortedAlerts.length > 30 && (
             <p className="text-xs text-muted-foreground text-center py-2">
               + {sortedAlerts.length - 30} alertas adicionais
             </p>
           )}
 
-          {/* Expandable Details */}
           <Accordion type="single" collapsible className="rounded-lg border border-border/30 mt-4">
             <AccordionItem value="details">
               <AccordionTrigger className="px-4 text-sm">
@@ -478,7 +471,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
                           {alert.severity === "high" ? "Alta" : "Moderada"}
                         </Badge>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                         <div className="p-2 rounded bg-background/50">
                           <div className="text-muted-foreground mb-1">Uniorg</div>
