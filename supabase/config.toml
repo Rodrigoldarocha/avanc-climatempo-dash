@@ -1,4 +1,0 @@
-project_id = "xukfebfmifhbnvcmnbrg"
-
-[functions.climatempo-proxy]
-verify_jwt = false
