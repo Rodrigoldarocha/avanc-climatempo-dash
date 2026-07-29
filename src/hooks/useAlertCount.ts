@@ -12,7 +12,8 @@ export function useAlertCount() {
   const { data } = useQuery<any[]>({
     queryKey: ["alerts", "7d", RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD],
     queryFn: async () => {
-      const perLocation = await runWithConcurrency(locations, 6, buildAlertsForLocation);
+      const sampleLocations = locations.slice(0, 15);
+      const perLocation = await runWithConcurrency(sampleLocations, 6, buildAlertsForLocation);
       return perLocation.flat();
     },
     staleTime: 1000 * 60 * 10,

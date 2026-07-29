@@ -117,6 +117,9 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
         <div className="flex items-center gap-3 py-6 justify-center text-muted-foreground">
           <AlertCircle className="h-5 w-5" />
           <p className="text-sm">Previsão horária indisponível para esta localidade</p>
+          {error && (
+            <p className="text-[10px] text-destructive/80 absolute mt-12">{error instanceof Error ? error.message : "Erro desconhecido"}</p>
+          )}
         </div>
       </div>
     );

@@ -72,14 +72,11 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
     return { avgTemp, maxTemp, minTemp, avgHumidity, avgWind, hottest, coldest };
   }, [weatherData]);
 
-  // Alert distribution by state (from cached alerts)
-  const alertQuery = useQuery<any[]>({
-    queryKey: ["alerts", "7d", 20, 70],
-    enabled: false,
-  });
+  const queryClient = useQueryClient();
+  const alerts = queryClient.getQueryData<any[]>(["alerts", "7d", 20, 70]) || [];
 
   const alertsByState = useMemo(() => {
-    const alerts = alertQuery.data ?? [];
+    const validAlerts = alerts;
     const byState: Record<string, { total: number; high: number }> = {};
     alerts.forEach((a: any) => {
       const st = a.location?.state;

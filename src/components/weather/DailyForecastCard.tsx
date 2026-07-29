@@ -41,6 +41,9 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
         <div className="flex items-center gap-3 py-6 justify-center text-muted-foreground">
           <AlertCircle className="h-5 w-5" />
           <p className="text-sm">Previsão indisponível</p>
+          {error && (
+            <p className="text-[10px] text-destructive/80 absolute mt-12">{error instanceof Error ? error.message : "Erro desconhecido"}</p>
+          )}
         </div>
       </div>
     );

@@ -24,9 +24,9 @@ import { useAlertCount } from "@/hooks/useAlertCount";
 type ViewMode = "dashboard" | "grid" | "detail";
 
 const Index = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("detail");
-  const [activeTab, setActiveTab] = useState<string>("alerts");
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("dashboard");
+  const [activeTab, setActiveTab] = useState<string>("current");
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(locations[0]);
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const { highCount } = useAlertCount();
