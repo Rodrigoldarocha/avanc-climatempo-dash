@@ -95,17 +95,23 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h2 className="text-base sm:text-lg font-display font-bold flex items-center gap-2">
-        <Activity className="h-5 w-5 text-primary" />
-        Painel de Resumo
-      </h2>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex items-center gap-2 min-w-0">
+          <Activity className="h-5 w-5 text-primary" />
+          <div className="panel-header">
+            <span className="panel-subtitle">Visão geral</span>
+            <h2 className="panel-title">Painel de Resumo</h2>
+          </div>
+        </div>
+        <div className="text-sm text-muted-foreground">{isOnline ? "API online" : "API offline"}</div>
+      </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {/* Total Alerts */}
         <button
           onClick={onOpenAlerts}
-          className="stat-card flex flex-col gap-1 text-left hover:border-destructive/50 transition-colors"
+          className="stat-card flex flex-col gap-3 text-left hover:border-destructive/50 transition-colors"
         >
           <div className="flex items-center gap-1.5">
             <AlertTriangle className="h-4 w-4 text-destructive" />

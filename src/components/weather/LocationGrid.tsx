@@ -57,17 +57,17 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
     <div className="space-y-4">
       {/* Header with Refresh - Mobile Optimized */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3 min-w-0">
             <Thermometer className="h-5 w-5 text-primary shrink-0" />
-            <h2 className="text-base sm:text-lg font-display font-bold">
-              <span className="sm:hidden">Locais</span>
-              <span className="hidden sm:inline">Estações Meteorológicas</span>
-            </h2>
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
-              {locations.length}
-            </Badge>
+            <div className="panel-header">
+              <span className="panel-subtitle">Locais monitorados</span>
+              <h2 className="panel-title">Estações Meteorológicas</h2>
+            </div>
           </div>
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+            {locations.length}
+          </Badge>
           
           {/* Refresh Button - Always Visible */}
           <Button
@@ -102,7 +102,7 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
               </span>
               <span className="text-[9px] text-muted-foreground/60">({locs.length})</span>
             </div>
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {locs.map((location, i) => (
                 <LocationCard
                   key={location.climaTempoCod}

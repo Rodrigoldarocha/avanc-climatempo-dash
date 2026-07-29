@@ -322,21 +322,23 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
   const isLoading = query.isLoading;
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-3 panel-card p-4">
       {/* Header - Mobile Optimized */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="h-4 w-4 text-foreground shrink-0" />
-            <h2 className="font-display font-semibold text-sm sm:text-base truncate">
-              Alertas (7 dias)
-            </h2>
-            {!isLoading && (
-              <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0">
-                {total}
-              </Badge>
-            )}
+            <div className="panel-header">
+              <span className="panel-subtitle">Alertas</span>
+              <h2 className="panel-title">Alertas (7 dias)</h2>
+            </div>
           </div>
+          {!isLoading && (
+            <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0">
+              {total}
+            </Badge>
+          )}
+        </div>
           
           <div className="flex items-center gap-1.5">
             <ExportAlertsDataButton alerts={sortedAlerts} />

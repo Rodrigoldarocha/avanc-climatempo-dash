@@ -161,6 +161,22 @@
     box-shadow: var(--shadow-clay);
   }
 
+  .panel-card {
+    @apply rounded-3xl border border-border/30 bg-card shadow-[var(--shadow-clay-sm)];
+  }
+
+  .panel-header {
+    @apply flex flex-col gap-2;
+  }
+
+  .panel-title {
+    @apply text-lg font-semibold tracking-tight;
+  }
+
+  .panel-subtitle {
+    @apply text-xs text-muted-foreground uppercase tracking-[0.2em];
+  }
+
   .weather-gradient-bg {
     background: linear-gradient(180deg, 
       hsl(var(--gradient-navy-start)) 0%, 

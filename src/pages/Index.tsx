@@ -153,12 +153,13 @@ const Index = () => {
 
           <main className={`container px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-20" : ""}`}>
           {viewMode === "dashboard" ? (
-            <div className="space-y-3 animate-fade-in" key="dashboard">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Painel</span>
+            <section className="space-y-4 animate-fade-in" key="dashboard">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="panel-header">
+                  <span className="panel-subtitle">Visão geral</span>
+                  <h1 className="text-2xl sm:text-3xl font-display font-semibold">Painel</h1>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button size="sm" variant="outline" className="gap-2" onClick={() => setViewMode("grid")}>
                     <Grid3X3 className="h-4 w-4" />
                     <span className="hidden sm:inline">Locais</span>
@@ -173,11 +174,11 @@ const Index = () => {
                 onOpenAlerts={handleOpenAlerts}
                 onLocationSelect={handleLocationSelect}
               />
-            </div>
+            </section>
           ) : viewMode === "grid" ? (
-            <div className="space-y-3 animate-fade-in" key="grid">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+            <section className="space-y-4 animate-fade-in" key="grid">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button size="sm" variant="ghost" className="gap-1 h-8 px-2" onClick={() => setViewMode("dashboard")}>
                     <ArrowLeft className="h-3.5 w-3.5" />
                     <LayoutDashboard className="h-3.5 w-3.5 hidden sm:block" />

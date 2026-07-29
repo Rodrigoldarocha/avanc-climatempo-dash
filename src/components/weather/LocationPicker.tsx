@@ -43,7 +43,7 @@ export const LocationPicker = ({ selectedLocation, onLocationChange }: LocationP
           <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-2 z-50 bg-popover" align="start">
+      <PopoverContent className="w-full max-w-[18rem] sm:max-w-[22rem] p-2 z-50 bg-popover" align="start">
         <div className="space-y-2">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
