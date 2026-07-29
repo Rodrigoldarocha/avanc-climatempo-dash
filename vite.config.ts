@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -9,21 +9,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  define: {
-    'process.env': {
-      CLIMATEMPO_FORECAST_TOKEN: JSON.stringify(process.env.CLIMATEMPO_FORECAST_TOKEN),
-      CLIMATEMPO_HISTORY_TOKEN: JSON.stringify(process.env.CLIMATEMPO_HISTORY_TOKEN),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+
+  return {
+    define: {
+      'process.env': Object.entries(env).reduce((acc, [key, value]) => {
+        acc[key] = JSON.stringify(value);
+        return acc;
+      }, {} as Record<string, string>),
     },
-  },
-  server: {
-    host: "::",
-    port: 8080,
-    hmr: {
-      overlay: false,
+    server: {
+      host: "::",
+      port: 8080,
+      hmr: {
+        overlay: false,
+      },
     },
-  },
-  plugins: [
+    plugins: [
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
@@ -155,4 +158,5 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 1000,
   },
-}));
+  };
+});

@@ -109,8 +109,11 @@ class ClimatempoHttpClient {
   }
 
   private static getEnvValue(name: string): string | undefined {
-    const env = (typeof import.meta !== "undefined" ? (import.meta as any).env : undefined) as Record<string, string> | undefined;
-    return env?.[`VITE_${name}`] || globalThis.process?.env?.[name];
+    const envMeta = typeof import.meta !== "undefined" ? (import.meta as any).env : undefined;
+    const rawValue = envMeta?.[`VITE_${name}`] ??
+      (typeof process !== "undefined" ? (process as any).env?.[`VITE_${name}`] : undefined) ??
+      (typeof process !== "undefined" ? (process as any).env?.[name] : undefined);
+    return typeof rawValue === "string" ? rawValue : undefined;
   }
 
   private static getTokens() {
@@ -168,11 +171,9 @@ class ClimatempoHttpClient {
     }
 
     if (!response.ok) {
-      const isFallback = response.status >= 500;
-      if (isFallback) {
-        throw new ApiUpstreamError("API Climatempo indisponível");
-      }
-      throw new ApiUpstreamError("Upstream weather API error");
+      const responseText = await response.text();
+      const message = `API Climatempo error ${response.status}: ${responseText || response.statusText}`;
+      throw new ApiUpstreamError(message);
     }
 
     return await response.json();
