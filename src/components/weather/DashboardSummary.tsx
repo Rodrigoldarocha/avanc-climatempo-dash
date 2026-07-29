@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { locations, getAllStates } from "@/data/locations";
 import { getCurrentWeather } from "@/services/climatempo";
 import { useAlertCount } from "@/hooks/useAlertCount";
@@ -89,7 +89,7 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
       .map(([state, counts]) => ({ state, ...counts }))
       .sort((a, b) => b.total - a.total)
       .slice(0, 12);
-  }, [alertQuery.data]);
+  }, [alerts]);
 
   const states = getAllStates();
 

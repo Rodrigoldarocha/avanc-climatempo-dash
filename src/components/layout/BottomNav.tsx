@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Grid3X3, Siren } from "lucide-react";
+import { LayoutDashboard, Grid3X3, Bell } from "lucide-react";
 
 export type BottomNavTab = "dashboard" | "grid" | "alerts";
 
@@ -12,7 +12,7 @@ interface BottomNavProps {
 const tabs = [
   { id: "dashboard" as BottomNavTab, label: "Painel", icon: LayoutDashboard },
   { id: "grid" as BottomNavTab, label: "Locais", icon: Grid3X3 },
-  { id: "alerts" as BottomNavTab, label: "Alertas", icon: Siren },
+  { id: "alerts" as BottomNavTab, label: "Alertas", icon: Bell },
 ];
 
 export const BottomNav = ({ activeTab, onTabChange, alertCount = 0 }: BottomNavProps) => {
@@ -35,13 +35,15 @@ export const BottomNav = ({ activeTab, onTabChange, alertCount = 0 }: BottomNavP
               role="tab"
               aria-selected={isActive}
             >
-              {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary animate-scale-in" />
-              )}
               <div className="relative">
-                <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
+                <div className={cn(
+                  "flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200",
+                  isActive ? "bg-primary/15" : "bg-transparent"
+                )}>
+                  <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
+                </div>
                 {tab.id === "alerts" && alertCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 flex items-center justify-center h-3.5 min-w-3.5 px-0.5 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold">
+                  <span className="absolute -top-1.5 -right-1 flex items-center justify-center h-3.5 min-w-3.5 px-0.5 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold">
                     {alertCount}
                   </span>
                 )}

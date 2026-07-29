@@ -60,7 +60,10 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <Thermometer className="h-5 w-5 text-primary shrink-0" />
-            <h2 className="text-base sm:text-lg font-display font-bold truncate">Estações Meteorológicas</h2>
+            <h2 className="text-base sm:text-lg font-display font-bold">
+              <span className="sm:hidden">Locais</span>
+              <span className="hidden sm:inline">Estações Meteorológicas</span>
+            </h2>
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
               {locations.length}
             </Badge>

@@ -60,8 +60,8 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          {/* Alert badge */}
-          {highCount > 0 && (
+          {/* Alert badge - desktop only (mobile uses bottom nav) */}
+          {!isMobile && highCount > 0 && (
             <button
               onClick={onOpenAlerts}
               className="relative flex items-center justify-center h-9 w-9 rounded-lg bg-secondary-foreground/10 hover:bg-secondary-foreground/20 transition-colors"
@@ -75,9 +75,8 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
             </button>
           )}
 
-          <h1 className="text-[10px] sm:text-xs md:text-sm font-semibold tracking-wider md:tracking-widest text-secondary-foreground uppercase text-right leading-tight">
-            Base<br className="sm:hidden" />
-            <span className="hidden sm:inline"> - </span>Clima Tempo
+          <h1 className="text-[10px] sm:text-xs md:text-sm font-semibold tracking-wider md:tracking-widest text-secondary-foreground uppercase whitespace-nowrap">
+            <span className="hidden sm:inline">Base — </span>Clima Tempo
           </h1>
 
           {/* Desktop: theme toggle | Mobile: hamburger menu */}
