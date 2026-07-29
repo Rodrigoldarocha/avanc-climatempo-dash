@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrentWeather, formatTemperature } from "@/services/climatempo";
 import { WeatherIcon } from "./WeatherIcon";
@@ -21,13 +22,13 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
     return <CurrentWeatherSkeleton />;
   }
 
-  if (query.error || !data) {
+  if (error || !data) {
     return (
       <div className="weather-card p-4 animate-fade-in">
         <div className="text-center py-6">
           <p className="text-sm font-medium">Dados indisponíveis</p>
           <p className="text-xs opacity-75 max-w-[200px]">Não foi possível carregar as condições atuais de {location.local}</p>
-          <p className="text-[10px] text-destructive/80 mt-2">{query.error instanceof Error ? query.error.message : "Erro desconhecido"}</p>
+          <p className="text-[10px] text-destructive/80 mt-2">{error instanceof Error ? error.message : "Erro desconhecido"}</p>
         </div>
       </div>
     );
