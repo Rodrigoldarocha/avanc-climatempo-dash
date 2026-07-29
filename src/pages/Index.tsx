@@ -151,7 +151,7 @@ const Index = () => {
             </div>
           </div>
 
-          <main className={`container px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-20" : ""}`}>
+          <main className={`w-full md:container px-3 sm:px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-20" : ""}`}>
           {viewMode === "dashboard" ? (
             <section className="space-y-4 animate-fade-in" key="dashboard">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
