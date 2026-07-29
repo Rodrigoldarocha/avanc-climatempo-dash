@@ -10,6 +10,12 @@ const __dirname = dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    'process.env': {
+      CLIMATEMPO_FORECAST_TOKEN: JSON.stringify(process.env.CLIMATEMPO_FORECAST_TOKEN),
+      CLIMATEMPO_HISTORY_TOKEN: JSON.stringify(process.env.CLIMATEMPO_HISTORY_TOKEN),
+    },
+  },
   server: {
     host: "::",
     port: 8080,
