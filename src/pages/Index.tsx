@@ -109,23 +109,22 @@ const Index = () => {
       : "grid";
 
   const renderDetailContent = () => {
+    const effectiveLocation = selectedLocation || locations[0];
+
     switch (activeTab) {
       case "alerts":
         return <AlertsPanel selectedLocation={selectedLocation} />;
       case "current":
-        if (!selectedLocation) return null;
         return (
           <div className="space-y-4">
-            <CurrentWeatherCard location={selectedLocation} />
-            <HourlyForecastCard location={selectedLocation} />
+            <CurrentWeatherCard location={effectiveLocation} />
+            <HourlyForecastCard location={effectiveLocation} />
           </div>
         );
       case "hourly":
-        if (!selectedLocation) return null;
-        return <HourlyForecastCard location={selectedLocation} />;
+        return <HourlyForecastCard location={effectiveLocation} />;
       case "daily":
-        if (!selectedLocation) return null;
-        return <DailyForecastCard location={selectedLocation} />;
+        return <DailyForecastCard location={effectiveLocation} />;
       default:
         return null;
     }
