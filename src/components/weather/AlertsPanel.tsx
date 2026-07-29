@@ -271,6 +271,8 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
       return perLocation.flat();
     },
     staleTime: 1000 * 60 * 10,
+    refetchInterval: 1000 * 60 * 10,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: false,
   });
 
