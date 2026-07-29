@@ -152,7 +152,13 @@ npm install
 # ou
 bun install
 
-# 3. Inicie o servidor de desenvolvimento
+# 3. Copie o arquivo de exemplo de ambiente
+git checkout -- .env.example
+cp .env.example .env
+
+# 4. Preencha os tokens da Climatempo em .env
+#    Use as variáveis VITE_CLIMATEMPO_FORECAST_TOKEN e VITE_CLIMATEMPO_HISTORY_TOKEN
+# 5. Inicie o servidor de desenvolvimento
 npm run dev
 # ou
 bun dev

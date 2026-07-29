@@ -108,9 +108,14 @@ class ClimatempoHttpClient {
     return value?.trim().replace(/^['"]|['"]$/g, "");
   }
 
+  private static getEnvValue(name: string): string | undefined {
+    const env = (typeof import.meta !== "undefined" ? (import.meta as any).env : undefined) as Record<string, string> | undefined;
+    return env?.[`VITE_${name}`] || globalThis.process?.env?.[name];
+  }
+
   private static getTokens() {
-    const forecastToken = this.sanitizeToken(globalThis.process?.env["CLIMATEMPO_FORECAST_TOKEN"]);
-    const historyToken = this.sanitizeToken(globalThis.process?.env["CLIMATEMPO_HISTORY_TOKEN"]);
+    const forecastToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_FORECAST_TOKEN"));
+    const historyToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_HISTORY_TOKEN"));
     if (!forecastToken || !historyToken) {
       throw new ApiConfigError("Tokens climáticos não configurados. Contate o administrador.");
     }
