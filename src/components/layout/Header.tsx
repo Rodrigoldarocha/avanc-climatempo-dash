@@ -1,11 +1,10 @@
-import logoAvanco from "@/assets/logo-avanco.png";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
 import { useApiStatus } from "@/hooks/useApiStatus";
 import { useAlertCount } from "@/hooks/useAlertCount";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileMenu } from "./MobileMenu";
-import { Clock, Wifi, WifiOff, AlertTriangle } from "lucide-react";
+import { CloudSun, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -14,72 +13,52 @@ interface HeaderProps {
 }
 
 export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
-  const { time, dateShort, dayName } = useCurrentTime();
+  const { time, dateShort } = useCurrentTime();
   const { isOnline, isLoading: statusLoading } = useApiStatus();
   const { highCount } = useAlertCount();
   const isMobile = useIsMobile();
 
   return (
-    <header className="sticky top-3 z-50 mx-3 md:mx-6 mt-3 rounded-3xl bg-secondary/85 backdrop-blur-xl border border-border/20 shadow-[var(--shadow-clay)]">
-      <div className="flex h-16 md:h-20 items-center justify-between px-4 md:px-6 gap-2">
-        {/* Logo */}
-        <img
-          src={logoAvanco}
-          alt="Grupo Avanço"
-          className="h-10 sm:h-12 md:h-14 w-auto flex-shrink-0"
-        />
-
-        {/* Center info - hidden on very small screens */}
-        <div className="hidden xs:flex items-center gap-2 md:gap-4 flex-1 justify-center">
-          {/* Clock */}
-          <div className="flex items-center gap-1.5 text-secondary-foreground/80">
-            <Clock className="h-3.5 w-3.5" />
-            <span className="text-[10px] md:text-xs font-mono tracking-wide">
-              <span className="hidden sm:inline capitalize">{dayName} </span>
-              {dateShort} <span className="text-secondary-foreground font-semibold">{time}</span>
-            </span>
+    <header className="sticky top-2 z-50 mx-3 mt-3 rounded-[24px] border border-border/20 bg-secondary/95 backdrop-blur-xl shadow-[0_22px_60px_rgba(0,0,0,0.18)]">
+      <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/15 text-primary shadow-sm shadow-primary/20">
+            <CloudSun className="h-5 w-5" />
           </div>
-
-          {/* API Status */}
-          <div className="flex items-center gap-1.5">
-            <div
-              className={cn(
-                "h-2 w-2 rounded-full transition-colors",
-                statusLoading
-                  ? "bg-muted-foreground animate-pulse"
-                  : isOnline
-                  ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"
-                  : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]"
-              )}
-            />
-            <span className="text-[9px] md:text-[10px] text-secondary-foreground/60 hidden md:inline">
-              {statusLoading ? "..." : isOnline ? "API Online" : "API Offline"}
-            </span>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
+              Clima Tempo
+            </p>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] text-foreground/75 truncate">
+              <span className="font-semibold truncate">{dateShort}</span>
+              <span className="text-muted-foreground/70">{time}</span>
+            </div>
           </div>
         </div>
 
-        {/* Right side */}
+        <div className="hidden sm:flex items-center gap-3 min-w-0 justify-center flex-1">
+          <div className="rounded-2xl border border-border/50 bg-background/10 px-3 py-2 text-[11px] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            {statusLoading ? "Verificando API..." : isOnline ? "API Online" : "API Offline"}
+          </div>
+          <div className="rounded-2xl border border-border/50 bg-background/10 px-3 py-2 text-[11px] font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            {highCount > 0 ? `${highCount} alertas críticos` : "Sem alertas críticos"}
+          </div>
+        </div>
+
         <div className="flex items-center gap-2">
-          {/* Alert badge - desktop only (mobile uses bottom nav) */}
           {!isMobile && highCount > 0 && (
             <button
               onClick={onOpenAlerts}
-              className="relative flex items-center justify-center h-9 w-9 rounded-lg bg-secondary-foreground/10 hover:bg-secondary-foreground/20 transition-colors"
+              className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-border/30 bg-secondary-foreground/10 text-secondary-foreground transition hover:bg-secondary-foreground/15"
               title={`${highCount} alertas de alta severidade`}
             >
-              <AlertTriangle className="h-4 w-4 text-secondary-foreground" />
-              <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-4 px-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive text-[9px] text-destructive-foreground font-bold px-1">
                 {highCount}
               </span>
-              <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-destructive animate-ping opacity-40" />
             </button>
           )}
 
-          <h1 className="text-[10px] sm:text-xs md:text-sm font-semibold tracking-wider md:tracking-widest text-secondary-foreground uppercase whitespace-nowrap">
-            <span className="hidden sm:inline">Base — </span>Clima Tempo
-          </h1>
-
-          {/* Desktop: theme toggle | Mobile: hamburger menu */}
           {isMobile ? (
             <MobileMenu onRefresh={onRefresh} />
           ) : (

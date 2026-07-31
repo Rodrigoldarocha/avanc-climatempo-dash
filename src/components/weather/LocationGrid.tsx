@@ -4,7 +4,7 @@ import { LocationCard } from "./LocationCard";
 import { LocationFilter } from "./LocationFilter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Thermometer, RefreshCw, Clock } from "lucide-react";
+import { MapPin, Thermometer, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQueryClient, useIsFetching } from "@tanstack/react-query";
 
@@ -55,34 +55,32 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
 
   return (
     <div className="space-y-4">
-      {/* Header with Refresh - Mobile Optimized */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3 min-w-0">
-            <Thermometer className="h-5 w-5 text-primary shrink-0" />
-            <div className="panel-header">
-              <span className="panel-subtitle">Locais monitorados</span>
-              <h2 className="panel-title">Estações Meteorológicas</h2>
-            </div>
+          <div className="min-w-0">
+            <h2 className="text-2xl font-semibold tracking-tight">Locais</h2>
+            <p className="mt-1 text-sm text-muted-foreground max-w-lg">
+              Busque, filtre e acesse rapidamente as estações monitoradas.
+            </p>
           </div>
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
-            {locations.length}
-          </Badge>
-          
-          {/* Refresh Button - Always Visible */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isCurrentlyFetching}
-            className="h-8 gap-1.5 text-xs shrink-0"
-          >
-            <RefreshCw className={cn("h-3.5 w-3.5", isCurrentlyFetching && "animate-spin")} />
-            <span className="hidden sm:inline">{isCurrentlyFetching ? "Atualizando..." : "Atualizar"}</span>
-          </Button>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-2xl border border-border/20 bg-background/10 px-3 py-1 text-xs text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+              {locations.length} locais
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isCurrentlyFetching}
+              className="h-8 gap-1.5 text-xs"
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", isCurrentlyFetching && "animate-spin")} />
+              <span>{isCurrentlyFetching ? "Atualizando" : "Atualizar"}</span>
+            </Button>
+          </div>
         </div>
-        
-        {/* Filters */}
+
         <LocationFilter
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -91,29 +89,15 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
         />
       </div>
 
-      {/* Grid by State */}
-      <div className="space-y-5">
-        {Object.entries(locationsByState).map(([state, locs]) => (
-          <div key={state}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <MapPin className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                {state}
-              </span>
-              <span className="text-[9px] text-muted-foreground/60">({locs.length})</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-              {locs.map((location, i) => (
-                <LocationCard
-                  key={location.climaTempoCod}
-                  location={location}
-                  onClick={() => onLocationSelect(location)}
-                  isSelected={selectedLocation?.climaTempoCod === location.climaTempoCod}
-                  index={i}
-                />
-              ))}
-            </div>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {filteredLocations.map((location, i) => (
+          <LocationCard
+            key={location.climaTempoCod}
+            location={location}
+            onClick={() => onLocationSelect(location)}
+            isSelected={selectedLocation?.climaTempoCod === location.climaTempoCod}
+            index={i}
+          />
         ))}
       </div>
 

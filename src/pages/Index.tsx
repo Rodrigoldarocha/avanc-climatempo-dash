@@ -159,24 +159,27 @@ const Index = () => {
           <main className={`w-full md:container px-3 sm:px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-28" : ""}`}>
           {viewMode === "dashboard" ? (
             <section className="space-y-4 animate-fade-in" key="dashboard">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div className="panel-header">
-                  <span className="panel-subtitle">Visão geral</span>
-                  <h1 className="text-2xl sm:text-3xl font-display font-semibold">Painel</h1>
-                </div>
-                {!isMobile && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button size="sm" variant="outline" className="gap-2" onClick={() => setViewMode("grid")}>
-                      <Grid3X3 className="h-4 w-4" />
-                      <span>Locais</span>
-                    </Button>
-                    <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
-                      <Siren className="h-4 w-4" />
-                      <span>Alertas</span>
-                    </Button>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h1 className="text-3xl font-semibold tracking-tight">Painel</h1>
+                    <p className="mt-1 text-sm text-muted-foreground max-w-xl">
+                      Resumo das principais métricas, alertas e destaques com mínima rolagem.
+                    </p>
                   </div>
-                )}
-              </div>
+                  {!isMobile && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button size="sm" variant="outline" className="gap-2" onClick={() => setViewMode("grid") }>
+                        <Grid3X3 className="h-4 w-4" />
+                        <span>Locais</span>
+                      </Button>
+                      <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
+                        <Siren className="h-4 w-4" />
+                        <span>Alertas</span>
+                      </Button>
+                    </div>
+                  )}
+                </div>
               <DashboardSummary
                 onOpenAlerts={handleOpenAlerts}
                 onLocationSelect={handleLocationSelect}

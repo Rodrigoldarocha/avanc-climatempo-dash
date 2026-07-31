@@ -76,62 +76,49 @@ export const LocationCard = ({ location, onClick, isSelected, index = 0 }: Locat
     <button
       onClick={onClick}
       className={cn(
-        "w-full p-3 rounded-lg border transition-all duration-200 text-left group bg-gradient-to-br",
-        "hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5",
-        "active:scale-[0.97]",
-        !hasError ? getTempGradient(temp) : "from-card/50 to-card/50",
+        "w-full h-[118px] min-h-[118px] rounded-[22px] border bg-card/90 p-3 text-left transition-all duration-200 group",
+        "hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]",
         isSelected
-          ? "border-primary/60 shadow-md shadow-primary/20 ring-1 ring-primary/30"
-          : "border-border/20 hover:border-primary/40"
+          ? "border-primary/60 shadow-[0_20px_35px_rgba(65,172,94,0.18)] ring-1 ring-primary/30"
+          : "border-border/15"
       )}
       style={{
         animation: `fade-in 0.4s ease-out ${index * 40}ms both`,
+        backgroundImage: !hasError ? getTempGradient(temp) : undefined,
       }}
     >
-      {/* City & State */}
-      <div className="flex items-center justify-between gap-1 mb-1.5">
-        <h3 className="font-semibold text-sm truncate leading-tight flex-1">{location.city}</h3>
-        <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">
-          {location.state}
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold leading-tight truncate">{location.city}</h3>
+          <p className="text-[11px] text-muted-foreground/70 truncate">{location.state}</p>
+        </div>
+        <span className="text-xs rounded-full border border-border/30 bg-background/80 px-2 py-1 text-muted-foreground">
+          {weather?.condition ?? "—"}
         </span>
       </div>
 
       {!hasError && weather ? (
-        <>
-          {/* Main Weather */}
-          <div className="flex items-center gap-2 mb-2">
-            <WeatherIcon condition={weather.icon} size="sm" />
-            <div>
-              <span className="text-2xl font-bold font-display tabular-nums">
-                {animatedTemp}°
-              </span>
-              <span className="text-xs text-muted-foreground ml-1">
-                ST {Math.round(weather.sensation)}°
-              </span>
-            </div>
+        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+          <div className="rounded-2xl bg-background/10 p-2">
+            <p className="text-[11px] uppercase tracking-[0.18em]">Temp.</p>
+            <p className="mt-1 text-xl font-semibold text-foreground tabular-nums">{animatedTemp}°</p>
           </div>
-
-          {/* Stats Row */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Droplets className="h-3.5 w-3.5 text-weather-rain" />
-              <span>{weather.humidity}%</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Wind className="h-3.5 w-3.5 text-weather-cloud" />
-              <span>{weather.wind_velocity} km/h</span>
-            </div>
+          <div className="rounded-2xl bg-background/10 p-2">
+            <p className="text-[11px] uppercase tracking-[0.18em]">Sensação</p>
+            <p className="mt-1 text-xl font-semibold text-foreground tabular-nums">{Math.round(weather.sensation)}°</p>
           </div>
-
-          {/* Condition */}
-          <p className="text-xs text-muted-foreground/80 mt-1.5 truncate">
-            {weather.condition}
-          </p>
-        </>
+          <div className="rounded-2xl bg-background/10 p-2">
+            <p className="text-[11px] uppercase tracking-[0.18em]">Umidade</p>
+            <p className="mt-1 font-semibold text-foreground">{weather.humidity}%</p>
+          </div>
+          <div className="rounded-2xl bg-background/10 p-2">
+            <p className="text-[11px] uppercase tracking-[0.18em]">Vento</p>
+            <p className="mt-1 font-semibold text-foreground">{weather.wind_velocity} km/h</p>
+          </div>
+        </div>
       ) : (
-        <div className="py-2 text-center">
-          <span className="text-xl text-muted-foreground/40">--°</span>
-          <p className="text-xs text-muted-foreground/50 mt-1">Indisponível</p>
+        <div className="flex h-full items-center justify-center">
+          <span className="text-sm text-muted-foreground/70">Dados indisponíveis</span>
         </div>
       )}
     </button>

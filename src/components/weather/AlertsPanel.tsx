@@ -322,74 +322,75 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
   const isLoading = query.isLoading;
 
   return (
-    <section className="space-y-3 panel-card p-4">
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-center gap-2 min-w-0">
-            <AlertTriangle className="h-4 w-4 text-foreground shrink-0" />
-            <div className="panel-header">
-              <span className="panel-subtitle">Alertas</span>
-              <h2 className="panel-title">Alertas (7 dias)</h2>
+    <section className="space-y-4 panel-card p-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Alertas</p>
+              <h2 className="text-2xl font-semibold tracking-tight">7 dias</h2>
             </div>
           </div>
           {!isLoading && (
-            <div className="flex">
-              <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0 self-start">
-                {total === 0 ? "Sem alertas" : `${total} alerta${total > 1 ? "s" : ""}`}
-              </Badge>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="rounded-2xl bg-background/90 px-3 py-2 text-foreground shadow-sm border border-border/20">
+                {totalCount} alertas
+              </span>
+              <span className="rounded-2xl bg-destructive/10 px-3 py-2 text-destructive shadow-sm border border-destructive/20">
+                {highCount} alta
+              </span>
+              <span className="rounded-2xl bg-amber-500/10 px-3 py-2 text-amber-200 shadow-sm border border-amber-300/20">
+                {modCount} moderada
+              </span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <ExportAlertsDataButton alerts={sortedAlerts} />
-          <ExportAlertsPdfButton
-            alerts={sortedAlerts}
-            rainMmhThreshold={RAIN_MM_H_THRESHOLD}
-            rainProbThreshold={RAIN_PROB_THRESHOLD}
-            daysWindow={DAYS_WINDOW}
-          />
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] items-start">
+          <div className="flex flex-wrap gap-2">
+            <ExportAlertsDataButton alerts={sortedAlerts} />
+            <ExportAlertsPdfButton
+              alerts={sortedAlerts}
+              rainMmhThreshold={RAIN_MM_H_THRESHOLD}
+              rainProbThreshold={RAIN_PROB_THRESHOLD}
+              daysWindow={DAYS_WINDOW}
+            />
+          </div>
           <Button
             variant="outline"
             size="sm"
-            className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-2"
+            className="h-9 w-full sm:w-auto gap-2"
             onClick={() => query.refetch()}
             disabled={query.isFetching}
             aria-label="Atualizar alertas"
             title="Atualizar alertas"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", query.isFetching && "animate-spin")} />
-            <span className="hidden sm:inline text-xs">Atualizar</span>
+            <RefreshCw className={cn("h-4 w-4", query.isFetching && "animate-spin")} />
+            Atualizar
           </Button>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
           <span>Chuva &gt;{RAIN_MM_H_THRESHOLD}mm/h</span>
           <span>•</span>
           <span>Prob &gt;{RAIN_PROB_THRESHOLD}%</span>
-          {total > 0 && (
-            <>
-              <span className="hidden sm:inline">•</span>
-              <span className="hidden sm:inline text-destructive">{highCount} alta</span>
-              <span className="hidden sm:inline text-amber-500">{modCount} moderada</span>
-            </>
-          )}
         </div>
 
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {([null, "high", "moderate"] as const).map((sev) => (
             <button
               key={sev ?? "all"}
               onClick={() => setSelectedSeverity(sev)}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap",
+                "rounded-2xl px-3 py-2 text-xs font-semibold transition duration-200 whitespace-nowrap",
                 selectedSeverity === sev
                   ? sev === "high"
-                    ? "bg-destructive text-destructive-foreground shadow-md"
+                    ? "bg-destructive text-destructive-foreground"
                     : sev === "moderate"
-                    ? "bg-amber-500 text-white shadow-md"
-                    : "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
+                    ? "bg-amber-500 text-black"
+                    : "bg-primary text-primary-foreground"
+                  : "bg-background/80 text-muted-foreground hover:bg-background"
               )}
             >
               {sev === null ? `Todas (${totalCount})` : sev === "high" ? `Alta (${highTotal})` : `Moderada (${modTotal})`}
@@ -431,12 +432,12 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
           </Button>
         </div>
       ) : total === 0 ? (
-        <div className="py-12 text-center space-y-2">
-          <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto">
-            <span className="text-2xl">✅</span>
+        <div className="py-10 text-center space-y-2">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-2xl">
+            ✅
           </div>
-          <p className="text-sm font-medium">Nenhum alerta no período</p>
-          <p className="text-xs text-muted-foreground">Todas as localidades dentro dos limites normais</p>
+          <p className="text-sm font-semibold">Nenhum alerta</p>
+          <p className="text-xs text-muted-foreground">Todas as localidades estão dentro dos limites normais.</p>
         </div>
       ) : (
         <>

@@ -100,89 +100,82 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
         <span>{isOnline ? "Dados atualizados • API online" : "Sem conexão com a API"}</span>
       </div>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
-        {/* Total Alerts */}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <button
           onClick={onOpenAlerts}
-          className="stat-card flex flex-col gap-3 text-left hover:border-destructive/50 transition-colors"
+          className="stat-card h-24 flex flex-col justify-between p-3 text-left hover:border-destructive/50 transition-colors"
         >
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-destructive" />
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Alertas</span>
           </div>
-          <div className="text-xl sm:text-2xl font-display font-bold text-destructive">
-            {totalCount || "—"}
-          </div>
-          <div className="text-[10px] text-muted-foreground">
-            {highCount > 0 ? `${highCount} alta severidade` : "Nenhum crítico"}
+          <div>
+            <div className="text-3xl font-display font-bold text-destructive">{totalCount || "—"}</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              {highCount > 0 ? `${highCount} alta severidade` : "Nenhum crítico"}
+            </div>
           </div>
         </button>
 
-        {/* Avg Temperature */}
-        <div className="stat-card flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
+        <div className="stat-card h-24 flex flex-col justify-between p-3">
+          <div className="flex items-center gap-2">
             <Thermometer className="h-4 w-4 text-weather-hot" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Temp. Média</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Temperatura</span>
           </div>
           {isLoading ? (
-            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-7 w-20" />
           ) : (
-            <>
-              <div className="text-xl sm:text-2xl font-display font-bold">
-                {stats ? `${Math.round(stats.avgTemp)}°` : "—"}
+            <div>
+              <div className="text-3xl font-display font-bold">{stats ? `${Math.round(stats.avgTemp)}°` : "—"}</div>
+              <div className="mt-1 text-[11px] text-muted-foreground">
+                {stats ? `${Math.round(stats.minTemp)}° • ${Math.round(stats.maxTemp)}°` : ""}
               </div>
-              <div className="text-[10px] text-muted-foreground">
-                {stats ? `${Math.round(stats.minTemp)}° – ${Math.round(stats.maxTemp)}°` : ""}
-              </div>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Avg Humidity */}
-        <div className="stat-card flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
+        <div className="stat-card h-24 flex flex-col justify-between p-3">
+          <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-weather-rain" />
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Umidade</span>
           </div>
           {isLoading ? (
-            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-7 w-20" />
           ) : (
-            <>
-              <div className="text-xl sm:text-2xl font-display font-bold">
-                {stats ? `${Math.round(stats.avgHumidity)}%` : "—"}
-              </div>
-              <div className="text-[10px] text-muted-foreground">Média geral</div>
-            </>
+            <div>
+              <div className="text-3xl font-display font-bold">{stats ? `${Math.round(stats.avgHumidity)}%` : "—"}</div>
+              <div className="mt-1 text-[11px] text-muted-foreground">Média geral</div>
+            </div>
           )}
         </div>
 
-        {/* Wind */}
-        <div className="stat-card flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
+        <div className="stat-card h-24 flex flex-col justify-between p-3">
+          <div className="flex items-center gap-2">
             <Wind className="h-4 w-4 text-weather-cloud" />
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Vento</span>
           </div>
           {isLoading ? (
-            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-7 w-20" />
           ) : (
-            <>
-              <div className="text-xl sm:text-2xl font-display font-bold">
-                {stats ? `${Math.round(stats.avgWind)}` : "—"}
-              </div>
-              <div className="text-[10px] text-muted-foreground">km/h médio</div>
-            </>
+            <div>
+              <div className="text-3xl font-display font-bold">{stats ? `${Math.round(stats.avgWind)}` : "—"}</div>
+              <div className="mt-1 text-[11px] text-muted-foreground">km/h médio</div>
+            </div>
           )}
         </div>
+      </div>
 
-        {/* Monitored Locations */}
-        <div className="stat-card flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="stat-card h-24 flex flex-col justify-between p-3">
+          <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" />
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Locais</span>
           </div>
-          <div className="text-xl sm:text-2xl font-display font-bold">{locations.length}</div>
-          <div className="text-[10px] text-muted-foreground">{states.length} estados</div>
+          <div>
+            <div className="text-3xl font-display font-bold">{locations.length}</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">{states.length} estados</div>
+          </div>
         </div>
       </div>
 
