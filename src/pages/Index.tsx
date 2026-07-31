@@ -184,6 +184,7 @@ const Index = () => {
                 onOpenAlerts={handleOpenAlerts}
                 onLocationSelect={handleLocationSelect}
               />
+            </div>
             </section>
           ) : viewMode === "grid" ? (
             <section className="space-y-4 animate-fade-in" key="grid">
