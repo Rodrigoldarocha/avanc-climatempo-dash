@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -85,57 +85,55 @@
   }
 
   .dark {
-    /* Dark mode - Deep navy with lime accents */
-    --background: 200 28% 10%;
-    --foreground: 60 20% 95%;
+    /* Nocturnal Meteorological System
+       Surface: Midnight Obsidian #111415
+       Primary: Electric Sulfur #deed1a
+       Labels: JetBrains Mono, numbers: Hanken Grotesk */
+    --background: 200 11% 7%;
+    --foreground: 200 12% 89%;
 
-    --card: 200 25% 14%;
-    --card-foreground: 60 20% 95%;
+    --card: 210 7% 12%;
+    --card-foreground: 200 12% 89%;
 
-    --popover: 200 25% 14%;
-    --popover-foreground: 60 20% 95%;
+    --popover: 210 7% 12%;
+    --popover-foreground: 200 12% 89%;
 
-    --primary: 65 95% 50%;
-    --primary-foreground: 200 25% 10%;
+    --primary: 67 86% 52%;
+    --primary-foreground: 64 100% 10%;
 
-    --secondary: 200 20% 22%;
+    --secondary: 220 10% 28%;
     --secondary-foreground: 60 20% 95%;
 
-    --muted: 200 20% 18%;
-    --muted-foreground: 200 10% 60%;
+    --muted: 210 4% 16%;
+    --muted-foreground: 60 19% 73%;
 
-    --accent: 65 90% 55%;
-    --accent-foreground: 200 25% 10%;
+    --accent: 67 86% 52%;
+    --accent-foreground: 64 100% 10%;
 
-    --destructive: 0 72% 45%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 356 100% 29%;
+    --destructive-foreground: 6 100% 92%;
 
-    --border: 200 20% 20%;
-    --input: 200 20% 18%;
-    --ring: 65 95% 50%;
+    --border: 210 4% 16%;
+    --input: 210 4% 16%;
+    --ring: 67 86% 52%;
 
-    --sidebar-background: 200 28% 8%;
-    --sidebar-foreground: 60 20% 95%;
-    --sidebar-primary: 65 95% 50%;
-    --sidebar-primary-foreground: 200 25% 10%;
-    --sidebar-accent: 200 25% 15%;
-    --sidebar-accent-foreground: 60 20% 95%;
-    --sidebar-border: 200 25% 15%;
-    --sidebar-ring: 65 95% 50%;
+    --sidebar-background: 200 8% 11%;
+    --sidebar-foreground: 60 19% 73%;
+    --sidebar-primary: 67 86% 52%;
+    --sidebar-primary-foreground: 64 100% 10%;
+    --sidebar-accent: 210 7% 16%;
+    --sidebar-accent-foreground: 200 12% 89%;
+    --sidebar-border: 210 4% 16%;
+    --sidebar-ring: 67 86% 52%;
 
     --shadow-clay:
-      8px 8px 20px hsl(200 40% 4% / 0.55),
-      -6px -6px 18px hsl(200 20% 22% / 0.45),
-      inset 2px 2px 4px hsl(200 20% 30% / 0.5),
-      inset -3px -4px 8px hsl(200 40% 4% / 0.4);
+      0 12px 40px hsl(200 40% 4% / 0.35),
+      inset 0 1px 0 hsl(200 20% 30% / 0.18);
     --shadow-clay-sm:
-      4px 4px 10px hsl(200 40% 4% / 0.5),
-      -3px -3px 8px hsl(200 20% 22% / 0.4),
-      inset 1px 1px 2px hsl(200 20% 30% / 0.45),
-      inset -2px -2px 4px hsl(200 40% 4% / 0.35);
+      0 8px 24px hsl(200 40% 4% / 0.3),
+      inset 0 1px 0 hsl(200 20% 30% / 0.15);
     --shadow-clay-inset:
-      inset 4px 4px 10px hsl(200 40% 4% / 0.55),
-      inset -4px -4px 10px hsl(200 20% 28% / 0.45);
+      inset 0 2px 8px hsl(200 40% 4% / 0.25);
   }
 }
 
@@ -171,39 +169,44 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Hanken Grotesk', sans-serif;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply rounded-[28px] border border-white/10 bg-background/40 text-card-foreground shadow-[0_24px_60px_rgba(0,0,0,0.32)] backdrop-blur-xl;
-    background-image: linear-gradient(135deg, hsl(var(--card) / 0.6), hsl(var(--card) / 0.45));
+    @apply rounded-[24px] border border-white/5 bg-card/40 text-card-foreground;
+    background-image: linear-gradient(135deg, hsl(var(--card) / 0.5), hsl(var(--card) / 0.3));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
 
   .weather-card {
-    @apply rounded-[28px] border border-white/10 bg-background/40 text-card-foreground;
-    background-image: linear-gradient(135deg, hsl(var(--card) / 0.72), hsl(var(--card) / 0.52));
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+    @apply rounded-[24px] border border-white/5 bg-card/40 text-card-foreground;
+    background-image: linear-gradient(135deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.35));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
     backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
   }
 
   .glass-card {
-    @apply rounded-[28px] border border-white/10 bg-background/40 text-card-foreground shadow-[0_24px_60px_rgba(0,0,0,0.25)] backdrop-blur-xl;
-    background-image: linear-gradient(135deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.35));
-    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    @apply rounded-[24px] border border-white/5 bg-card/40 text-card-foreground;
+    background-image: linear-gradient(135deg, hsl(var(--card) / 0.45), hsl(var(--card) / 0.28));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease, border-color 0.3s ease;
   }
 
   .glass-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255,255,255,0.16);
-    background-image: linear-gradient(135deg, hsl(var(--card) / 0.65), hsl(var(--card) / 0.45));
+    border-color: rgba(255, 255, 255, 0.1);
+    background-image: linear-gradient(135deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.38));
   }
 
   .panel-card {
-    @apply rounded-[28px] border border-white/10 bg-background/45;
-    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.18);
+    @apply rounded-[24px] border border-white/5 bg-card/45;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
 
   .panel-header {
@@ -271,7 +274,7 @@
 
   .temperature-display {
     @apply font-bold tracking-tight;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Hanken Grotesk', sans-serif;
     text-shadow: 0 2px 10px hsl(var(--foreground) / 0.1);
   }
 
@@ -288,19 +291,18 @@
   }
 
   .stat-card {
-    @apply rounded-3xl border border-white/10 bg-background/40 text-card-foreground backdrop-blur-xl;
-    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.22);
-    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    @apply rounded-3xl border border-white/5 bg-card/40 text-card-foreground backdrop-blur-xl;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16);
+    transition: background 0.3s ease, border-color 0.3s ease;
   }
 
   .stat-card:hover {
-    transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.1);
     background-image: linear-gradient(135deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.35));
   }
 
   .chart-container {
-    @apply rounded-3xl p-4 border border-white/10 bg-background/30 text-card-foreground shadow-[0_18px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl;
+    @apply rounded-3xl p-4 border border-white/5 bg-card/30 text-card-foreground shadow-[0_10px_32px_rgba(0,0,0,0.16)] backdrop-blur-xl;
   }
 
   .clay-pill {
@@ -370,5 +372,15 @@
   .touch-target {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Technical data labels — JetBrains Mono, uppercased (design system) */
+  .data-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 }

@@ -19,14 +19,14 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
   const isMobile = useIsMobile();
 
   return (
-    <header className="sticky top-2 z-50 mx-3 mt-3 glass-card overflow-hidden">
-      <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-4">
+    <header className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-xl border-b border-white/10">
+      <div className="flex h-16 items-center justify-between gap-3 px-3 sm:px-5">
         <div className="flex items-center gap-3 min-w-0">
           <div className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/15 text-primary shadow-sm shadow-primary/20">
             <CloudSun className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
+            <p className="data-label text-muted-foreground/70">
               Clima Tempo
             </p>
             <div className="flex flex-wrap items-center gap-2 text-[11px] text-foreground/75 truncate">
@@ -37,10 +37,10 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
         </div>
 
         <div className="hidden sm:flex items-center gap-3 min-w-0 justify-center flex-1">
-          <div className="rounded-2xl border border-border/50 bg-background/10 px-3 py-2 text-[11px] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <div className="rounded-full border border-white/5 bg-secondary/30 px-3 py-1.5 data-label text-muted-foreground">
             {statusLoading ? "Verificando API..." : isOnline ? "API Online" : "API Offline"}
           </div>
-          <div className="rounded-2xl border border-border/50 bg-background/10 px-3 py-2 text-[11px] font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 data-label text-primary">
             {highCount > 0 ? `${highCount} alertas críticos` : "Sem alertas críticos"}
           </div>
         </div>
@@ -49,7 +49,7 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
           {!isMobile && highCount > 0 && (
             <button
               onClick={onOpenAlerts}
-              className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-border/30 bg-secondary-foreground/10 text-secondary-foreground transition hover:bg-secondary-foreground/15"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-secondary-foreground/10 text-secondary-foreground transition hover:bg-secondary-foreground/15"
               title={`${highCount} alertas de alta severidade`}
             >
               <AlertTriangle className="h-4 w-4" />

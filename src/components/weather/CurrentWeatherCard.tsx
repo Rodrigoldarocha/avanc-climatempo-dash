@@ -37,49 +37,56 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
   const weather = data.data;
 
   return (
-    <div className="weather-card p-4 sm:p-5 animate-fade-in">
-      {/* Main Temperature */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <WeatherIcon condition={weather.icon} size="lg" />
-          <div>
-            <div className="temperature-display text-4xl sm:text-5xl">
-              {formatTemperature(weather.temperature)}
+    <div className="weather-card p-5 sm:p-7 animate-fade-in relative overflow-hidden">
+      {/* Atmospheric glow */}
+      <div className="absolute -top-20 -right-20 w-56 h-56 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="relative z-10">
+        {/* Main Temperature Hero */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <WeatherIcon condition={weather.icon} size="lg" />
+              <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full -z-10" />
             </div>
-            <p className="text-sm text-muted-foreground capitalize">
-              {weather.condition}
-            </p>
+            <div>
+              <div className="temperature-display text-6xl sm:text-[84px] leading-none sm:leading-[84px]">
+                {formatTemperature(weather.temperature)}
+              </div>
+              <p className="text-xl font-display font-semibold text-primary mt-1">
+                {weather.condition}
+              </p>
+            </div>
+          </div>
+          <div className="glass-card p-4 rounded-2xl min-w-[140px] shrink-0">
+            <div className="flex items-center gap-2 data-label text-muted-foreground mb-1">
+              <Thermometer className="h-4 w-4" />
+              Sensação
+            </div>
+            <div className="text-2xl sm:text-3xl font-display font-semibold">
+              {formatTemperature(weather.sensation)}
+            </div>
           </div>
         </div>
-        <div className="text-right">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Thermometer className="h-3.5 w-3.5" />
-            <span>Sensação</span>
-          </div>
-          <div className="text-xl sm:text-2xl font-semibold font-display">
-            {formatTemperature(weather.sensation)}
-          </div>
-        </div>
-      </div>
 
-      {/* Compact Stats */}
-      <div className="grid grid-cols-4 gap-2">
-        <StatItem icon={<Droplets className="h-4 w-4 text-sky-400" />} label="Umidade" value={`${weather.humidity}%`} />
-        <StatItem icon={<Wind className="h-4 w-4 text-slate-400" />} label="Vento" value={`${weather.wind_velocity}`} />
-        <StatItem icon={<Gauge className="h-4 w-4 text-emerald-400" />} label="Pressão" value={`${weather.pressure}`} />
-        <StatItem icon={<span className="text-xs font-medium">{weather.wind_direction}</span>} label="Direção" value="" />
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+          <StatItem icon={<Droplets className="h-4 w-4 text-sky-400" />} label="Umidade" value={`${weather.humidity}%`} />
+          <StatItem icon={<Wind className="h-4 w-4 text-slate-400" />} label="Vento" value={`${weather.wind_velocity}`} />
+          <StatItem icon={<Gauge className="h-4 w-4 text-emerald-400" />} label="Pressão" value={`${weather.pressure}`} />
+          <StatItem icon={<span className="data-label">{weather.wind_direction}</span>} label="Direção" value="" />
+        </div>
       </div>
     </div>
   );
 };
 
 const StatItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="clay-pill p-3">
-    <div className="flex items-center gap-1.5 mb-1">
+  <div className="rounded-2xl border border-white/5 bg-white/[0.04] p-3 flex flex-col gap-1.5 hover:bg-white/[0.07] transition-colors">
+    <div className="flex items-center gap-1.5 data-label text-muted-foreground">
       {icon}
-      <span className="text-xs text-muted-foreground">{label}</span>
+      {label}
     </div>
-    {value && <div className="text-sm font-semibold">{value}</div>}
+    {value && <div className="text-lg font-display font-semibold">{value}</div>}
   </div>
 );
 

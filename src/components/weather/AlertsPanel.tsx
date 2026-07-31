@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { AlertTriangle, Droplets, Percent, RefreshCw, ChevronRight } from "lucide-react";
+import { AlertTriangle, Percent, RefreshCw, ChevronRight, Calendar } from "lucide-react";
 
 import type { Location } from "@/data/locations";
 import { locations } from "@/data/locations";
@@ -213,47 +213,45 @@ const formatDateTime = (isoLike: string) => {
 // Mobile-first Alert Card Component
 const AlertCard = ({ alert }: { alert: WeatherAlert }) => {
   const isHigh = alert.severity === "high";
-  
+  const probTrigger = alert.triggers.find((t) => t.type === "rain_probability");
+  const mmhTrigger = alert.triggers.find((t) => t.type === "rain_mm_h");
+
   return (
     <div className={cn(
-      "p-3 rounded-lg border transition-colors",
-      isHigh 
-        ? "bg-destructive/10 border-destructive/30" 
+      "rounded-2xl border p-5 flex flex-col justify-between h-44 transition-all hover:scale-[1.02] cursor-pointer",
+      isHigh
+        ? "bg-destructive/10 border-destructive/30"
         : "bg-amber-500/10 border-amber-500/30"
     )}>
-      {/* Header Row */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-sm truncate">{alert.location.local}</div>
-          <div className="text-xs text-muted-foreground">
+      <div className="flex justify-between items-start gap-2">
+        <div className="min-w-0">
+          <h3 className="font-bold text-sm tracking-tight truncate">{alert.location.local}</h3>
+          <p className="data-label text-[10px] text-muted-foreground mt-0.5 uppercase">
             {alert.location.city}/{alert.location.state}
-          </div>
+          </p>
         </div>
         <Badge variant={isHigh ? "destructive" : "default"} className="shrink-0 text-[10px]">
           {isHigh ? "Alta" : "Moderada"}
         </Badge>
       </div>
-      
-      {/* Date/Time */}
-      <div className="text-xs text-muted-foreground mb-2">
-        📅 {formatDateTime(alert.dateTimeIso)}
-      </div>
-      
-      {/* Triggers */}
-      <div className="flex flex-wrap gap-2">
-        {alert.triggers.map((t) => (
-          <div 
-            key={t.type} 
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-background/50 text-xs"
-          >
-            {t.type === "rain_mm_h" ? (
-              <Droplets className="h-3 w-3 text-sky-400" />
-            ) : (
-              <Percent className="h-3 w-3 text-amber-400" />
-            )}
-            <span className="font-semibold">{t.value}{t.unit}</span>
+
+      <div className="flex items-end justify-between mt-3">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Calendar className="h-3.5 w-3.5" />
+            <span className="data-label text-[11px]">{formatDateTime(alert.dateTimeIso)}</span>
           </div>
-        ))}
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Percent className="h-3.5 w-3.5 text-amber-400" />
+            <span className="text-sm font-bold">
+              {(probTrigger?.value ?? mmhTrigger?.value ?? 0)}
+              {probTrigger ? "%" : (mmhTrigger ? " mm/h" : "")}
+            </span>
+          </div>
+        </div>
+        <div className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-muted-foreground shrink-0">
+          <ChevronRight className="h-4 w-4" />
+        </div>
       </div>
     </div>
   );

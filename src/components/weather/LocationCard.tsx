@@ -76,49 +76,47 @@ export const LocationCard = ({ location, onClick, isSelected, index = 0 }: Locat
     <button
       onClick={onClick}
       className={cn(
-        "glass-card w-full h-[118px] min-h-[118px] rounded-[22px] p-3 text-left transition-all duration-200 group",
-        "hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]",
+        "glass-card w-full h-[140px] min-h-[140px] rounded-[20px] p-4 text-left transition-all duration-200 group relative overflow-hidden",
+        "hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
         isSelected
           ? "border-primary/60 ring-1 ring-primary/30"
-          : "border-border/20"
+          : "border-white/5"
       )}
       style={{
         animation: `fade-in 0.4s ease-out ${index * 40}ms both`,
         backgroundImage: !hasError ? getTempGradient(temp) : undefined,
       }}
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold leading-tight truncate">{location.city}</h3>
+          <h3 className="text-sm font-bold leading-tight truncate uppercase">{location.city}</h3>
           <p className="text-[11px] text-muted-foreground/70 truncate">{location.state}</p>
         </div>
-        <span className="text-xs rounded-full border border-border/30 bg-background/80 px-2 py-1 text-muted-foreground">
+        <span className="data-label text-[10px] rounded-full border border-white/5 bg-white/5 px-2 py-1 text-muted-foreground shrink-0">
           {weather?.condition ?? "—"}
         </span>
       </div>
 
       {!hasError && weather ? (
-        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-          <div className="rounded-2xl bg-background/10 p-2">
-            <p className="text-[11px] uppercase tracking-[0.18em]">Temp.</p>
-            <p className="mt-1 text-xl font-semibold text-foreground tabular-nums">{animatedTemp}°</p>
+        <div className="relative z-10 flex items-end justify-between">
+          <div>
+            <p className="data-label text-[10px] text-muted-foreground mb-0.5">Temp.</p>
+            <span className="temperature-display text-3xl leading-none">{animatedTemp}°</span>
           </div>
-          <div className="rounded-2xl bg-background/10 p-2">
-            <p className="text-[11px] uppercase tracking-[0.18em]">Sensação</p>
-            <p className="mt-1 text-xl font-semibold text-foreground tabular-nums">{Math.round(weather.sensation)}°</p>
-          </div>
-          <div className="rounded-2xl bg-background/10 p-2">
-            <p className="text-[11px] uppercase tracking-[0.18em]">Umidade</p>
-            <p className="mt-1 font-semibold text-foreground">{weather.humidity}%</p>
-          </div>
-          <div className="rounded-2xl bg-background/10 p-2">
-            <p className="text-[11px] uppercase tracking-[0.18em]">Vento</p>
-            <p className="mt-1 font-semibold text-foreground">{weather.wind_velocity} km/h</p>
+          <div className="text-right">
+            <p className="data-label text-[10px] text-muted-foreground mb-0.5">Sensação</p>
+            <span className="temperature-display text-3xl leading-none">{Math.round(weather.sensation)}°</span>
           </div>
         </div>
       ) : (
         <div className="flex h-full items-center justify-center">
           <span className="text-sm text-muted-foreground/70">Dados indisponíveis</span>
+        </div>
+      )}
+
+      {!hasError && weather && (
+        <div className="absolute -right-5 -bottom-5 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+          <WeatherIcon condition={weather.icon} size="lg" />
         </div>
       )}
     </button>

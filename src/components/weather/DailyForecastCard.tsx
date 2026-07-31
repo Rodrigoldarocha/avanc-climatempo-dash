@@ -78,7 +78,7 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
           return (
             <div
               key={day.date || index}
-              className="clay-pill flex items-center gap-2 sm:gap-3 p-3 hover:scale-[1.01] active:scale-[0.99] transition-transform"
+              className="flex items-center gap-2 sm:gap-3 p-3 rounded-xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
             >
               <WeatherIcon condition={icon} size="sm" />
               <div className="flex-1 min-w-0">
@@ -88,7 +88,7 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-sky-400 tabular-nums">{Math.round(minTemp)}°</span>
-                <div className="w-10 h-1 rounded-full bg-gradient-to-r from-sky-400 to-orange-400 opacity-50" />
+                <div className="w-16 sm:w-24 h-1 rounded-full bg-gradient-to-r from-sky-400 to-orange-400 opacity-50" />
                 <span className="text-xs text-orange-400 font-medium tabular-nums">{Math.round(maxTemp)}°</span>
               </div>
               <div className="flex items-center gap-1 min-w-[40px]">

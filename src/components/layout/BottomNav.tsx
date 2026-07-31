@@ -17,8 +17,8 @@ const tabs = [
 
 export const BottomNav = ({ activeTab, onTabChange, alertCount = 0 }: BottomNavProps) => {
   return (
-    <nav className="fixed bottom-3 left-3 right-3 z-50 rounded-[24px] bg-secondary/95 backdrop-blur-xl border border-border/20 shadow-[0_20px_45px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around h-[72px] px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-secondary/80 backdrop-blur-xl border-t border-white/5 shadow-[0_-8px_24px_rgba(0,0,0,0.2)] rounded-t-xl pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-center justify-around h-[68px] px-4">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -28,22 +28,19 @@ export const BottomNav = ({ activeTab, onTabChange, alertCount = 0 }: BottomNavP
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors duration-200 touch-target",
-                isActive ? "text-primary" : "text-secondary-foreground/60"
+                "relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full rounded-full transition-all duration-200 touch-target",
+                isActive
+                  ? "bg-primary text-on-primary scale-105"
+                  : "text-secondary-foreground/60 hover:text-primary"
               )}
               aria-label={tab.label}
               role="tab"
               aria-selected={isActive}
             >
-              <div className={cn(
-                "flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200",
-                isActive ? "bg-primary/15 shadow-[inset_0_0_0_1px_rgba(232,255,26,0.28)]" : "bg-transparent"
-              )}>
-                <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
-              </div>
-              <span className={cn("text-[11px] font-medium", isActive && "font-semibold")}>{tab.label}</span>
+              <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
+              <span className={cn("text-[11px]", isActive && "font-semibold")}>{tab.label}</span>
               {tab.id === "alerts" && alertCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-[1rem] rounded-full bg-destructive text-[9px] text-destructive-foreground font-semibold px-1">
+                <span className="absolute -top-1 right-1/4 flex items-center justify-center h-4 min-w-[1rem] rounded-full bg-destructive text-[9px] text-destructive-foreground font-semibold px-1">
                   {alertCount}
                 </span>
               )}

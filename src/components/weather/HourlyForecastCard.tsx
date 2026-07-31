@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Clock, Droplets, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { Location } from "@/data/locations";
 
 interface HourlyForecastCardProps {
@@ -156,21 +157,24 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
           {allHours.slice(0, 24).map((hour, index) => (
             <div
               key={`${hour.date}-${index}`}
-              className="clay-pill flex flex-col items-center p-3 min-w-[68px] hover:scale-[1.03] active:scale-[0.97] transition-transform"
+              className={cn(
+                "rounded-xl border border-white/5 bg-white/[0.04] flex flex-col items-center gap-2 p-3 min-w-[84px] transition-colors hover:bg-white/[0.08]",
+                index === 0 && "border-b-2 border-b-primary bg-white/[0.06]"
+              )}
             >
-              <span className="text-xs text-muted-foreground font-medium">
+              <span className="data-label text-[11px] text-muted-foreground">
                 {hour.hour || `${index}h`}
               </span>
-              <span className="font-semibold text-base tabular-nums my-1">
+              <span className="font-display font-semibold text-lg tabular-nums">
                 {Math.round(hour.temp)}°
               </span>
               {Number(hour.rain) > 0 ? (
-                <div className="flex items-center gap-0.5 text-xs text-sky-400">
+                <div className="flex items-center gap-1 text-xs text-sky-400">
                   <Droplets className="h-3 w-3" />
                   <span>{Number(hour.rain).toFixed(1)}</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Droplets className="h-3 w-3" />
                   <span>{Math.round(Number(hour.humidity) || 0)}%</span>
                 </div>
@@ -195,7 +199,7 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
               return (
                 <div
                   key={dayKey}
-                  className="clay-pill flex items-center gap-2 p-3"
+                  className="flex items-center gap-2 p-3 rounded-xl border border-white/5 bg-white/[0.03]"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">

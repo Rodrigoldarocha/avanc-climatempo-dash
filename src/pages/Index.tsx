@@ -149,8 +149,8 @@ const Index = () => {
         )}
 
         <div className="relative z-10 flex-1 flex flex-col min-w-0">
-          <div className="flex items-center gap-2 px-3 md:px-6 pt-3">
-            {!isMobile && <SidebarTrigger />}
+          <div className="flex items-center gap-1">
+            {!isMobile && <SidebarTrigger className="ml-2 shrink-0" />}
             <div className="flex-1 min-w-0">
               <Header onOpenAlerts={handleOpenAlerts} onRefresh={handleRefresh} />
             </div>

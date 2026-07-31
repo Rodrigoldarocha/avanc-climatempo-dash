@@ -10,6 +10,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { LayoutDashboard, Grid3X3, Siren, Cloud, Clock, Calendar } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type SidebarPage = "dashboard" | "grid" | "alerts" | "current" | "hourly" | "daily";
 
@@ -44,7 +45,12 @@ export function AppSidebar({ current, onSelect, alertCount = 0 }: AppSidebarProp
           onClick={() => onSelect(item.id)}
           isActive={isActive}
           tooltip={item.label}
-          className="gap-2"
+          className={cn(
+            "gap-2 border-l-4 rounded-r-lg h-10 transition-all",
+            isActive
+              ? "border-primary bg-sidebar-accent text-sidebar-foreground font-medium"
+              : "border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground hover:translate-x-0.5"
+          )}
         >
           <Icon className="h-4 w-4 shrink-0" />
           {!collapsed && <span className="flex-1 text-left">{item.label}</span>}
@@ -59,7 +65,7 @@ export function AppSidebar({ current, onSelect, alertCount = 0 }: AppSidebarProp
   };
 
   return (
-    <Sidebar collapsible="icon" className="glass-card border-sidebar-border/20">
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navegação</SidebarGroupLabel>
