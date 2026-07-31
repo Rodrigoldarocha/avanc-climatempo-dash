@@ -95,19 +95,13 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex items-center gap-2 min-w-0">
-          <Activity className="h-5 w-5 text-primary" />
-          <div className="panel-header">
-            <span className="panel-subtitle">Visão geral</span>
-            <h2 className="panel-title">Painel de Resumo</h2>
-          </div>
-        </div>
-        <div className="text-sm text-muted-foreground">{isOnline ? "API online" : "API offline"}</div>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Activity className="h-4 w-4 text-primary shrink-0" />
+        <span>{isOnline ? "Dados atualizados • API online" : "Sem conexão com a API"}</span>
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
         {/* Total Alerts */}
         <button
           onClick={onOpenAlerts}

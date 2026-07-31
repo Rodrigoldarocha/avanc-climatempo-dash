@@ -333,9 +333,11 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
             </div>
           </div>
           {!isLoading && (
-            <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0">
-              {total}
-            </Badge>
+            <div className="flex">
+              <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0 self-start">
+                {total === 0 ? "Sem alertas" : `${total} alerta${total > 1 ? "s" : ""}`}
+              </Badge>
+            </div>
           )}
         </div>
 
@@ -353,6 +355,8 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
             className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-2"
             onClick={() => query.refetch()}
             disabled={query.isFetching}
+            aria-label="Atualizar alertas"
+            title="Atualizar alertas"
           >
             <RefreshCw className={cn("h-3.5 w-3.5", query.isFetching && "animate-spin")} />
             <span className="hidden sm:inline text-xs">Atualizar</span>
