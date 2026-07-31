@@ -144,9 +144,25 @@
     @apply border-border;
   }
 
+  html {
+    /* Fluid root size: the whole rem-based UI scales with the screen width,
+       so no manual zoom is needed on small or large phones. */
+    font-size: clamp(13px, 3.6vw, 16px);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  @media (min-width: 768px) {
+    html {
+      font-size: 16px;
+    }
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   h1, h2, h3, h4, h5, h6 {
