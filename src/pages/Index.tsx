@@ -207,11 +207,12 @@ const Index = () => {
                   </div>
                 )}
               </div>
-              <LocationGrid
-                onLocationSelect={handleLocationSelect}
-                selectedLocation={selectedLocation}
-              />
-            </section>
+            </div>
+            <LocationGrid
+              onLocationSelect={handleLocationSelect}
+              selectedLocation={selectedLocation}
+            />
+          </section>
           ) : (
             <div className="glass-card p-5 animate-fade-in" key="detail">
               <div className="flex items-center gap-2 mb-4">
