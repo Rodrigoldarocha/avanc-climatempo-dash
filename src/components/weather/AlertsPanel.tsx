@@ -333,9 +333,11 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
             </div>
           </div>
           {!isLoading && (
-            <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0">
-              {total}
-            </Badge>
+            <div className="flex">
+              <Badge variant={total > 0 ? "destructive" : "secondary"} className="text-[10px] shrink-0 self-start">
+                {total === 0 ? "Sem alertas" : `${total} alerta${total > 1 ? "s" : ""}`}
+              </Badge>
+            </div>
           )}
         </div>
 

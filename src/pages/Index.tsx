@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTimeOfDay } from "@/hooks/useTimeOfDay";
 import { Header } from "@/components/layout/Header";
 import { ForecastMenu, type MenuOption } from "@/components/layout/ForecastMenu";
@@ -31,6 +31,11 @@ const Index = () => {
   const isMobile = useIsMobile();
   const { highCount } = useAlertCount();
   const timeOfDay = useTimeOfDay();
+
+  // Bug fix: keep scroll position from carrying over between views on mobile
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [viewMode, activeTab]);
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
@@ -132,7 +137,7 @@ const Index = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-dvh flex w-full bg-background">
         <div className={`fixed inset-0 weather-gradient-bg time-${timeOfDay} opacity-40 pointer-events-none`} />
 
         {!isMobile && (
@@ -159,16 +164,18 @@ const Index = () => {
                   <span className="panel-subtitle">Visão geral</span>
                   <h1 className="text-2xl sm:text-3xl font-display font-semibold">Painel</h1>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button size="sm" variant="outline" className="gap-2" onClick={() => setViewMode("grid")}>
-                    <Grid3X3 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Locais</span>
-                  </Button>
-                  <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
-                    <Siren className="h-4 w-4" />
-                    <span className="hidden sm:inline">Alertas</span>
-                  </Button>
-                </div>
+                {!isMobile && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button size="sm" variant="outline" className="gap-2" onClick={() => setViewMode("grid")}>
+                      <Grid3X3 className="h-4 w-4" />
+                      <span>Locais</span>
+                    </Button>
+                    <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
+                      <Siren className="h-4 w-4" />
+                      <span>Alertas</span>
+                    </Button>
+                  </div>
+                )}
               </div>
               <DashboardSummary
                 onOpenAlerts={handleOpenAlerts}
@@ -186,12 +193,14 @@ const Index = () => {
                   <span className="text-sm font-medium">Locais monitorados</span>
                   <ForecastMenu onSelect={handleMenuSelect} />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
-                    <Siren className="h-4 w-4" />
-                    <span className="hidden sm:inline">Alertas</span>
-                  </Button>
-                </div>
+                {!isMobile && (
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
+                      <Siren className="h-4 w-4" />
+                      <span>Alertas</span>
+                    </Button>
+                  </div>
+                )}
               </div>
               <LocationGrid
                 onLocationSelect={handleLocationSelect}
