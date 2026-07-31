@@ -30,7 +30,7 @@ export const BottomNav = ({ activeTab, onTabChange, alertCount = 0 }: BottomNavP
               className={cn(
                 "relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full rounded-full transition-all duration-200 touch-target",
                 isActive
-                  ? "bg-primary text-on-primary scale-105"
+                  ? "bg-primary/15 text-primary scale-105"
                   : "text-secondary-foreground/60 hover:text-primary"
               )}
               aria-label={tab.label}
