@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clima Tempo - Locais</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-secondary-fixed-variant": "#42474f",
+                "background": "#111415",
+                "outline-variant": "#474833",
+                "secondary-fixed-dim": "#c2c7d0",
+                "inverse-on-surface": "#2e3132",
+                "surface-container": "#1d2021",
+                "on-secondary": "#2c3138",
+                "surface-tint": "#c2d000",
+                "error-container": "#93000a",
+                "on-primary-fixed": "#1b1d00",
+                "secondary-container": "#42474f",
+                "on-error": "#690005",
+                "surface-container-highest": "#323536",
+                "primary-fixed-dim": "#c2d000",
+                "primary-fixed": "#deed1a",
+                "surface-bright": "#373a3b",
+                "inverse-primary": "#5c6300",
+                "surface": "#111415",
+                "on-background": "#e1e3e4",
+                "on-surface-variant": "#c8c8ac",
+                "tertiary-fixed-dim": "#bfc7d4",
+                "on-primary": "#2f3300",
+                "on-tertiary": "#29313b",
+                "error": "#ffb4ab",
+                "on-primary-fixed-variant": "#454b00",
+                "on-surface": "#e1e3e4",
+                "secondary-fixed": "#dee2ec",
+                "surface-container-high": "#282a2b",
+                "primary-container": "#deed1a",
+                "on-error-container": "#ffdad6",
+                "tertiary-fixed": "#dbe3f0",
+                "surface-container-lowest": "#0c0f10",
+                "secondary": "#c2c7d0",
+                "surface-dim": "#111415",
+                "on-tertiary-fixed": "#141c25",
+                "surface-container-low": "#191c1d",
+                "surface-variant": "#323536",
+                "on-secondary-container": "#b1b5bf",
+                "on-secondary-fixed": "#171c23",
+                "primary": "#ffffff",
+                "inverse-surface": "#e1e3e4",
+                "tertiary-container": "#dbe3f0",
+                "tertiary": "#ffffff",
+                "on-tertiary-container": "#5d6570",
+                "on-tertiary-fixed-variant": "#3f4752",
+                "on-primary-container": "#626a00",
+                "outline": "#929279"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "container-padding": "1.25rem",
+                "section-margin": "2rem",
+                "stack-gap": "1rem",
+                "element-gap": "0.5rem"
+            },
+            "fontFamily": {
+                "headline-lg": ["Hanken Grotesk"],
+                "headline-lg-mobile": ["Hanken Grotesk"],
+                "display-temp": ["Hanken Grotesk"],
+                "label-data": ["JetBrains Mono"],
+                "body-secondary": ["Inter"],
+                "body-primary": ["Inter"],
+                "title-md": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "600" }],
+                "display-temp": ["84px", { "lineHeight": "90px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                "label-data": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                "body-secondary": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                "body-primary": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0F1216;
+            color: #e1e3e4;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(29, 32, 33, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .glass-card:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 0px;
+            width: 0px;
+            display: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-body-primary text-body-primary min-h-screen pb-24">
+<!-- Navigation Drawer (Desktop Anchor) -->
+<nav class="hidden md:flex flex-col gap-element-gap p-container-padding h-full w-64 fixed left-0 top-0 bg-surface-container-low border-r border-white/5 z-[60]">
+<div class="mb-8 px-2">
+<span class="font-headline-lg text-headline-lg text-primary">Clima Tempo</span>
+</div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase tracking-widest mb-2 px-2">Navegação</p>
+<a class="flex items-center gap-4 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-primary text-body-primary">Painel</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg bg-surface-container-highest text-primary border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-body-primary text-body-primary font-bold">Locais</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-body-primary text-body-primary">Alertas</span>
+</a>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase tracking-widest mt-6 mb-2 px-2">Previsões</p>
+<a class="flex items-center gap-4 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">cloud</span>
+<span class="font-body-primary text-body-primary">Clima Atual</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">schedule</span>
+<span class="font-body-primary text-body-primary">Previsão 72h</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-body-primary text-body-primary">Previsão 15 dias</span>
+</a>
+</nav>
+<!-- Top App Bar -->
+<header class="bg-surface-container/80 backdrop-blur-xl border-b border-white/10 docked full-width top-0 sticky z-50 flex justify-between items-center w-full px-container-padding h-16 md:pl-72">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary md:hidden">menu</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Locais</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-primary-container text-on-primary-container px-4 py-1.5 rounded-full flex items-center gap-2 font-label-data text-label-data active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+                Alertas
+            </button>
+<span class="material-symbols-outlined text-primary">light_mode</span>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="max-w-7xl mx-auto px-container-padding pt-6 md:pl-72">
+<!-- Search & Filter Area -->
+<section class="space-y-6">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-high border-none rounded-full py-4 pl-12 pr-6 text-body-primary placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary-fixed duration-300" placeholder="Buscar cidade..." type="text"/>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex overflow-x-auto gap-2 custom-scrollbar pb-1 -mx-2 px-2 no-scrollbar">
+<button class="px-5 py-2 rounded-full bg-primary-fixed text-on-primary-fixed font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">Todos</button>
+<button class="px-5 py-2 rounded-full glass-card text-on-surface-variant font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">AC</button>
+<button class="px-5 py-2 rounded-full glass-card text-on-surface-variant font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">AL</button>
+<button class="px-5 py-2 rounded-full glass-card text-on-surface-variant font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">AM</button>
+<button class="px-5 py-2 rounded-full glass-card text-on-surface-variant font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">AP</button>
+<button class="px-5 py-2 rounded-full glass-card text-on-surface-variant font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">BA</button>
+<button class="px-5 py-2 rounded-full glass-card text-on-surface-variant font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">CE</button>
+<button class="px-5 py-2 rounded-full glass-card text-on-surface-variant font-label-data text-label-data whitespace-nowrap active:scale-95 duration-150">DF</button>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-data text-label-data px-1">
+<span>55 locais encontrados</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] animate-spin">sync</span>
+<span>Atualizando...</span>
+</div>
+</div>
+</section>
+<!-- Bento Grid of Cities -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 pb-10">
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Cruzeiro do Sul</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">AC</p>
+</div>
+<span class="bg-surface-container-highest/50 px-2 py-1 rounded text-[10px] font-label-data uppercase">Sol</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">27°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-primary">29°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[80px]">sunny</span>
+</div>
+</div>
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Rio Branco</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">AC</p>
+</div>
+<span class="bg-surface-container-highest/50 px-2 py-1 rounded text-[10px] font-label-data uppercase">Sol</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">30°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-primary">33°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]">sunny</span>
+</div>
+</div>
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Arapiraca</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">AL</p>
+</div>
+<span class="bg-surface-container-highest/50 px-2 py-1 rounded text-[10px] font-label-data uppercase">Sol</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">28°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-primary">28°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]">sunny</span>
+</div>
+</div>
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group border-primary-fixed/20 bg-surface-container-high">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Manaus</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">AM</p>
+</div>
+<span class="bg-error-container text-on-error-container px-2 py-1 rounded text-[10px] font-label-data uppercase">Calor Extremo</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">31°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-error">36°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]">thermostat</span>
+</div>
+</div>
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Feira de Santana</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">BA</p>
+</div>
+<span class="bg-surface-container-highest/50 px-2 py-1 rounded text-[10px] font-label-data uppercase">Nublado</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">24°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-primary">24°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]">cloud</span>
+</div>
+</div>
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Vitória da Conquista</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">BA</p>
+</div>
+<span class="bg-surface-container-highest/50 px-2 py-1 rounded text-[10px] font-label-data uppercase">Garoa</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">21°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-primary">21°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]">rainy</span>
+</div>
+</div>
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Sobral</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">CE</p>
+</div>
+<span class="bg-surface-container-highest/50 px-2 py-1 rounded text-[10px] font-label-data uppercase">Sol</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">30°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-primary">32°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]">sunny</span>
+</div>
+</div>
+<!-- City Card -->
+<div class="glass-card rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-lg-mobile text-body-primary leading-tight uppercase font-bold tracking-tight">Brasília</h3>
+<p class="text-on-surface-variant font-label-data text-label-data">DF</p>
+</div>
+<span class="bg-surface-container-highest/50 px-2 py-1 rounded text-[10px] font-label-data uppercase">Sol</span>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div>
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Temp.</p>
+<span class="font-display-temp text-headline-lg text-primary">26°</span>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-data text-[10px] uppercase mb-1">Sensação</p>
+<span class="font-display-temp text-headline-lg text-primary">26°</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]">sunny</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Mobile Anchor) -->
+<nav class="md:hidden flex justify-around items-center w-full py-3 px-6 fixed bottom-0 z-50 bg-surface-container-highest/80 backdrop-blur-xl border-t border-white/5 rounded-t-xl shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-data text-label-data">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">warning</span>
+<span class="font-label-data text-label-data">Alerts</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-data text-label-data">Search</span>
+</a>
+</nav>
+<!-- Micro-interactions Script -->
+<script>
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transition = 'transform 0.1s ease';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transition = 'transform 0.3s ease';
+            });
+        });
+
+        // Simple search feedback simulation
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            console.log('Buscando por:', e.target.value);
+            // Dynamic filtering logic would go here
+        });
+    </script>
+</body></html>

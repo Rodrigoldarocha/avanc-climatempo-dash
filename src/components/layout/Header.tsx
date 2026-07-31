@@ -19,7 +19,7 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
   const isMobile = useIsMobile();
 
   return (
-    <header className="sticky top-2 z-50 mx-3 mt-3 rounded-[24px] border border-border/20 bg-secondary/95 backdrop-blur-xl shadow-[0_22px_60px_rgba(0,0,0,0.18)]">
+    <header className="sticky top-2 z-50 mx-3 mt-3 glass-card overflow-hidden">
       <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-4">
         <div className="flex items-center gap-3 min-w-0">
           <div className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/15 text-primary shadow-sm shadow-primary/20">

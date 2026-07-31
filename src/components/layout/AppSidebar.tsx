@@ -59,7 +59,7 @@ export function AppSidebar({ current, onSelect, alertCount = 0 }: AppSidebarProp
   };
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="glass-card border-sidebar-border/20">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navegação</SidebarGroupLabel>

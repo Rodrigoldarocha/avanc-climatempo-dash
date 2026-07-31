@@ -159,7 +159,7 @@ const Index = () => {
           <main className={`w-full md:container px-3 sm:px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-28" : ""}`}>
           {viewMode === "dashboard" ? (
             <section className="space-y-4 animate-fade-in" key="dashboard">
-              <div className="flex flex-col gap-3">
+              <div className="glass-card p-5 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <h1 className="text-3xl font-semibold tracking-tight">Painel</h1>
@@ -180,15 +180,16 @@ const Index = () => {
                     </div>
                   )}
                 </div>
-              <DashboardSummary
-                onOpenAlerts={handleOpenAlerts}
-                onLocationSelect={handleLocationSelect}
-              />
-            </div>
+                <DashboardSummary
+                  onOpenAlerts={handleOpenAlerts}
+                  onLocationSelect={handleLocationSelect}
+                />
+              </div>
             </section>
           ) : viewMode === "grid" ? (
             <section className="space-y-4 animate-fade-in" key="grid">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="glass-card p-5 space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
                   <Button size="sm" variant="ghost" className="gap-1 h-8 px-2" onClick={() => setViewMode("dashboard")}>
                     <ArrowLeft className="h-3.5 w-3.5" />
@@ -212,7 +213,7 @@ const Index = () => {
               />
             </section>
           ) : (
-            <div className="animate-fade-in" key="detail">
+            <div className="glass-card p-5 animate-fade-in" key="detail">
               <div className="flex items-center gap-2 mb-4">
                 <Button
                   variant="ghost"

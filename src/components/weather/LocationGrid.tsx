@@ -55,7 +55,7 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3">
+      <div className="glass-card p-5 space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h2 className="text-2xl font-semibold tracking-tight">Locais</h2>

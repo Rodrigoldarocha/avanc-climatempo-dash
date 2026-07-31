@@ -60,7 +60,7 @@ export const LocationCard = ({ location, onClick, isSelected, index = 0 }: Locat
   if (isLoading) {
     return (
       <div
-        className="p-3 rounded-lg bg-card/60 border border-border/20"
+        className="glass-card p-3"
         style={{ animationDelay: `${index * 50}ms` }}
       >
         <div className="space-y-2">
@@ -76,11 +76,11 @@ export const LocationCard = ({ location, onClick, isSelected, index = 0 }: Locat
     <button
       onClick={onClick}
       className={cn(
-        "w-full h-[118px] min-h-[118px] rounded-[22px] border bg-card/90 p-3 text-left transition-all duration-200 group",
+        "glass-card w-full h-[118px] min-h-[118px] rounded-[22px] p-3 text-left transition-all duration-200 group",
         "hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]",
         isSelected
-          ? "border-primary/60 shadow-[0_20px_35px_rgba(65,172,94,0.18)] ring-1 ring-primary/30"
-          : "border-border/15"
+          ? "border-primary/60 ring-1 ring-primary/30"
+          : "border-border/20"
       )}
       style={{
         animation: `fade-in 0.4s ease-out ${index * 40}ms both`,

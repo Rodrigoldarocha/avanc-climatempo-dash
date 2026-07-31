@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Hanken+Grotesk:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#42474f",
+                        "background": "#111415",
+                        "outline-variant": "#474833",
+                        "secondary-fixed-dim": "#c2c7d0",
+                        "inverse-on-surface": "#2e3132",
+                        "surface-container": "#1d2021",
+                        "on-secondary": "#2c3138",
+                        "surface-tint": "#c2d000",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#1b1d00",
+                        "secondary-container": "#42474f",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#323536",
+                        "primary-fixed-dim": "#c2d000",
+                        "primary-fixed": "#deed1a",
+                        "surface-bright": "#373a3b",
+                        "inverse-primary": "#5c6300",
+                        "surface": "#111415",
+                        "on-background": "#e1e3e4",
+                        "on-surface-variant": "#c8c8ac",
+                        "tertiary-fixed-dim": "#bfc7d4",
+                        "on-primary": "#2f3300",
+                        "on-tertiary": "#29313b",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#454b00",
+                        "on-surface": "#e1e3e4",
+                        "secondary-fixed": "#dee2ec",
+                        "surface-container-high": "#282a2b",
+                        "primary-container": "#deed1a",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#dbe3f0",
+                        "surface-container-lowest": "#0c0f10",
+                        "secondary": "#c2c7d0",
+                        "surface-dim": "#111415",
+                        "on-tertiary-fixed": "#141c25",
+                        "surface-container-low": "#191c1d",
+                        "surface-variant": "#323536",
+                        "on-secondary-container": "#b1b5bf",
+                        "on-secondary-fixed": "#171c23",
+                        "primary": "#ffffff",
+                        "inverse-surface": "#e1e3e4",
+                        "tertiary-container": "#dbe3f0",
+                        "tertiary": "#ffffff",
+                        "on-tertiary-container": "#5d6570",
+                        "on-tertiary-fixed-variant": "#3f4752",
+                        "on-primary-container": "#626a00",
+                        "outline": "#929279"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "1.25rem",
+                        "section-margin": "2rem",
+                        "stack-gap": "1rem",
+                        "element-gap": "0.5rem"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "display-temp": ["Hanken Grotesk"],
+                        "label-data": ["JetBrains Mono"],
+                        "body-secondary": ["Inter"],
+                        "body-primary": ["Inter"],
+                        "title-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "600"}],
+                        "display-temp": ["84px", {"lineHeight": "90px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "label-data": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-secondary": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-primary": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "title-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F1216;
+            color: #e1e3e4;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(30, 34, 38, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .temp-bar {
+            height: 4px;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #4facfe 0%, #deed1a 100%);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen pb-20 md:pb-0 md:pl-64">
+<!-- Desktop Navigation Drawer -->
+<aside class="hidden md:flex flex-col gap-element-gap p-container-padding h-full w-64 fixed left-0 top-0 bg-surface-container-low border-r border-white/5 z-50">
+<div class="mb-8">
+<h1 class="text-headline-lg font-headline-lg text-primary">Clima Tempo</h1>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1 font-body-primary text-body-primary" href="#">
+<span class="material-symbols-outlined">dashboard</span> Painel
+            </a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1 font-body-primary text-body-primary" href="#">
+<span class="material-symbols-outlined">location_on</span> Locais
+            </a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1 font-body-primary text-body-primary" href="#">
+<span class="material-symbols-outlined">notifications</span> Alertas
+            </a>
+<div class="pt-4 pb-2 text-xs uppercase tracking-widest text-on-surface-variant/50 font-label-data px-3">Previsões</div>
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1 font-body-primary text-body-primary" href="#">
+<span class="material-symbols-outlined">cloud</span> Clima Atual
+            </a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-transform hover:translate-x-1 font-body-primary text-body-primary" href="#">
+<span class="material-symbols-outlined">schedule</span> Previsão 72h
+            </a>
+<a class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-highest text-primary border-l-4 border-primary transition-transform hover:translate-x-1 font-body-primary text-body-primary" href="#">
+<span class="material-symbols-outlined">calendar_month</span> Previsão 15 dias
+            </a>
+</nav>
+</aside>
+<!-- Top App Bar (Mobile focused) -->
+<header class="flex justify-between items-center w-full px-container-padding h-16 bg-surface-container/80 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary md:hidden">menu</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">Clima Tempo</span>
+<div class="hidden md:flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-white/5">
+<span class="material-symbols-outlined text-primary-fixed text-sm">location_on</span>
+<span class="font-body-secondary text-body-secondary">Cruzeiro do Sul, AC</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-2 px-3 py-1 bg-surface-container-highest rounded-full text-label-data text-on-surface-variant border border-white/5">
+<span class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(222,237,26,0.5)]"></span>
+                API ONLINE
+            </div>
+<span class="material-symbols-outlined text-primary">light_mode</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow p-container-padding max-w-4xl mx-auto w-full space-y-section-margin">
+<!-- Search & Quick Navigation -->
+<div class="flex items-center justify-between gap-4">
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-body-secondary text-body-secondary">Voltar</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-on-surface hover:bg-surface-variant/40 transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm">download</span>
+<span class="font-label-data text-label-data">Exportar</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-on-surface hover:bg-surface-variant/40 transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+<span class="font-label-data text-label-data">PDF</span>
+</button>
+</div>
+</div>
+<!-- Section: Forecast -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Próximos 15 Dias</h2>
+</div>
+<span class="font-label-data text-label-data text-on-surface-variant/60 uppercase tracking-tighter">Cruzeiro do Sul</span>
+</div>
+<!-- Bento Forecast List -->
+<div class="glass-card rounded-xl overflow-hidden divide-y divide-white/5">
+<!-- Item: Today -->
+<div class="group flex items-center justify-between p-5 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 text-on-surface">
+<p class="font-title-md text-title-md">Hoje</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">thunderstorm</span>
+</div>
+<div class="flex items-center gap-8 flex-grow justify-end md:justify-center px-4">
+<div class="flex items-center gap-3 min-w-[120px] justify-center">
+<span class="font-label-data text-label-data text-secondary">23°</span>
+<div class="flex-grow max-w-[80px] temp-bar opacity-80"></div>
+<span class="font-label-data text-label-data text-primary-fixed">33°</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-on-surface-variant/70">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">humidity_percentage</span>
+<span class="font-label-data text-label-data">65%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">air</span>
+<span class="font-label-data text-label-data">8km/h</span>
+</div>
+</div>
+</div>
+<div class="hidden md:block">
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</div>
+</div>
+<!-- Item: Tomorrow -->
+<div class="group flex items-center justify-between p-5 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 text-on-surface">
+<p class="font-body-primary text-body-primary">Amanhã</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">rainy</span>
+</div>
+<div class="flex items-center gap-8 flex-grow justify-end md:justify-center px-4">
+<div class="flex items-center gap-3 min-w-[120px] justify-center">
+<span class="font-label-data text-label-data text-secondary">23°</span>
+<div class="flex-grow max-w-[80px] temp-bar opacity-80" style="background: linear-gradient(90deg, #4facfe 0%, #68e0cf 100%);"></div>
+<span class="font-label-data text-label-data text-primary-fixed">29°</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-on-surface-variant/70">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">humidity_percentage</span>
+<span class="font-label-data text-label-data">77%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">air</span>
+<span class="font-label-data text-label-data">5km/h</span>
+</div>
+</div>
+</div>
+<div class="hidden md:block"><span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></div>
+</div>
+<!-- Item: Sunday -->
+<div class="group flex items-center justify-between p-5 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 text-on-surface">
+<p class="font-body-primary text-body-primary whitespace-nowrap">Dom, 02</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">thunderstorm</span>
+</div>
+<div class="flex items-center gap-8 flex-grow justify-end md:justify-center px-4">
+<div class="flex items-center gap-3 min-w-[120px] justify-center">
+<span class="font-label-data text-label-data text-secondary">23°</span>
+<div class="flex-grow max-w-[80px] temp-bar opacity-80"></div>
+<span class="font-label-data text-label-data text-primary-fixed">31°</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-on-surface-variant/70">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">humidity_percentage</span>
+<span class="font-label-data text-label-data">78%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">air</span>
+<span class="font-label-data text-label-data">3km/h</span>
+</div>
+</div>
+</div>
+<div class="hidden md:block"><span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></div>
+</div>
+<!-- Item: Monday -->
+<div class="group flex items-center justify-between p-5 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 text-on-surface">
+<p class="font-body-primary text-body-primary whitespace-nowrap">Seg, 03</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">rainy</span>
+</div>
+<div class="flex items-center gap-8 flex-grow justify-end md:justify-center px-4">
+<div class="flex items-center gap-3 min-w-[120px] justify-center">
+<span class="font-label-data text-label-data text-secondary">23°</span>
+<div class="flex-grow max-w-[80px] temp-bar opacity-80" style="background: linear-gradient(90deg, #4facfe 0%, #68e0cf 100%);"></div>
+<span class="font-label-data text-label-data text-primary-fixed">29°</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-on-surface-variant/70">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">humidity_percentage</span>
+<span class="font-label-data text-label-data">81%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">air</span>
+<span class="font-label-data text-label-data">4km/h</span>
+</div>
+</div>
+</div>
+<div class="hidden md:block"><span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></div>
+</div>
+<!-- Item: Tuesday -->
+<div class="group flex items-center justify-between p-5 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 text-on-surface">
+<p class="font-body-primary text-body-primary whitespace-nowrap">Ter, 04</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">thunderstorm</span>
+</div>
+<div class="flex items-center gap-8 flex-grow justify-end md:justify-center px-4">
+<div class="flex items-center gap-3 min-w-[120px] justify-center">
+<span class="font-label-data text-label-data text-secondary">22°</span>
+<div class="flex-grow max-w-[80px] temp-bar opacity-80"></div>
+<span class="font-label-data text-label-data text-primary-fixed">30°</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-on-surface-variant/70">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">humidity_percentage</span>
+<span class="font-label-data text-label-data">75%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">air</span>
+<span class="font-label-data text-label-data">3km/h</span>
+</div>
+</div>
+</div>
+<div class="hidden md:block"><span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></div>
+</div>
+<!-- Item: Wednesday (Sunny Day) -->
+<div class="group flex items-center justify-between p-5 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 text-on-surface">
+<p class="font-body-primary text-body-primary whitespace-nowrap">Qua, 05</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+</div>
+<div class="flex items-center gap-8 flex-grow justify-end md:justify-center px-4">
+<div class="flex items-center gap-3 min-w-[120px] justify-center">
+<span class="font-label-data text-label-data text-secondary">22°</span>
+<div class="flex-grow max-w-[80px] temp-bar opacity-80" style="background: linear-gradient(90deg, #fce38a 0%, #f38181 100%);"></div>
+<span class="font-label-data text-label-data text-primary-fixed">30°</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-on-surface-variant/70">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">humidity_percentage</span>
+<span class="font-label-data text-label-data">0%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">air</span>
+<span class="font-label-data text-label-data">3km/h</span>
+</div>
+</div>
+</div>
+<div class="hidden md:block"><span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></div>
+</div>
+</div>
+<!-- More data info card -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="glass-card p-4 rounded-xl flex flex-col gap-2">
+<div class="flex items-center justify-between text-on-surface-variant/70">
+<span class="font-label-data text-label-data uppercase">Média do Período</span>
+<span class="material-symbols-outlined text-sm">trending_up</span>
+</div>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-primary-fixed">24° / 31°</p>
+</div>
+<div class="glass-card p-4 rounded-xl flex flex-col gap-2">
+<div class="flex items-center justify-between text-on-surface-variant/70">
+<span class="font-label-data text-label-data uppercase">Prob. Chuva</span>
+<span class="material-symbols-outlined text-sm">water_drop</span>
+</div>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-primary-fixed">82%</p>
+</div>
+<div class="glass-card p-4 rounded-xl flex flex-col gap-2">
+<div class="flex items-center justify-between text-on-surface-variant/70">
+<span class="font-label-data text-label-data uppercase">Alertas Ativos</span>
+<span class="material-symbols-outlined text-sm">warning</span>
+</div>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-error">Sem Alertas</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface-container-highest/80 backdrop-blur-xl border-t border-white/5 rounded-t-xl shadow-lg flex justify-around items-center py-3 px-6">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-data text-label-data mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">warning</span>
+<span class="font-label-data text-label-data mt-1">Alerts</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-full px-6 py-1.5 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="font-label-data text-label-data mt-0.5">15 Dias</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-data text-label-data mt-1">Search</span>
+</a>
+</nav>
+<!-- Background Atmosphere -->
+<div class="fixed inset-0 pointer-events-none -z-10">
+<div class="absolute top-0 right-0 w-1/2 h-1/2 bg-primary-fixed/5 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-on-secondary-fixed-variant/10 rounded-full blur-[100px]"></div>
+</div>
+<script>
+        // Simple micro-interaction for list items
+        document.querySelectorAll('.glass-card div').forEach(item => {
+            item.addEventListener('touchstart', function() {
+                this.classList.add('scale-[0.98]');
+            });
+            item.addEventListener('touchend', function() {
+                this.classList.remove('scale-[0.98]');
+            });
+        });
+    </script>
+</body></html>

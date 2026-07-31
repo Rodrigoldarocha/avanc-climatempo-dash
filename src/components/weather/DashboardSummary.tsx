@@ -94,7 +94,7 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
   const states = getAllStates();
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="glass-card space-y-4 p-5 animate-fade-in">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Activity className="h-4 w-4 text-primary shrink-0" />
         <span>{isOnline ? "Dados atualizados • API online" : "Sem conexão com a API"}</span>
