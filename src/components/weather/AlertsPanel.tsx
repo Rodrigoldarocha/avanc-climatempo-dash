@@ -320,7 +320,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
   const isLoading = query.isLoading;
 
   return (
-    <section className="space-y-4 glass-card p-4">
+    <section className="space-y-4 glass-card p-4 sm:p-5">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 min-w-0">

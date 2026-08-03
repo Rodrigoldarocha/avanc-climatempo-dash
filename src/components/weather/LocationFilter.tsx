@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -38,7 +37,7 @@ export const LocationFilter = ({
       )}
 
       <div className="relative">
-        <div className="overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+        <div className="max-w-full overflow-x-auto overscroll-x-contain pb-1 scrollbar-hide" role="group" aria-label="Filtrar por estado">
           <div className="flex gap-1 min-w-max bg-card/80 backdrop-blur-sm border border-border/40 rounded-xl p-1 shadow-sm">
             <button
               onClick={() => onStateChange(null)}

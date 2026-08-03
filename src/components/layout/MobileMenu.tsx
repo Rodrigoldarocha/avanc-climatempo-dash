@@ -38,7 +38,8 @@ export function MobileMenu({ onRefresh }: MobileMenuProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9 rounded-lg bg-secondary-foreground/10 hover:bg-secondary-foreground/20"
+          className="h-11 w-11 rounded-xl bg-secondary-foreground/10 hover:bg-secondary-foreground/20"
+          aria-label="Abrir menu"
         >
           <Menu className="h-4 w-4 text-secondary-foreground" />
         </Button>
@@ -68,25 +69,27 @@ export function MobileMenu({ onRefresh }: MobileMenuProps) {
           <div className="border-t border-border/30" />
 
           {/* Actions */}
-          <button
+          <Button
+            variant="ghost"
             onClick={toggleTheme}
-            className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-accent/20 transition-colors text-sm"
+            className="h-11 w-full justify-start gap-3 px-3"
           >
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             {isDark ? "Modo claro" : "Modo escuro"}
-          </button>
+          </Button>
 
           {onRefresh && (
-            <button
+            <Button
+              variant="ghost"
               onClick={() => {
                 onRefresh();
                 setOpen(false);
               }}
-              className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-accent/20 transition-colors text-sm"
+              className="h-11 w-full justify-start gap-3 px-3"
             >
               <RefreshCw className="h-4 w-4" />
               Atualizar dados
-            </button>
+            </Button>
           )}
         </div>
       </SheetContent>

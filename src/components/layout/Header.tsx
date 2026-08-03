@@ -22,7 +22,7 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
     <header className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-xl border-b border-white/10">
       <div className="flex h-16 items-center justify-between gap-3 px-3 sm:px-5">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/15 text-primary shadow-sm shadow-primary/20">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary shadow-sm shadow-primary/20">
             <CloudSun className="h-5 w-5" />
           </div>
           <div className="min-w-0">

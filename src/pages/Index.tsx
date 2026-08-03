@@ -156,10 +156,10 @@ const Index = () => {
             </div>
           </div>
 
-          <main className={`w-full md:container px-3 sm:px-4 md:px-6 py-4 max-w-7xl mx-auto ${isMobile ? "pb-28" : ""}`}>
+          <main className={`w-full px-3 py-3 sm:px-4 sm:py-4 md:container md:px-6 max-w-7xl mx-auto ${isMobile ? "pb-24" : ""}`}>
           {viewMode === "dashboard" ? (
             <section className="space-y-4 animate-fade-in" key="dashboard">
-              <div className="glass-card p-5 space-y-4">
+               <div className="glass-card p-4 sm:p-5 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <h1 className="text-3xl font-semibold tracking-tight">Painel</h1>
@@ -214,7 +214,7 @@ const Index = () => {
             />
           </section>
           ) : (
-            <div className="glass-card p-5 animate-fade-in" key="detail">
+             <div className={activeTab === "alerts" ? "animate-fade-in" : "glass-card p-4 sm:p-5 animate-fade-in"} key="detail">
               <div className="flex items-center gap-2 mb-4">
                 <Button
                   variant="ghost"
