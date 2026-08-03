@@ -191,7 +191,7 @@ const Index = () => {
               <div className="glass-card p-5 space-y-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button size="sm" variant="ghost" className="gap-1 h-8 px-2" onClick={() => setViewMode("dashboard")}>
+                  <Button size="sm" variant="ghost" className="gap-1 h-11 px-2" onClick={() => setViewMode("dashboard")} aria-label="Voltar ao painel">
                     <ArrowLeft className="h-3.5 w-3.5" />
                     <LayoutDashboard className="h-3.5 w-3.5 hidden sm:block" />
                   </Button>
@@ -240,7 +240,7 @@ const Index = () => {
                       <ExportPdfButton location={selectedLocation} />
                     </>
                   )}
-                  <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8">
+                  <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-11 w-11" aria-label="Atualizar dados">
                     <RefreshCw className="h-3.5 w-3.5" />
                   </Button>
                 </div>

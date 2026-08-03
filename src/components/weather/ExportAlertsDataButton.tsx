@@ -101,7 +101,7 @@ export const ExportAlertsDataButton = ({ alerts }: ExportAlertsDataButtonProps) 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={isExporting || alerts.length === 0} className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-1.5">
+        <Button aria-label="Exportar alertas" variant="outline" size="sm" disabled={isExporting || alerts.length === 0} className="h-11 w-11 p-0 sm:w-auto sm:px-3 sm:gap-1.5">
           {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline text-xs">Exportar</span>
         </Button>

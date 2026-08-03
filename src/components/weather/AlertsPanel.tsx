@@ -377,11 +377,13 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
 
         <div className="flex flex-wrap gap-2">
           {([null, "high", "moderate"] as const).map((sev) => (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               key={sev ?? "all"}
               onClick={() => setSelectedSeverity(sev)}
               className={cn(
-                "rounded-2xl px-3 py-2 text-xs font-semibold transition duration-200 whitespace-nowrap",
+                "h-11 rounded-2xl px-3 text-xs font-semibold whitespace-nowrap",
                 selectedSeverity === sev
                   ? sev === "high"
                     ? "bg-destructive text-destructive-foreground"
@@ -392,7 +394,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
               )}
             >
               {sev === null ? `Todas (${totalCount})` : sev === "high" ? `Alta (${highTotal})` : `Moderada (${modTotal})`}
-            </button>
+            </Button>
           ))}
         </div>
 
