@@ -314,7 +314,7 @@ export const ExportAlertsPdfButton = ({
       size="sm"
       onClick={generatePdf}
       disabled={isGenerating || sorted.length === 0}
-      className="h-8 w-8 p-0 sm:w-auto sm:px-3 sm:gap-1.5 transition-all"
+      className="h-11 w-11 p-0 sm:w-auto sm:px-3 sm:gap-1.5 transition-all"
       title={sorted.length === 0 ? "Sem alertas" : "Baixar PDF"}
     >
       {isGenerating ? (

@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAllStates } from "@/data/locations";
@@ -32,38 +32,42 @@ export const LocationFilter = ({
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8 h-8 text-sm bg-card/50 border-border/40"
+            className="pl-8 h-11 text-sm bg-card/50 border-border/40"
           />
         </div>
       )}
 
       <div className="relative">
-        <div className="overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+        <div className="max-w-full overflow-x-auto overscroll-x-contain pb-1 scrollbar-hide" role="group" aria-label="Filtrar por estado">
           <div className="flex gap-1 min-w-max bg-card/80 backdrop-blur-sm border border-border/40 rounded-xl p-1 shadow-sm">
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={() => onStateChange(null)}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap touch-target",
+                "h-11 px-3 rounded-lg text-xs whitespace-nowrap",
                 selectedState === null
                   ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
               )}
             >
               Todos
-            </button>
+            </Button>
             {states.map((state) => (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 key={state}
                 onClick={() => onStateChange(selectedState === state ? null : state)}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap touch-target",
+                  "h-11 px-3 rounded-lg text-xs whitespace-nowrap",
                   selectedState === state
                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
                 )}
               >
                 {state}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

@@ -30,7 +30,7 @@ export function ForecastMenu({ onSelect, currentOption }: ForecastMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 h-8">
+        <Button variant="outline" size="sm" className="gap-2 h-11" aria-label="Abrir menu de previsões">
           <CurrentIcon className="h-4 w-4" />
           <span className="hidden sm:inline">{currentItem.label}</span>
           <ChevronDown className="h-3.5 w-3.5" />

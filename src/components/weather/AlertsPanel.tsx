@@ -320,7 +320,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
   const isLoading = query.isLoading;
 
   return (
-    <section className="space-y-4 glass-card p-4">
+    <section className="space-y-4 glass-card p-4 sm:p-5">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 min-w-0">
@@ -377,11 +377,13 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
 
         <div className="flex flex-wrap gap-2">
           {([null, "high", "moderate"] as const).map((sev) => (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               key={sev ?? "all"}
               onClick={() => setSelectedSeverity(sev)}
               className={cn(
-                "rounded-2xl px-3 py-2 text-xs font-semibold transition duration-200 whitespace-nowrap",
+                "h-11 rounded-2xl px-3 text-xs font-semibold whitespace-nowrap",
                 selectedSeverity === sev
                   ? sev === "high"
                     ? "bg-destructive text-destructive-foreground"
@@ -392,7 +394,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
               )}
             >
               {sev === null ? `Todas (${totalCount})` : sev === "high" ? `Alta (${highTotal})` : `Moderada (${modTotal})`}
-            </button>
+            </Button>
           ))}
         </div>
 
