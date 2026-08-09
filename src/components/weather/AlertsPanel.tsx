@@ -4,8 +4,8 @@ import { format, parseISO } from "date-fns";
 import { AlertTriangle, Percent, RefreshCw, ChevronRight, Calendar } from "lucide-react";
 
 import type { Location } from "@/data/locations";
-import { locations } from "@/data/locations";
-import { get15DayForecast, get72HourForecast } from "@/services/climatempo";
+import { useAlerts } from "@/hooks/useAlerts";
+import type { WeatherAlert, Severity } from "@/lib/alerts";
 import { cn } from "@/lib/utils";
 import { LocationFilter } from "./LocationFilter";
 import {
