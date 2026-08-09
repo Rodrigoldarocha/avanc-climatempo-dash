@@ -66,13 +66,12 @@ export const runWithConcurrency = async <T, R>(
   limit: number,
   worker: (item: T) => Promise<R>,
 ): Promise<R[]> => {
-  const results: R[] = [];
+  const results: R[] = new Array(items.length);
   let idx = 0;
   const runners = Array.from({ length: Math.min(limit, items.length) }).map(async () => {
     while (idx < items.length) {
-      const current = items[idx++];
-      const res = await worker(current);
-      results.push(res);
+      const current = idx++;
+      results[current] = await worker(items[current]);
     }
   });
   await Promise.all(runners);
@@ -80,12 +79,18 @@ export const runWithConcurrency = async <T, R>(
 };
 
 export const buildAlertsForLocation = async (location: Location): Promise<WeatherAlert[]> => {
-  const [daily, hourly] = await Promise.all([
+  // A failure in a single location must not break the whole alert list
+  const [dailyRes, hourlyRes] = await Promise.allSettled([
     get15DayForecast(location.climaTempoCod),
     get72HourForecast(location.climaTempoCod),
   ]);
+  const daily: any = dailyRes.status === "fulfilled" ? dailyRes.value : { data: [] };
+  const hourly: any = hourlyRes.status === "fulfilled" ? hourlyRes.value : { data: [] };
 
   const now = new Date();
+  // Daily entries are dated at midnight, so today's alerts must not be discarded
+  const minDate = new Date(now);
+  minDate.setHours(0, 0, 0, 0);
   const maxDate = new Date(now);
   maxDate.setDate(maxDate.getDate() + DAYS_WINDOW);
 
@@ -100,7 +105,7 @@ export const buildAlertsForLocation = async (location: Location): Promise<Weathe
     const iso = toIso(d.date);
     const dt = safeParseToDate(iso);
     if (!dt) return;
-    if (dt < now || dt > maxDate) return;
+    if (dt < minDate || dt > maxDate) return;
 
     const key = `${location.climaTempoCod}|${iso}`;
     const existing = byKey.get(key);
@@ -144,7 +149,7 @@ export const buildAlertsForLocation = async (location: Location): Promise<Weathe
     const iso = toIso(h.date, h.hour);
     const dt = safeParseToDate(iso);
     if (!dt) return;
-    if (dt < now || dt > maxDate) return;
+    if (dt < minDate || dt > maxDate) return;
 
     const key = `${location.climaTempoCod}|${iso}`;
     const existing = byKey.get(key);

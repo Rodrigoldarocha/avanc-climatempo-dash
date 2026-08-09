@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
-import type { WeatherAlert } from "@/components/weather/AlertsPanel";
+import type { WeatherAlert } from "@/lib/alerts";
 import { toast } from "@/hooks/use-toast";
 
 

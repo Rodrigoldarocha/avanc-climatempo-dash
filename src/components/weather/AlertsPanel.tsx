@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { AlertTriangle, Percent, RefreshCw, ChevronRight, Calendar } from "lucide-react";
 
 import type { Location } from "@/data/locations";
-import { locations } from "@/data/locations";
-import { get15DayForecast, get72HourForecast } from "@/services/climatempo";
+import { useAlerts } from "@/hooks/useAlerts";
+import { RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD, DAYS_WINDOW, type WeatherAlert, type Severity } from "@/lib/alerts";
+export type { WeatherAlert };
 import { cn } from "@/lib/utils";
 import { LocationFilter } from "./LocationFilter";
 import {
@@ -19,40 +19,6 @@ import { Button } from "@/components/ui/button";
 import { ExportAlertsPdfButton } from "@/components/weather/ExportAlertsPdfButton";
 import { ExportAlertsDataButton } from "@/components/weather/ExportAlertsDataButton";
 
-type TriggerType = "rain_mm_h" | "rain_probability";
-type Severity = "high" | "moderate";
-
-export type WeatherAlert = {
-  id: string;
-  dateTimeIso: string;
-  location: Location;
-  triggers: Array<{
-    type: TriggerType;
-    value: number;
-    unit: string;
-    source: "hourly" | "daily";
-  }>;
-  severity: Severity;
-  context?: {
-    adjacent?: {
-      prev?: { label: string; value: number; unit: string };
-      next?: { label: string; value: number; unit: string };
-    };
-    confidence?: string;
-  };
-};
-
-const RAIN_MM_H_THRESHOLD = 20;
-const RAIN_PROB_THRESHOLD = 70;
-const DAYS_WINDOW = 7;
-
-const toIso = (date: string, hour?: string) => {
-  if (!hour) return date;
-  const safeHour = hour.includes(":") ? hour : `${hour}:00`;
-  if (date.includes("T") || date.includes(" ")) return date;
-  return `${date}T${safeHour}`;
-};
-
 const safeParseToDate = (isoLike: string): Date | null => {
   try {
     const d = isoLike.includes("T") ? parseISO(isoLike) : new Date(isoLike);
@@ -60,147 +26,6 @@ const safeParseToDate = (isoLike: string): Date | null => {
   } catch {
     return null;
   }
-};
-
-const severityFromTriggers = (triggers: WeatherAlert["triggers"]): Severity => {
-  const prob = triggers.find((t) => t.type === "rain_probability")?.value;
-  const mmh = triggers.find((t) => t.type === "rain_mm_h")?.value;
-  if ((prob ?? 0) >= 90 || (mmh ?? 0) >= 40) return "high";
-  return "moderate";
-};
-
-const runWithConcurrency = async <T, R>(
-  items: T[],
-  limit: number,
-  worker: (item: T) => Promise<R>,
-): Promise<R[]> => {
-  const results: R[] = [];
-  let idx = 0;
-
-  const runners = Array.from({ length: Math.min(limit, items.length) }).map(async () => {
-    while (idx < items.length) {
-      const current = items[idx++];
-      const res = await worker(current);
-      results.push(res);
-    }
-  });
-
-  await Promise.all(runners);
-  return results;
-};
-
-const buildAlertsForLocation = async (location: Location): Promise<WeatherAlert[]> => {
-  const [daily, hourly] = await Promise.all([
-    get15DayForecast(location.climaTempoCod),
-    get72HourForecast(location.climaTempoCod),
-  ]);
-
-  const now = new Date();
-  const maxDate = new Date(now);
-  maxDate.setDate(maxDate.getDate() + DAYS_WINDOW);
-
-  const byKey = new Map<string, WeatherAlert>();
-
-  const dailyDays = (daily.data ?? []).slice(0, DAYS_WINDOW);
-  dailyDays.forEach((d, i) => {
-    const prob = d?.rain?.probability;
-    if (typeof prob !== "number") return;
-    if (prob <= RAIN_PROB_THRESHOLD) return;
-
-    const iso = toIso(d.date);
-    const dt = safeParseToDate(iso);
-    if (!dt) return;
-    if (dt < now || dt > maxDate) return;
-
-    const key = `${location.climaTempoCod}|${iso}`;
-    const existing = byKey.get(key);
-    const trigger = {
-      type: "rain_probability" as const,
-      value: prob,
-      unit: "%",
-      source: "daily" as const,
-    };
-
-    const prev = dailyDays[i - 1]?.rain?.probability;
-    const next = dailyDays[i + 1]?.rain?.probability;
-
-    if (existing) {
-      existing.triggers = mergeTriggers(existing.triggers, trigger);
-      existing.severity = severityFromTriggers(existing.triggers);
-      return;
-    }
-
-    byKey.set(key, {
-      id: key,
-      dateTimeIso: iso,
-      location,
-      triggers: [trigger],
-      severity: severityFromTriggers([trigger]),
-      context: {
-        adjacent: {
-          prev: typeof prev === "number" ? { label: "Dia anterior", value: prev, unit: "%" } : undefined,
-          next: typeof next === "number" ? { label: "Dia seguinte", value: next, unit: "%" } : undefined,
-        },
-      },
-    });
-  });
-
-  const hourBlocks = (hourly.data ?? []).flatMap((d) => {
-    const date = d?.date;
-    const hours = d?.hour_to_hour ?? [];
-    if (!date || !Array.isArray(hours)) return [];
-    return hours.map((h) => ({ date, hour: h?.hour, rain: h?.rain }));
-  });
-
-  hourBlocks.forEach((h) => {
-    const mmh = h?.rain;
-    if (typeof mmh !== "number") return;
-    if (mmh <= RAIN_MM_H_THRESHOLD) return;
-
-    const iso = toIso(h.date, h.hour);
-    const dt = safeParseToDate(iso);
-    if (!dt) return;
-    if (dt < now || dt > maxDate) return;
-
-    const key = `${location.climaTempoCod}|${iso}`;
-    const existing = byKey.get(key);
-    const trigger = {
-      type: "rain_mm_h" as const,
-      value: mmh,
-      unit: "mm/h",
-      source: "hourly" as const,
-    };
-
-    if (existing) {
-      existing.triggers = mergeTriggers(existing.triggers, trigger);
-      existing.severity = severityFromTriggers(existing.triggers);
-      return;
-    }
-
-    byKey.set(key, {
-      id: key,
-      dateTimeIso: iso,
-      location,
-      triggers: [trigger],
-      severity: severityFromTriggers([trigger]),
-      context: {
-        confidence: "Previsão horária (72h)",
-      },
-    });
-  });
-
-  return Array.from(byKey.values());
-};
-
-const mergeTriggers = (
-  current: WeatherAlert["triggers"],
-  incoming: WeatherAlert["triggers"][number],
-) => {
-  const exists = current.some((t) => t.type === incoming.type);
-  if (exists) {
-    return current.map((t) => (t.type === incoming.type ? incoming : t));
-  }
-  return [...current, incoming];
 };
 
 const formatDateTime = (isoLike: string) => {
@@ -218,7 +43,7 @@ const AlertCard = ({ alert }: { alert: WeatherAlert }) => {
 
   return (
     <div className={cn(
-      "rounded-2xl border p-5 flex flex-col justify-between h-44 transition-all hover:scale-[1.02] cursor-pointer",
+      "rounded-2xl border p-5 flex flex-col justify-between gap-3 min-h-44 transition-all hover:scale-[1.02] cursor-pointer",
       isHigh
         ? "bg-destructive/10 border-destructive/30"
         : "bg-amber-500/10 border-amber-500/30"
@@ -262,18 +87,7 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [selectedSeverity, setSelectedSeverity] = useState<Severity | null>(null);
 
-  const query = useQuery({
-    queryKey: ["alerts", "7d", RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD],
-    queryFn: async () => {
-      const sampleLocations = locations.slice(0, 15);
-      const perLocation = await runWithConcurrency(sampleLocations, 6, buildAlertsForLocation);
-      return perLocation.flat();
-    },
-    staleTime: 1000 * 60 * 10,
-    refetchInterval: 1000 * 60 * 10,
-    refetchIntervalInBackground: true,
-    refetchOnWindowFocus: false,
-  });
+  const query = useAlerts();
 
   const sortedAlerts = useMemo(() => {
     const list = query.data ?? [];
@@ -335,11 +149,11 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
               <span className="rounded-2xl bg-background/90 px-3 py-2 text-foreground shadow-sm border border-border/20">
                 {totalCount} alertas
               </span>
-              <span className="rounded-2xl bg-destructive/10 px-3 py-2 text-destructive shadow-sm border border-destructive/20">
-                {highCount} alta
+              <span className="rounded-2xl bg-destructive/15 px-3 py-2 text-destructive-foreground shadow-sm border border-destructive/40">
+                {highTotal} alta
               </span>
-              <span className="rounded-2xl bg-amber-500/10 px-3 py-2 text-amber-200 shadow-sm border border-amber-300/20">
-                {modCount} moderada
+              <span className="rounded-2xl bg-amber-500/15 px-3 py-2 text-amber-200 shadow-sm border border-amber-300/30">
+                {modTotal} moderada
               </span>
             </div>
           )}
