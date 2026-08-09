@@ -44,6 +44,8 @@ const Index = () => {
   };
 
   const handleOpenAlerts = () => {
+    // Alerts are global: opening them must not stay filtered by the last location
+    setSelectedLocation(null);
     setViewMode("detail");
     setActiveTab("alerts");
   };

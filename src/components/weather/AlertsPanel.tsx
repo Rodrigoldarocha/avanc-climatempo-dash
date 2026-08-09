@@ -43,7 +43,7 @@ const AlertCard = ({ alert }: { alert: WeatherAlert }) => {
 
   return (
     <div className={cn(
-      "rounded-2xl border p-5 flex flex-col justify-between h-44 transition-all hover:scale-[1.02] cursor-pointer",
+      "rounded-2xl border p-5 flex flex-col justify-between gap-3 min-h-44 transition-all hover:scale-[1.02] cursor-pointer",
       isHigh
         ? "bg-destructive/10 border-destructive/30"
         : "bg-amber-500/10 border-amber-500/30"
