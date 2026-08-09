@@ -4,7 +4,8 @@ import { AlertTriangle, Percent, RefreshCw, ChevronRight, Calendar } from "lucid
 
 import type { Location } from "@/data/locations";
 import { useAlerts } from "@/hooks/useAlerts";
-import type { WeatherAlert, Severity } from "@/lib/alerts";
+import { RAIN_MM_H_THRESHOLD, RAIN_PROB_THRESHOLD, DAYS_WINDOW, type WeatherAlert, type Severity } from "@/lib/alerts";
+export type { WeatherAlert };
 import { cn } from "@/lib/utils";
 import { LocationFilter } from "./LocationFilter";
 import {

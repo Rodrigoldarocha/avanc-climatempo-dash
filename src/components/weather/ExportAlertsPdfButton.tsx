@@ -4,7 +4,7 @@ import { FileDown, Loader2, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import type { WeatherAlert } from "@/components/weather/AlertsPanel";
+import type { WeatherAlert } from "@/lib/alerts";
 import { getTotalLocations } from "@/data/locations";
 import logoAvanco from "@/assets/logo-avanco.png";
 
