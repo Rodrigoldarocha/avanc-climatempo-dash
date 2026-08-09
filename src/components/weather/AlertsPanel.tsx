@@ -149,11 +149,11 @@ export const AlertsPanel = ({ selectedLocation }: { selectedLocation?: Location 
               <span className="rounded-2xl bg-background/90 px-3 py-2 text-foreground shadow-sm border border-border/20">
                 {totalCount} alertas
               </span>
-              <span className="rounded-2xl bg-destructive/10 px-3 py-2 text-destructive shadow-sm border border-destructive/20">
-                {highCount} alta
+              <span className="rounded-2xl bg-destructive/15 px-3 py-2 text-destructive-foreground shadow-sm border border-destructive/40">
+                {highTotal} alta
               </span>
-              <span className="rounded-2xl bg-amber-500/10 px-3 py-2 text-amber-200 shadow-sm border border-amber-300/20">
-                {modCount} moderada
+              <span className="rounded-2xl bg-amber-500/15 px-3 py-2 text-amber-200 shadow-sm border border-amber-300/30">
+                {modTotal} moderada
               </span>
             </div>
           )}
