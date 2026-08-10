@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { locations, getAllStates } from "@/data/locations";
 import { getCurrentWeather } from "@/services/climatempo";
 import { useAlertCount } from "@/hooks/useAlertCount";
+import { useAlerts } from "@/hooks/useAlerts";
 import { useApiStatus } from "@/hooks/useApiStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -35,8 +36,9 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
   const { highCount, totalCount } = useAlertCount();
   const { isOnline } = useApiStatus();
 
-  // Fetch current weather for a sample of locations (first 10 for speed)
-  const sampleLocations = useMemo(() => locations.slice(0, 15), []);
+  // Current weather is fetched for every monitored location so the KPIs
+  // reflect the whole network, not an arbitrary sample.
+  const sampleLocations = locations;
 
   const weatherQueries = useQueries({
     queries: sampleLocations.map((loc) => ({
@@ -72,11 +74,10 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
     return { avgTemp, maxTemp, minTemp, avgHumidity, avgWind, hottest, coldest };
   }, [weatherData]);
 
-  const queryClient = useQueryClient();
-  const alerts = queryClient.getQueryData<any[]>(["alerts", "7d", 20, 70]) || [];
+  // Single source of truth for alerts (same query as the badge and the Alerts screen)
+  const { data: alerts = [] } = useAlerts();
 
   const alertsByState = useMemo(() => {
-    const validAlerts = alerts;
     const byState: Record<string, { total: number; high: number }> = {};
     alerts.forEach((a: any) => {
       const st = a.location?.state;

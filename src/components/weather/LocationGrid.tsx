@@ -16,18 +16,14 @@ interface LocationGridProps {
 export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGridProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
   const queryClient = useQueryClient();
   const isFetching = useIsFetching({ queryKey: ["currentWeather"] });
   
   const states = getAllStates();
   
+  // Real refetch: the spinner is driven by the actual network state, not a timer
   const handleRefresh = async () => {
-    setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["currentWeather"] });
-    setLastRefreshTime(new Date());
-    setTimeout(() => setIsRefreshing(false), 1500);
   };
   
   const filteredLocations = useMemo(() => {
@@ -51,7 +47,7 @@ export const LocationGrid = ({ onLocationSelect, selectedLocation }: LocationGri
     return grouped;
   }, [filteredLocations]);
 
-  const isCurrentlyFetching = isFetching > 0 || isRefreshing;
+  const isCurrentlyFetching = isFetching > 0;
 
   return (
     <div className="space-y-4">
