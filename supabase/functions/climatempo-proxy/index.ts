@@ -20,11 +20,11 @@ Deno.serve(async (req) => {
     const { endpoint, locationCode, fromDate } = await req.json().catch(() => ({}));
 
     if (!VALID_ENDPOINTS.has(endpoint)) {
-      return json({ error: "Endpoint inválido" }, 400);
+      return json({ error: "config", message: "Endpoint inválido" });
     }
     const code = Number(locationCode);
     if (!Number.isInteger(code) || code <= 0 || code > 9_999_999) {
-      return json({ error: "Código de localidade inválido" }, 400);
+      return json({ error: "config", message: "Código de localidade inválido" });
     }
     const safeFrom =
       typeof fromDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fromDate) ? fromDate : "2024-01-01";
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     const forecastToken = Deno.env.get("CLIMATEMPO_FORECAST_TOKEN");
     const historyToken = Deno.env.get("CLIMATEMPO_HISTORY_TOKEN");
     if (!forecastToken || !historyToken) {
-      return json({ error: "Tokens da API não configurados" }, 500);
+      return json({ error: "config", message: "Tokens da API não configurados" });
     }
 
     let url: string;
@@ -55,21 +55,22 @@ Deno.serve(async (req) => {
       upstream = await fetch(url, { signal: AbortSignal.timeout(15000) });
     } catch (_networkError) {
       // Never crash: the client turns this into a retryable, user-friendly error
-      return json({ error: "network", message: "Serviço temporariamente indisponível" }, 503);
+      return json({ error: "network", message: "Serviço temporariamente indisponível" });
     }
 
     if (!upstream.ok) {
       const text = await upstream.text().catch(() => "");
       console.error(`Climatempo ${endpoint} ${code} -> ${upstream.status}`);
-      return json(
-        { error: "upstream", status: upstream.status, message: text.slice(0, 200) || upstream.statusText },
-        502,
-      );
+      return json({
+        error: "upstream",
+        status: upstream.status,
+        message: text.slice(0, 200) || upstream.statusText,
+      });
     }
 
     return json(await upstream.json());
   } catch (error) {
     console.error("climatempo-proxy failure", error instanceof Error ? error.message : error);
-    return json({ error: "internal", message: "Erro interno no proxy" }, 500);
+    return json({ error: "internal", message: "Erro interno no proxy" });
   }
 });
