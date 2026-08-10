@@ -1,1 +1,3 @@
 project_id = "mfzjejkmbepyehrjjfuq"
+[functions.climatempo-proxy]
+verify_jwt = false

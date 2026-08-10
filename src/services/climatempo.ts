@@ -1,4 +1,6 @@
-// Climatempo API Service — direct HTTP calls
+// Climatempo API Service — all calls go through the secure backend proxy.
+// Tokens never reach the browser.
+import { supabase } from "@/integrations/supabase/client";
 
 export class ApiConfigError extends Error {
   constructor(msg: string) { super(msg); this.name = "ApiConfigError"; }
