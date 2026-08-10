@@ -102,82 +102,36 @@ export interface HistoricalData {
   }>;
 }
 
+type ProxyEndpoint = "current" | "hours72" | "days15" | "history";
+
 class ClimatempoHttpClient {
-  private static BASE_URL = "https://apiadvisor.climatempo.com.br/api/v1";
-  private static readonly VALID_ENDPOINTS = new Set(["current", "hours72", "days15", "history"]);
-  private static readonly DEFAULT_FORECAST_TOKEN = "89bb538e364626514c7c6f4144c3a3cb";
-  private static readonly DEFAULT_HISTORY_TOKEN = "730dfea9272da27dc1ce7dab4107467e";
-
-  private static sanitizeToken(value: string | undefined): string | undefined {
-    return value?.trim().replace(/^['"]|['"]$/g, "");
-  }
-
-  private static getEnvValue(name: string): string | undefined {
-    const envMeta = typeof import.meta !== "undefined" ? (import.meta as any).env : undefined;
-    const rawValue = envMeta?.[`VITE_${name}`] ??
-      (typeof process !== "undefined" ? (process as any).env?.[`VITE_${name}`] : undefined) ??
-      (typeof process !== "undefined" ? (process as any).env?.[name] : undefined);
-    return typeof rawValue === "string" ? rawValue : undefined;
-  }
-
-  private static getTokens() {
-    const forecastToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_FORECAST_TOKEN")) ?? this.DEFAULT_FORECAST_TOKEN;
-    const historyToken = this.sanitizeToken(this.getEnvValue("CLIMATEMPO_HISTORY_TOKEN")) ?? this.DEFAULT_HISTORY_TOKEN;
-    return { forecastToken, historyToken };
-  }
-
   private static async makeRequest(
-    endpoint: string,
+    endpoint: ProxyEndpoint,
     locationCode: number,
     params?: Record<string, string>
   ): Promise<any> {
-    if (!this.VALID_ENDPOINTS.has(endpoint)) {
-      throw new ApiConfigError("Invalid endpoint");
-    }
-
     const code = Number(locationCode);
     if (!Number.isInteger(code) || code <= 0 || code > 9_999_999) {
-      throw new ApiConfigError("Invalid locationCode");
+      throw new ApiConfigError("Código de localidade inválido");
     }
 
-    const safeFromDate = typeof params?.fromDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(params.fromDate)
-      ? params.fromDate
-      : "2024-01-01";
+    const { data, error } = await supabase.functions.invoke("climatempo-proxy", {
+      body: { endpoint, locationCode: code, fromDate: params?.fromDate },
+    });
 
-    const { forecastToken, historyToken } = this.getTokens();
-
-    let url: string;
-    switch (endpoint) {
-      case "current":
-        url = `${this.BASE_URL}/weather/locale/${code}/current?token=${encodeURIComponent(forecastToken)}`;
-        break;
-      case "hours72":
-        url = `${this.BASE_URL}/forecast/locale/${code}/hours/72?token=${encodeURIComponent(forecastToken)}`;
-        break;
-      case "days15":
-        url = `${this.BASE_URL}/forecast/locale/${code}/days/15?token=${encodeURIComponent(forecastToken)}`;
-        break;
-      case "history":
-        url = `${this.BASE_URL}/history/locale/${code}?token=${encodeURIComponent(historyToken)}&from=${safeFromDate}`;
-        break;
-      default:
-        throw new ApiConfigError("Invalid endpoint");
-    }
-
-    let response: Response;
-    try {
-      response = await fetch(url);
-    } catch (networkError) {
+    if (error) {
       throw new ApiNetworkError("Serviço temporariamente indisponível");
     }
 
-    if (!response.ok) {
-      const responseText = await response.text();
-      const message = `API Climatempo error ${response.status}: ${responseText || response.statusText}`;
-      throw new ApiUpstreamError(message);
+    if (data && typeof data === "object" && "error" in data) {
+      const kind = (data as any).error;
+      const message = (data as any).message ?? "Falha ao consultar a API de clima";
+      if (kind === "network") throw new ApiNetworkError(message);
+      if (kind === "upstream") throw new ApiUpstreamError(message);
+      throw new ApiConfigError(message);
     }
 
-    return await response.json();
+    return data;
   }
 
   static async getCurrentWeather(locationCode: number): Promise<CurrentWeather> {
