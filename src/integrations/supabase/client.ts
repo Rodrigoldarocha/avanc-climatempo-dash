@@ -4,6 +4,7 @@ import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
 
 function isNewSupabaseApiKey(value: string): boolean {
@@ -33,7 +34,21 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+// Stub usado quando VITE_SUPABASE_URL/KEY não configurados: app abre sem auth/proxy.
+const createSupabaseStub = () => ({
+  auth: {
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    getUser: async () => ({ data: { user: null } }),
+    signOut: async () => ({ error: null }),
+    setSession: async () => ({}),
+  },
+  functions: {
+    invoke: async () => ({ data: null, error: { message: "Supabase não configurado" } }),
+  },
+});
+
+export const supabase = isSupabaseConfigured
+  ? createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   global: {
     fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
   },
@@ -42,4 +57,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
   }
-});
+  })
+  : createSupabaseStub();

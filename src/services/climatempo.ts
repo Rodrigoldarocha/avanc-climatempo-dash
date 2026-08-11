@@ -1,6 +1,6 @@
 // Climatempo API Service — all calls go through the secure backend proxy.
 // Tokens never reach the browser.
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 export class ApiConfigError extends Error {
   constructor(msg: string) { super(msg); this.name = "ApiConfigError"; }
@@ -105,6 +105,8 @@ export interface HistoricalData {
 type ProxyEndpoint = "current" | "hours72" | "days15" | "history";
 
 class ClimatempoHttpClient {
+  private static readonly BASE_URL = "https://apiadvisor.climatempo.com.br/api/v1";
+
   private static async makeRequest(
     endpoint: ProxyEndpoint,
     locationCode: number,
@@ -113,6 +115,11 @@ class ClimatempoHttpClient {
     const code = Number(locationCode);
     if (!Number.isInteger(code) || code <= 0 || code > 9_999_999) {
       throw new ApiConfigError("Código de localidade inválido");
+    }
+
+    // Fallback direto quando Supabase não configurado (tokens locais).
+    if (!isSupabaseConfigured) {
+      return this.directRequest(endpoint, code, params?.fromDate);
     }
 
     const { data, error } = await supabase.functions.invoke("climatempo-proxy", {
@@ -132,6 +139,48 @@ class ClimatempoHttpClient {
     }
 
     return data;
+  }
+
+  private static async directRequest(
+    endpoint: ProxyEndpoint,
+    locationCode: number,
+    fromDate?: string
+  ): Promise<any> {
+    const forecastToken = import.meta.env.VITE_CLIMATEMPO_FORECAST_TOKEN;
+    const historyToken = import.meta.env.VITE_CLIMATEMPO_HISTORY_TOKEN;
+
+    if (!forecastToken || !historyToken) {
+      throw new ApiConfigError("Tokens da API não configurados");
+    }
+
+    let url: string;
+    switch (endpoint) {
+      case "current":
+        url = `${this.BASE_URL}/weather/locale/${locationCode}/current?token=${encodeURIComponent(forecastToken)}`;
+        break;
+      case "hours72":
+        url = `${this.BASE_URL}/forecast/locale/${locationCode}/hours/72?token=${encodeURIComponent(forecastToken)}`;
+        break;
+      case "days15":
+        url = `${this.BASE_URL}/forecast/locale/${locationCode}/days/15?token=${encodeURIComponent(forecastToken)}`;
+        break;
+      default:
+        url = `${this.BASE_URL}/history/locale/${locationCode}?token=${encodeURIComponent(historyToken)}&from=${encodeURIComponent(fromDate ?? "2024-01-01")}`;
+    }
+
+    let upstream: Response;
+    try {
+      upstream = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    } catch (_networkError) {
+      throw new ApiNetworkError("Serviço temporariamente indisponível");
+    }
+
+    if (!upstream.ok) {
+      const text = await upstream.text().catch(() => "");
+      throw new ApiUpstreamError(text.slice(0, 200) || upstream.statusText);
+    }
+
+    return upstream.json();
   }
 
   static async getCurrentWeather(locationCode: number): Promise<CurrentWeather> {
