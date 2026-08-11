@@ -81,6 +81,7 @@ O painel exibe dados meteorológicos consolidados de 55 unidades em 19 estados, 
 
 ### PWA
 - **Sem service worker** — o PWA foi removido para evitar que o navegador sirva uma versão antiga do app (tela vazia) após deploys. O `index.html` contém um fail-safe que limpa service workers/caches antigos, recarrega automaticamente se um asset falhar e exibe erro visível em vez de tela em branco.
+- **`public/sw.js`** — service worker de limpeza legado: substitui o SW antigo (bytes diferentes forçam a atualização), apaga todos os caches e se auto-desregistra, quebrando o impasse de usuários presos com a versão antiga em cache. Ele não intercepta requisições nem cacheia nada.
 
 ### API
 - **[Climatempo API](https://advisor.climatempo.com.br/)** — Fonte de dados meteorológicos
