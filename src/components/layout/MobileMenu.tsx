@@ -8,6 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { useApiStatus } from "@/hooks/useApiStatus";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
 import { cn } from "@/lib/utils";
@@ -91,6 +92,10 @@ export function MobileMenu({ onRefresh }: MobileMenuProps) {
               Atualizar dados
             </Button>
           )}
+
+          <div className="border-t border-border/30" />
+
+          <GoogleAuthButton variant="full" onDone={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>
