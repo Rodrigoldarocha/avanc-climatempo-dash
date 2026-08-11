@@ -4,6 +4,66 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png">
     <script>!function(){var e=localStorage.getItem("avanco-weather-theme");if(e==="dark"||e==="light"){document.documentElement.classList.add(e)}else if(window.matchMedia("(prefers-color-scheme: dark)").matches){document.documentElement.classList.add("dark")}}();</script>
+    <script>
+      // Fail-safe contra tela vazia por cache/service worker obsoleto.
+      (function () {
+        // 1) Remove service workers e caches antigos (PWA legado) que podem prender
+        //    uma versão antiga do app no navegador.
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            regs.forEach(function (reg) { reg.unregister(); });
+          }).catch(function () {});
+        }
+        if (window.caches && window.caches.keys) {
+          window.caches.keys().then(function (keys) {
+            keys.forEach(function (k) {
+              if (/workbox|climatempo-api|google-fonts/.test(k)) {
+                window.caches.delete(k).catch(function () {});
+              }
+            });
+          }).catch(function () {});
+        }
+
+        // 2) Se um chunk (script/css) falhar ao carregar — ex.: index.html antigo
+        //    referenciando arquivos que não existem mais — recarrega uma vez.
+        var reloadedOnce = false;
+        function showFatalError() {
+          if (document.getElementById("fatal-error")) return;
+          var div = document.createElement("div");
+          div.id = "fatal-error";
+          div.style.cssText = "position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#1E2B33;color:#fff;font-family:system-ui,sans-serif;font-size:15px;text-align:center;padding:24px;z-index:2147483647";
+          var p = document.createElement("p");
+          p.textContent = "Não foi possível carregar o aplicativo.";
+          var b = document.createElement("button");
+          b.textContent = "Recarregar página";
+          b.style.cssText = "background:#fff;color:#1E2B33;border:0;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer";
+          b.addEventListener("click", function () { location.reload(); });
+          div.appendChild(p);
+          div.appendChild(b);
+          document.body.appendChild(div);
+        }
+        window.addEventListener("error", function (e) {
+          var t = e.target;
+          if (t && (t.tagName === "SCRIPT" || t.tagName === "LINK")) {
+            e.preventDefault();
+            if (!reloadedOnce) {
+              reloadedOnce = true;
+              setTimeout(function () { location.reload(); }, 300);
+            } else {
+              showFatalError();
+            }
+          }
+        }, true);
+
+        // 3) Se o app não montar em 10s, mostra erro visível em vez de tela em branco.
+        setTimeout(function () {
+          var root = document.getElementById("root");
+          if (root && root.children.length === 0) {
+            showFatalError();
+          }
+        }, 10000);
+      })();
+    </script>
     <link rel="apple-touch-icon" href="/apple-touch-icon.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Clima Dashboard | Grupo Avanço</title>

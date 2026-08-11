@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Freebuff local state
+.freebuff/
+
 # Environment variables
 .env
 

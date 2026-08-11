@@ -80,7 +80,7 @@ O painel exibe dados meteorológicos consolidados de 55 unidades em 19 estados, 
 - **[SheetJS (xlsx)](https://sheetjs.com/)** — Exportação de dados em Excel
 
 ### PWA
-- **[vite-plugin-pwa](https://vite-pwa-org.netlify.app/)** — Service Worker com Workbox, cache offline e manifest
+- **Sem service worker** — o PWA foi removido para evitar que o navegador sirva uma versão antiga do app (tela vazia) após deploys. O `index.html` contém um fail-safe que limpa service workers/caches antigos, recarrega automaticamente se um asset falhar e exibe erro visível em vez de tela em branco.
 
 ### API
 - **[Climatempo API](https://advisor.climatempo.com.br/)** — Fonte de dados meteorológicos
