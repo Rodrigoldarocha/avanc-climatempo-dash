@@ -4,6 +4,7 @@ import { useApiStatus } from "@/hooks/useApiStatus";
 import { useAlertCount } from "@/hooks/useAlertCount";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileMenu } from "./MobileMenu";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { CloudSun, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +63,10 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
           {isMobile ? (
             <MobileMenu onRefresh={onRefresh} />
           ) : (
-            <ThemeToggle />
+            <>
+              <GoogleAuthButton />
+              <ThemeToggle />
+            </>
           )}
         </div>
       </div>
