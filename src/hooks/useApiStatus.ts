@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { getCurrentWeather } from "@/services/climatempo";
 
 // Localidade validada no contrato da API e também presente na lista monitorada.
@@ -10,17 +10,28 @@ const HEALTH_CHECK_LOCATION_CODE = 3427;
  * entire API as offline.
  */
 export function useApiStatus() {
-  const { isSuccess, isPending, isFetching } = useQuery({
-    queryKey: ["currentWeather", HEALTH_CHECK_LOCATION_CODE],
-    queryFn: () => getCurrentWeather(HEALTH_CHECK_LOCATION_CODE),
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: 2,
-  });
+  const [status, setStatus] = useState({ isOnline: false, isLoading: true });
 
-  return {
-    isOnline: isSuccess,
-    isLoading: isPending || (isFetching && !isSuccess),
-  };
+  useEffect(() => {
+    let active = true;
+
+    const checkApi = async () => {
+      try {
+        await getCurrentWeather(HEALTH_CHECK_LOCATION_CODE);
+        if (active) setStatus({ isOnline: true, isLoading: false });
+      } catch {
+        if (active) setStatus({ isOnline: false, isLoading: false });
+      }
+    };
+
+    void checkApi();
+    const interval = window.setInterval(checkApi, 5 * 60 * 1000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  return status;
 }
