@@ -6,12 +6,32 @@ const corsHeaders = {
 
 const BASE_URL = "https://apiadvisor.climatempo.com.br/api/v1";
 const VALID_ENDPOINTS = new Set(["current", "hours72", "days15", "history"]);
+const MAX_UPSTREAM_ATTEMPTS = 2;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+
+const fetchUpstream = async (url: string): Promise<Response> => {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_UPSTREAM_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (response.status < 500 && response.status !== 429) return response;
+      if (attempt === MAX_UPSTREAM_ATTEMPTS) return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt === MAX_UPSTREAM_ATTEMPTS) throw error;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 350 * attempt));
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Falha de conexão com o provedor");
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -52,7 +72,7 @@ Deno.serve(async (req) => {
 
     let upstream: Response;
     try {
-      upstream = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      upstream = await fetchUpstream(url);
     } catch (_networkError) {
       // Never crash: the client turns this into a retryable, user-friendly error
       return json({ error: "network", message: "Serviço temporariamente indisponível" });
