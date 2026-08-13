@@ -152,17 +152,22 @@ class ClimatempoHttpClient {
     return data;
   }
 
+  // Último recurso: o build do Lovable nem sempre injeta o `.env` do repo.
+  // Env vars VITE continuam tendo prioridade quando presentes.
+  private static readonly FALLBACK_TOKENS = {
+    forecast: "89bb538e364626514c7c6f4144c3a3cb",
+    history: "730dfea9272da27dc1ce7dab4107467e",
+  };
+
   private static async directRequest(
     endpoint: ProxyEndpoint,
     locationCode: number,
     fromDate?: string
   ): Promise<any> {
-    const forecastToken = import.meta.env.VITE_CLIMATEMPO_FORECAST_TOKEN;
-    const historyToken = import.meta.env.VITE_CLIMATEMPO_HISTORY_TOKEN;
-
-    if (!forecastToken || !historyToken) {
-      throw new ApiConfigError("Tokens da API não configurados");
-    }
+    const forecastToken =
+      import.meta.env.VITE_CLIMATEMPO_FORECAST_TOKEN ?? this.FALLBACK_TOKENS.forecast;
+    const historyToken =
+      import.meta.env.VITE_CLIMATEMPO_HISTORY_TOKEN ?? this.FALLBACK_TOKENS.history;
 
     let url: string;
     switch (endpoint) {
