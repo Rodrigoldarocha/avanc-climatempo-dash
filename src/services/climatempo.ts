@@ -122,18 +122,29 @@ class ClimatempoHttpClient {
       return this.directRequest(endpoint, code, params?.fromDate);
     }
 
-    const { data, error } = await supabase.functions.invoke("climatempo-proxy", {
-      body: { endpoint, locationCode: code, fromDate: params?.fromDate },
-    });
+    // Proxy é a rota preferida, mas se a edge function não estiver deployada
+    // (ex.: preview do Lovable) ou o Supabase estiver fora do ar, cai para a
+    // chamada direta com os tokens VITE antes de reportar indisponibilidade.
+    const fallbackDirect = () => this.directRequest(endpoint, code, params?.fromDate);
 
+    let result: { data: unknown; error: unknown };
+    try {
+      result = await supabase.functions.invoke("climatempo-proxy", {
+        body: { endpoint, locationCode: code, fromDate: params?.fromDate },
+      });
+    } catch (_invokeError) {
+      return fallbackDirect();
+    }
+
+    const { data, error } = result;
     if (error) {
-      throw new ApiNetworkError("Serviço temporariamente indisponível");
+      return fallbackDirect();
     }
 
     if (data && typeof data === "object" && "error" in data) {
       const kind = (data as any).error;
       const message = (data as any).message ?? "Falha ao consultar a API de clima";
-      if (kind === "network") throw new ApiNetworkError(message);
+      if (kind === "network" || kind === "config") return fallbackDirect();
       if (kind === "upstream") throw new ApiUpstreamError(message);
       throw new ApiConfigError(message);
     }
