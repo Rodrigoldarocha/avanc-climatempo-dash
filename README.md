@@ -85,8 +85,8 @@ src/
 ### Configuração
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
-cd <NOME_DO_PROJETO>
+git clone https://github.com/Rodrigoldarocha/avanc-climatempo-dash.git
+cd avanc-climatempo-dash
 
 npm install
 cp .env.example .env
@@ -169,6 +169,14 @@ Não versionar arquivos `.env` ou credenciais no Git.
 Utilize `.env.example` para documentar as variáveis necessárias.
 
 Para ambientes de produção, recomenda-se utilizar um **backend/API proxy** para proteger tokens e controlar as requisições à API meteorológica.
+
+> 🔒 Este projeto já inclui uma **Supabase Edge Function** (`supabase/functions/climatempo-proxy/`) que atua como proxy server-side, mantendo os tokens da Climatempo fora do frontend.
+
+---
+
+## 👨‍💻 Autor
+
+**Rodrigo Rocha** — [GitHub](https://github.com/Rodrigoldarocha) · [LinkedIn](https://www.linkedin.com/in/rodrigo-rocha-19249170/)
 
 ---
 
