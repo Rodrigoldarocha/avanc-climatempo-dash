@@ -1,0 +1,18 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" rx="28" fill="#111827"/>
+  <rect x="42" y="42" width="1116" height="546" rx="22" fill="url(#paint0_linear_1_2)"/>
+  <circle cx="186" cy="224" r="86" fill="#D4E300" fill-opacity="0.9"/>
+  <path d="M148 224C148 195.281 171.281 172 200 172H202C230.719 172 254 195.281 254 224V226C254 254.719 230.719 278 202 278H200C171.281 278 148 254.719 148 226V224Z" fill="#111827" fill-opacity="0.15"/>
+  <path d="M223 198C233.5 209.5 242 220.5 242 234.5C242 259.5 204.5 282 165 270.5C157.5 254 154 238 165 224.5C175.5 210.5 198.5 195.5 223 198Z" fill="#111827" fill-opacity="0.75"/>
+  <path d="M399 196H746" stroke="#D4E300" stroke-width="12" stroke-linecap="round"/>
+  <text x="400" y="272" fill="#F9FAFB" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700">Clima Dashboard</text>
+  <text x="400" y="356" fill="#E5E7EB" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="500">Previsões, alertas e clima em tempo real</text>
+  <rect x="400" y="404" width="262" height="64" rx="16" fill="#D4E300"/>
+  <text x="456" y="447" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Grupo Avanço</text>
+  <defs>
+    <linearGradient id="paint0_linear_1_2" x1="92" y1="60" x2="1094" y2="556" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1E2B33"/>
+      <stop offset="1" stop-color="#2D3E4A"/>
+    </linearGradient>
+  </defs>
+</svg>

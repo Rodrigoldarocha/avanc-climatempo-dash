@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useTimeOfDay } from "@/hooks/useTimeOfDay";
 import { Header } from "@/components/layout/Header";
 import { ForecastMenu, type MenuOption } from "@/components/layout/ForecastMenu";
@@ -182,6 +183,16 @@ const Index = () => {
                     </div>
                   )}
                 </div>
+
+                <div className="flex flex-wrap items-center gap-3 border-b border-border/60 pb-3">
+                  <Link to="/faq" className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90">
+                    Ver FAQ
+                  </Link>
+                  <Link to="/contato" className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary">
+                    Falar com a equipe
+                  </Link>
+                </div>
+
                 <DashboardSummary
                   onOpenAlerts={handleOpenAlerts}
                   onLocationSelect={handleLocationSelect}
@@ -266,9 +277,17 @@ const Index = () => {
         {!isMobile && (
           <footer className="border-t border-border/20 mt-8 py-4">
             <div className="container px-4 text-center text-[10px] text-muted-foreground">
-              <a href="https://www.climatempo.com.br" target="_blank" className="hover:text-primary">Climatempo</a>
+              <Link to="/" className="hover:text-primary">Início</Link>
               {" • "}
-              <a href="https://www.grupoavanco.com.br" target="_blank" className="hover:text-primary">Grupo Avanço</a>
+              <Link to="/faq" className="hover:text-primary">FAQ</Link>
+              {" • "}
+              <Link to="/contato" className="hover:text-primary">Contato</Link>
+              {" • "}
+              <Link to="/politica-de-privacidade" className="hover:text-primary">Privacidade</Link>
+              {" • "}
+              <a href="https://www.climatempo.com.br" target="_blank" rel="noreferrer" className="hover:text-primary">Climatempo</a>
+              {" • "}
+              <a href="https://www.grupoavanco.com.br" target="_blank" rel="noreferrer" className="hover:text-primary">Grupo Avanço</a>
               {" • "}{new Date().getFullYear()}
             </div>
           </footer>
