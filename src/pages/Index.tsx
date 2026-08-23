@@ -161,36 +161,68 @@ const Index = () => {
 
           <main className={`w-full px-3 py-3 sm:px-4 sm:py-4 md:container md:px-6 max-w-7xl mx-auto ${isMobile ? "pb-24" : ""}`}>
           {viewMode === "dashboard" ? (
-            <section className="space-y-4 animate-fade-in" key="dashboard">
-               <div className="glass-card p-4 sm:p-5 space-y-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <section className="space-y-4 animate-rise" key="dashboard">
+              <div className="premium-hero p-4 sm:p-6 lg:p-7">
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="max-w-2xl space-y-4">
+                    <span className="premium-pill">
+                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      Monitoramento meteorológico
+                    </span>
+                    <div className="space-y-3">
+                      <h1 className="text-4xl font-black tracking-[-0.06em] text-foreground sm:text-5xl lg:text-6xl">
+                        Painel de clima
+                        <span className="block text-primary">estratégico</span>
+                      </h1>
+                      <p className="max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+                        Resumo executivo das condições, alertas e variáveis críticas em uma visão clara, elegante e pronta para decisão.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      <Link to="/faq" className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(212,227,0,0.25)]">
+                        Ver FAQ
+                      </Link>
+                      <Link to="/contato" className="inline-flex items-center rounded-full border border-border/70 bg-background/40 px-4 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:text-primary">
+                        Falar com a equipe
+                      </Link>
+                    </div>
+                  </div>
+
+                  {!isMobile && (
+                    <div className="grid w-full max-w-sm gap-3 sm:grid-cols-2">
+                      <div className="premium-panel p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Cobertura</p>
+                        <p className="mt-2 text-2xl font-black tracking-[-0.05em]">{locations.length}</p>
+                        <p className="text-xs text-muted-foreground">locais monitorados</p>
+                      </div>
+                      <div className="premium-panel p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Alertas</p>
+                        <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-destructive">{highCount}</p>
+                        <p className="text-xs text-muted-foreground">alta severidade</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="glass-card p-4 sm:p-5">
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <h1 className="text-3xl font-semibold tracking-tight">Painel</h1>
-                    <p className="mt-1 text-sm text-muted-foreground max-w-xl">
-                      Resumo das principais métricas, alertas e destaques com mínima rolagem.
-                    </p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Visão geral</p>
+                    <h2 className="mt-1 text-2xl font-black tracking-[-0.05em] text-foreground">Resumo operacional</h2>
                   </div>
                   {!isMobile && (
                     <div className="flex flex-wrap items-center gap-2">
-                      <Button size="sm" variant="outline" className="gap-2" onClick={() => setViewMode("grid") }>
+                      <Button size="sm" variant="outline" className="gap-2 transition-all duration-300 hover:-translate-y-0.5" onClick={() => setViewMode("grid")}>
                         <Grid3X3 className="h-4 w-4" />
                         <span>Locais</span>
                       </Button>
-                      <Button size="sm" className="gap-2" onClick={handleOpenAlerts}>
+                      <Button size="sm" className="gap-2 transition-all duration-300 hover:-translate-y-0.5" onClick={handleOpenAlerts}>
                         <Siren className="h-4 w-4" />
                         <span>Alertas</span>
                       </Button>
                     </div>
                   )}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 border-b border-border/60 pb-3">
-                  <Link to="/faq" className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90">
-                    Ver FAQ
-                  </Link>
-                  <Link to="/contato" className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary">
-                    Falar com a equipe
-                  </Link>
                 </div>
 
                 <DashboardSummary

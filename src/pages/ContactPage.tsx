@@ -1,33 +1,23 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { Seo } from "@/components/seo/Seo";
+import { validateContactForm, type ContactFormValues } from "@/lib/contact";
 
-const initialForm = { name: "", email: "", message: "" };
+const initialForm: ContactFormValues = { name: "", email: "", message: "" };
 
 export default function ContactPage() {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState<ContactFormValues>(initialForm);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const navigate = useNavigate();
+
+  const errors = useMemo(() => validateContactForm(form), [form]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmedName = form.name.trim();
-    const trimmedEmail = form.email.trim();
-    const trimmedMessage = form.message.trim();
-
-    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
-      setStatus("error");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setStatus("error");
-      return;
-    }
-
-    if (trimmedMessage.length < 20) {
+    const nextErrors = validateContactForm(form);
+    if (Object.keys(nextErrors).length > 0) {
       setStatus("error");
       return;
     }
@@ -76,11 +66,15 @@ export default function ContactPage() {
                 id="name"
                 value={form.name}
                 onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none ring-0 transition focus:border-primary"
+                className={`w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary ${
+                  errors.name ? "border-destructive" : "border-border"
+                }`}
                 placeholder="Seu nome"
                 aria-label="Nome"
                 maxLength={80}
+                aria-invalid={Boolean(errors.name)}
               />
+              {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
             </div>
 
             <div>
@@ -90,11 +84,15 @@ export default function ContactPage() {
                 type="email"
                 value={form.email}
                 onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none ring-0 transition focus:border-primary"
+                className={`w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary ${
+                  errors.email ? "border-destructive" : "border-border"
+                }`}
                 placeholder="seu@email.com"
                 aria-label="E-mail"
                 maxLength={120}
+                aria-invalid={Boolean(errors.email)}
               />
+              {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
             </div>
 
             <div>
@@ -103,16 +101,20 @@ export default function ContactPage() {
                 id="message"
                 value={form.message}
                 onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
-                className="min-h-[140px] w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none ring-0 transition focus:border-primary"
+                className={`min-h-[140px] w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary ${
+                  errors.message ? "border-destructive" : "border-border"
+                }`}
                 placeholder="Descreva sua dúvida, sugestão ou pedido"
                 aria-label="Mensagem"
                 maxLength={500}
+                aria-invalid={Boolean(errors.message)}
               />
+              {errors.message && <p className="mt-1 text-xs text-destructive">{errors.message}</p>}
             </div>
 
-            {status === "error" && (
+            {status === "error" && Object.keys(errors).length > 0 && (
               <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                Verifique os campos. Nome, e-mail e mensagem são obrigatórios, e a mensagem precisa ter ao menos 20 caracteres.
+                Corrija os campos destacados antes de enviar a mensagem.
               </p>
             )}
 

@@ -95,40 +95,41 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
   const states = getAllStates();
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-rise">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Activity className="h-4 w-4 text-primary shrink-0" />
         <span>{isOnline ? "Dados atualizados • API online" : "Sem conexão com a API"}</span>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <button
           onClick={onOpenAlerts}
-          className="stat-card h-24 flex flex-col justify-between p-3 text-left hover:border-destructive/50 transition-colors"
+          className="metric-card h-28 flex flex-col justify-between p-3 text-left transition-all duration-300 hover:border-destructive/40"
         >
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Alertas</span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Alertas</span>
+            </div>
           </div>
           <div>
-            <div className="text-3xl font-display font-bold text-destructive">{totalCount || "—"}</div>
+            <div className="text-3xl font-bold tracking-[-0.05em] text-destructive">{totalCount || "—"}</div>
             <div className="mt-1 text-[11px] text-muted-foreground">
               {highCount > 0 ? `${highCount} alta severidade` : "Nenhum crítico"}
             </div>
           </div>
         </button>
 
-        <div className="stat-card h-24 flex flex-col justify-between p-3">
+        <div className="metric-card h-28 flex flex-col justify-between p-3">
           <div className="flex items-center gap-2">
             <Thermometer className="h-4 w-4 text-weather-hot" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Temperatura</span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Temperatura</span>
           </div>
           {isLoading ? (
             <Skeleton className="h-7 w-20" />
           ) : (
             <div>
-              <div className="text-3xl font-display font-bold">{stats ? `${Math.round(stats.avgTemp)}°` : "—"}</div>
+              <div className="text-3xl font-bold tracking-[-0.05em]">{stats ? `${Math.round(stats.avgTemp)}°` : "—"}</div>
               <div className="mt-1 text-[11px] text-muted-foreground">
                 {stats ? `${Math.round(stats.minTemp)}° • ${Math.round(stats.maxTemp)}°` : ""}
               </div>
@@ -136,66 +137,65 @@ export const DashboardSummary = ({ onOpenAlerts, onLocationSelect }: DashboardSu
           )}
         </div>
 
-        <div className="stat-card h-24 flex flex-col justify-between p-3">
+        <div className="metric-card h-28 flex flex-col justify-between p-3">
           <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-weather-rain" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Umidade</span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Umidade</span>
           </div>
           {isLoading ? (
             <Skeleton className="h-7 w-20" />
           ) : (
             <div>
-              <div className="text-3xl font-display font-bold">{stats ? `${Math.round(stats.avgHumidity)}%` : "—"}</div>
+              <div className="text-3xl font-bold tracking-[-0.05em]">{stats ? `${Math.round(stats.avgHumidity)}%` : "—"}</div>
               <div className="mt-1 text-[11px] text-muted-foreground">Média geral</div>
             </div>
           )}
         </div>
 
-        <div className="stat-card h-24 flex flex-col justify-between p-3">
+        <div className="metric-card h-28 flex flex-col justify-between p-3">
           <div className="flex items-center gap-2">
             <Wind className="h-4 w-4 text-weather-cloud" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Vento</span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Vento</span>
           </div>
           {isLoading ? (
             <Skeleton className="h-7 w-20" />
           ) : (
             <div>
-              <div className="text-3xl font-display font-bold">{stats ? `${Math.round(stats.avgWind)}` : "—"}</div>
+              <div className="text-3xl font-bold tracking-[-0.05em]">{stats ? `${Math.round(stats.avgWind)}` : "—"}</div>
               <div className="mt-1 text-[11px] text-muted-foreground">km/h médio</div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div className="stat-card h-24 flex flex-col justify-between p-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="metric-card h-24 flex flex-col justify-between p-3">
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Locais</span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Locais</span>
           </div>
           <div>
-            <div className="text-3xl font-display font-bold">{locations.length}</div>
+            <div className="text-3xl font-bold tracking-[-0.05em]">{locations.length}</div>
             <div className="mt-1 text-[11px] text-muted-foreground">{states.length} estados</div>
           </div>
         </div>
       </div>
 
-      {/* Extremes */}
       {stats?.hottest && stats?.coldest && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="stat-card flex items-center gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="metric-card flex items-center gap-3 p-3">
             <TrendingUp className="h-5 w-5 text-weather-hot shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Mais quente</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Mais quente</div>
               <div className="text-sm font-semibold truncate">
                 {stats.hottest.name} — {Math.round(stats.maxTemp)}°C
               </div>
             </div>
           </div>
-          <div className="stat-card flex items-center gap-3">
+          <div className="metric-card flex items-center gap-3 p-3">
             <TrendingUp className="h-5 w-5 text-weather-cold shrink-0 rotate-180" />
             <div className="min-w-0">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Mais frio</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Mais frio</div>
               <div className="text-sm font-semibold truncate">
                 {stats.coldest.name} — {Math.round(stats.minTemp)}°C
               </div>
