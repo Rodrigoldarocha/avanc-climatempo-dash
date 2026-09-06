@@ -3,15 +3,129 @@
 import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 import { getLocationByCode } from "@/data/locations";
 
-export class ApiConfigError extends Error {
-  constructor(msg: string) { super(msg); this.name = "ApiConfigError"; }
+export type ApiEndpoint = "current" | "hours72" | "days15" | "history";
+
+export const ENDPOINT_LABELS: Record<ApiEndpoint, string> = {
+  current: "Clima atual",
+  hours72: "Previsão 72h",
+  days15: "Previsão 15 dias",
+  history: "Histórico climático",
+};
+
+export class ApiError extends Error {
+  endpoint?: ApiEndpoint;
+  status?: number;
+  retryable = true;
+  constructor(msg: string, endpoint?: ApiEndpoint, status?: number) {
+    super(msg);
+    this.name = "ApiError";
+    this.endpoint = endpoint;
+    this.status = status;
+  }
 }
-export class ApiNetworkError extends Error {
-  constructor(msg: string) { super(msg); this.name = "ApiNetworkError"; }
+export class ApiConfigError extends ApiError {
+  constructor(msg: string, endpoint?: ApiEndpoint) {
+    super(msg, endpoint);
+    this.name = "ApiConfigError";
+    this.retryable = false;
+  }
 }
-export class ApiUpstreamError extends Error {
-  constructor(msg: string) { super(msg); this.name = "ApiUpstreamError"; }
+export class ApiNetworkError extends ApiError {
+  constructor(msg: string, endpoint?: ApiEndpoint) {
+    super(msg, endpoint);
+    this.name = "ApiNetworkError";
+  }
 }
+export class ApiTimeoutError extends ApiError {
+  constructor(msg: string, endpoint?: ApiEndpoint) {
+    super(msg, endpoint);
+    this.name = "ApiTimeoutError";
+  }
+}
+export class ApiInvalidResponseError extends ApiError {
+  constructor(msg: string, endpoint?: ApiEndpoint) {
+    super(msg, endpoint);
+    this.name = "ApiInvalidResponseError";
+    this.retryable = false;
+  }
+}
+export class ApiRateLimitError extends ApiError {
+  constructor(msg: string, endpoint?: ApiEndpoint) {
+    super(msg, endpoint, 429);
+    this.name = "ApiRateLimitError";
+    this.retryable = false;
+  }
+}
+export class ApiUpstreamError extends ApiError {
+  constructor(msg: string, endpoint?: ApiEndpoint, status?: number) {
+    super(msg, endpoint, status);
+    this.name = "ApiUpstreamError";
+  }
+}
+
+/** Mensagem detalhada e amigável por endpoint/erro, para exibir na interface. */
+export const describeApiError = (
+  error: unknown,
+  endpoint?: ApiEndpoint
+): { title: string; detail: string; retryable: boolean; code?: string } => {
+  const scope = ENDPOINT_LABELS[(error as ApiError)?.endpoint ?? endpoint ?? "current"];
+
+  if (error instanceof ApiRateLimitError) {
+    return {
+      title: `${scope}: limite de consultas atingido`,
+      detail:
+        "O provedor de dados recusou novas consultas (429). A cota diária do plano foi esgotada — tente novamente mais tarde.",
+      retryable: false,
+      code: "429",
+    };
+  }
+  if (error instanceof ApiTimeoutError) {
+    return {
+      title: `${scope}: tempo de resposta esgotado`,
+      detail: "O provedor demorou demais para responder. Você pode tentar novamente agora.",
+      retryable: true,
+      code: "timeout",
+    };
+  }
+  if (error instanceof ApiNetworkError) {
+    return {
+      title: `${scope}: sem conexão`,
+      detail: "Não foi possível alcançar o serviço de dados. Verifique sua internet e tente novamente.",
+      retryable: true,
+      code: "offline",
+    };
+  }
+  if (error instanceof ApiInvalidResponseError) {
+    return {
+      title: `${scope}: resposta inválida`,
+      detail: "O provedor respondeu em um formato inesperado. Os dados podem estar temporariamente indisponíveis.",
+      retryable: true,
+      code: "invalid",
+    };
+  }
+  if (error instanceof ApiConfigError) {
+    return {
+      title: `${scope}: configuração indisponível`,
+      detail: (error as Error).message || "Configuração do serviço de dados ausente.",
+      retryable: false,
+      code: "config",
+    };
+  }
+  if (error instanceof ApiUpstreamError) {
+    return {
+      title: `${scope}: falha no provedor${error.status ? ` (${error.status})` : ""}`,
+      detail: error.message || "O provedor de dados retornou um erro.",
+      retryable: true,
+      code: error.status ? String(error.status) : "upstream",
+    };
+  }
+  return {
+    title: `${scope}: falha ao carregar`,
+    detail: error instanceof Error ? error.message : "Erro desconhecido ao consultar os dados.",
+    retryable: true,
+  };
+};
+
 
 export interface CurrentWeather {
   id: number;
