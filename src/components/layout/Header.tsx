@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
   const { time, dateShort } = useCurrentTime();
-  const { isOnline, isLoading: statusLoading } = useApiStatus();
+  
   const { highCount } = useAlertCount();
   const isMobile = useIsMobile();
 
