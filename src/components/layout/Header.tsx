@@ -1,12 +1,13 @@
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
-import { useApiStatus } from "@/hooks/useApiStatus";
 import { useAlertCount } from "@/hooks/useAlertCount";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileMenu } from "./MobileMenu";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { ApiStatusIndicator } from "@/components/weather/ApiStatusIndicator";
 import { CloudSun, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 interface HeaderProps {
   onOpenAlerts?: () => void;
@@ -15,7 +16,7 @@ interface HeaderProps {
 
 export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
   const { time, dateShort } = useCurrentTime();
-  const { isOnline, isLoading: statusLoading } = useApiStatus();
+  
   const { highCount } = useAlertCount();
   const isMobile = useIsMobile();
 
@@ -38,13 +39,12 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
         </div>
 
         <div className="hidden flex-1 items-center justify-center gap-3 sm:flex">
-          <div className="rounded-full border border-white/10 bg-secondary/20 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground shadow-sm">
-            {statusLoading ? "Verificando API..." : isOnline ? "API online" : "API offline"}
-          </div>
+          <ApiStatusIndicator />
           <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-primary shadow-sm">
             {highCount > 0 ? `${highCount} alertas críticos` : "Sem alertas críticos"}
           </div>
         </div>
+
 
         <div className="flex items-center gap-2">
           {!isMobile && highCount > 0 && (
