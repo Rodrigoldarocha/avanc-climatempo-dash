@@ -1,7 +1,13 @@
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getCurrentWeather, formatTemperature } from "@/services/climatempo";
+import {
+  getCurrentWeather,
+  formatTemperature,
+  ApiInvalidResponseError,
+  type ApiError,
+} from "@/services/climatempo";
 import { WeatherIcon } from "./WeatherIcon";
+import { ApiErrorState } from "./ApiErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Thermometer, Droplets, Wind, Gauge } from "lucide-react";
 import type { Location } from "@/data/locations";
@@ -11,11 +17,11 @@ interface CurrentWeatherCardProps {
 }
 
 export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["currentWeather", location.climaTempoCod],
     queryFn: () => getCurrentWeather(location.climaTempoCod),
     refetchInterval: 5 * 60 * 1000,
-    retry: 2,
+    retry: (attempt, err) => (err as ApiError)?.retryable !== false && attempt < 2,
   });
 
   if (isLoading) {
@@ -25,14 +31,16 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
   if (error || !data) {
     return (
       <div className="weather-card p-4 animate-fade-in">
-        <div className="text-center py-6">
-          <p className="text-sm font-medium">Dados indisponíveis</p>
-          <p className="text-xs opacity-75 max-w-[200px]">Não foi possível carregar as condições atuais de {location.local}</p>
-          <p className="text-[10px] text-destructive/80 mt-2">{error instanceof Error ? error.message : "Erro desconhecido"}</p>
-        </div>
+        <ApiErrorState
+          error={error ?? new ApiInvalidResponseError(`Sem dados para ${location.local}`, "current")}
+          endpoint="current"
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
       </div>
     );
   }
+
 
   const weather = data.data;
 
