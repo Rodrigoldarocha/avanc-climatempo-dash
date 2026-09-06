@@ -1,12 +1,13 @@
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
-import { useApiStatus } from "@/hooks/useApiStatus";
 import { useAlertCount } from "@/hooks/useAlertCount";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileMenu } from "./MobileMenu";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { ApiStatusIndicator } from "@/components/weather/ApiStatusIndicator";
 import { CloudSun, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 interface HeaderProps {
   onOpenAlerts?: () => void;
