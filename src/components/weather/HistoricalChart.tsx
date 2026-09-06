@@ -29,10 +29,11 @@ export const HistoricalChart = ({ location }: HistoricalChartProps) => {
   const isMobile = useIsMobile();
   const fromDate = format(subMonths(new Date(), 6), "yyyy-MM-dd");
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["historicalData", location.climaTempoCod, fromDate],
     queryFn: () => getHistoricalData(location.climaTempoCod, fromDate),
-    retry: 2,
+    // Não insistir quando o provedor recusa por limite/cota (429) ou config.
+    retry: (attempt, err) => (err as ApiError)?.retryable !== false && attempt < 2,
     staleTime: 24 * 60 * 60 * 1000,
   });
 
@@ -49,14 +50,16 @@ export const HistoricalChart = ({ location }: HistoricalChartProps) => {
             Histórico Climático
           </h3>
         </div>
-        <div className="text-center py-8">
-          <p className="text-muted-foreground text-sm">
-            Não foi possível carregar o histórico.
-          </p>
-        </div>
+        <ApiErrorState
+          error={error ?? new ApiInvalidResponseError("Nenhum dado histórico retornado", "history")}
+          endpoint="history"
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
       </div>
     );
   }
+
 
   const chartData = (data.data ?? []).map((day: any) => {
     const rainValue = typeof day.rain === 'object' && day.rain !== null 
