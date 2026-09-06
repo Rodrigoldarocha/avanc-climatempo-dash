@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getHistoricalData } from "@/services/climatempo";
+import { getHistoricalData, ApiInvalidResponseError, type ApiError } from "@/services/climatempo";
+import { ApiErrorState } from "@/components/weather/ApiErrorState";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { History, TrendingUp, TrendingDown, Droplets } from "lucide-react";
 import type { Location } from "@/data/locations";
