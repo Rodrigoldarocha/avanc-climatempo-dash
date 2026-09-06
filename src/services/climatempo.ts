@@ -430,22 +430,42 @@ class ClimatempoHttpClient {
     let upstream: Response;
     try {
       upstream = await fetch(url, { signal: AbortSignal.timeout(15000) });
-    } catch (_networkError) {
-      return this.generateFallbackPayload(endpoint, locationCode, fromDate);
+    } catch (networkError) {
+      const name = (networkError as Error)?.name;
+      if (name === "TimeoutError" || name === "AbortError") {
+        throw new ApiTimeoutError("Tempo de resposta esgotado", endpoint);
+      }
+      throw new ApiNetworkError("Falha de conexão com o provedor de clima", endpoint);
     }
 
     if (!upstream.ok) {
       const text = await upstream.text().catch(() => "");
       const upstreamError = text.slice(0, 200) || upstream.statusText;
 
-      if (upstream.status >= 500 || upstream.status === 429) {
+      if (upstream.status === 429) {
+        throw new ApiRateLimitError(upstreamError, endpoint);
+      }
+
+      if (upstream.status >= 500) {
         return this.generateFallbackPayload(endpoint, locationCode, fromDate);
       }
 
-      throw new ApiUpstreamError(upstreamError);
+      throw new ApiUpstreamError(upstreamError, endpoint, upstream.status);
     }
 
-    return upstream.json();
+    let payload: unknown;
+    try {
+      payload = await upstream.json();
+    } catch {
+      throw new ApiInvalidResponseError("O provedor retornou dados ilegíveis", endpoint);
+    }
+
+    if (!payload || typeof payload !== "object" || !("data" in (payload as any))) {
+      throw new ApiInvalidResponseError("Estrutura de dados inesperada do provedor", endpoint);
+    }
+
+    return payload;
+
   }
 
   static async getCurrentWeather(locationCode: number): Promise<CurrentWeather> {
