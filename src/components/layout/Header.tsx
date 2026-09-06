@@ -38,13 +38,12 @@ export const Header = ({ onOpenAlerts, onRefresh }: HeaderProps) => {
         </div>
 
         <div className="hidden flex-1 items-center justify-center gap-3 sm:flex">
-          <div className="rounded-full border border-white/10 bg-secondary/20 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground shadow-sm">
-            {statusLoading ? "Verificando API..." : isOnline ? "API online" : "API offline"}
-          </div>
+          <ApiStatusIndicator />
           <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-primary shadow-sm">
             {highCount > 0 ? `${highCount} alertas críticos` : "Sem alertas críticos"}
           </div>
         </div>
+
 
         <div className="flex items-center gap-2">
           {!isMobile && highCount > 0 && (
