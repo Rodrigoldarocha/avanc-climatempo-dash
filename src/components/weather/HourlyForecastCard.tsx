@@ -100,31 +100,23 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
   if (error || !hasData) {
     return (
       <div className="weather-card p-4 animate-fade-in">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-display font-semibold">Previsão 72h</h3>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => refetch()}
-            className="h-6 text-xs gap-1"
-          >
-            <RefreshCw className="h-3 w-3" />
-            Tentar novamente
-          </Button>
+        <div className="flex items-center gap-2 mb-1">
+          <Clock className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-display font-semibold">Previsão 72h</h3>
         </div>
-        <div className="flex items-center gap-3 py-6 justify-center text-muted-foreground">
-          <AlertCircle className="h-5 w-5" />
-          <p className="text-sm">Previsão horária indisponível para esta localidade</p>
-          {error && (
-            <p className="text-[10px] text-destructive/80 absolute mt-12">{error instanceof Error ? error.message : "Erro desconhecido"}</p>
-          )}
-        </div>
+        <ApiErrorState
+          error={
+            error ??
+            new ApiInvalidResponseError("Previsão horária indisponível para esta localidade", "hours72")
+          }
+          endpoint="hours72"
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
       </div>
     );
   }
+
 
   // Group hours by day for the summary
   const hoursByDay: Record<string, typeof allHours> = {};
