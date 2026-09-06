@@ -258,13 +258,20 @@ class ClimatempoHttpClient {
 
     if (data && typeof data === "object" && "error" in data) {
       const kind = (data as any).error;
+      const status = Number((data as any).status) || undefined;
       const message = (data as any).message ?? "Falha ao consultar a API de clima";
+      if (status === 429) throw new ApiRateLimitError(message, endpoint);
       if (kind === "network" || kind === "config") return fallbackDirect();
-      if (kind === "upstream") throw new ApiUpstreamError(message);
-      throw new ApiConfigError(message);
+      if (kind === "upstream") throw new ApiUpstreamError(message, endpoint, status);
+      throw new ApiConfigError(message, endpoint);
+    }
+
+    if (!data || typeof data !== "object") {
+      throw new ApiInvalidResponseError("Resposta vazia do serviço de clima", endpoint);
     }
 
     return data;
+
   }
 
   // Último recurso: o build do Lovable nem sempre injeta o `.env` do repo.
