@@ -431,3 +431,8 @@
     text-transform: uppercase;
   }
 }
+
+/* Hide Lovable badge */
+#base44-badge {
+  display: none !important;
+}
