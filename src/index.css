@@ -433,6 +433,7 @@
 }
 
 /* Hide Lovable badge */
-#base44-badge {
+#base44-badge,
+#lovable-badge {
   display: none !important;
 }
