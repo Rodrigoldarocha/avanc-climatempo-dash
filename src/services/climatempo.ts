@@ -262,7 +262,13 @@ class ClimatempoHttpClient {
       const message = (data as any).message ?? "Falha ao consultar a API de clima";
       if (status === 429) throw new ApiRateLimitError(message, endpoint);
       if (kind === "network" || kind === "config") return fallbackDirect();
-      if (kind === "upstream") throw new ApiUpstreamError(message, endpoint, status);
+      if (kind === "upstream") {
+        const friendly =
+          status && status >= 500
+            ? "O servidor da Climatempo está fora do ar no momento. Tente novamente em alguns minutos."
+            : String(message).replace(/<[^>]*>/g, "").trim().slice(0, 160) || "Erro do provedor";
+        throw new ApiUpstreamError(friendly, endpoint, status);
+      }
       throw new ApiConfigError(message, endpoint);
     }
 
