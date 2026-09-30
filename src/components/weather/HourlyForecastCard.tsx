@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { get72HourForecast } from "@/services/climatempo";
+import { get72HourForecast, ApiInvalidResponseError } from "@/services/climatempo";
+import { ApiErrorState } from "./ApiErrorState";
 import { WeatherIcon } from "./WeatherIcon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -13,7 +14,7 @@ interface HourlyForecastCardProps {
 }
 
 export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
-  const { data, isLoading, error, refetch, dataUpdatedAt } = useQuery({
+  const { data, isLoading, isFetching, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["hourlyForecast", location.climaTempoCod],
     queryFn: () => get72HourForecast(location.climaTempoCod),
     retry: 2,
