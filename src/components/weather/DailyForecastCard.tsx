@@ -1,3 +1,4 @@
+import { CachedDataNotice } from "./CachedDataNotice";
 import { useQuery } from "@tanstack/react-query";
 import { get15DayForecast } from "@/services/climatempo";
 import { WeatherIcon } from "./WeatherIcon";
@@ -61,6 +62,7 @@ export const DailyForecastCard = ({ location }: DailyForecastCardProps) => {
 
   return (
     <div className="weather-card p-4 sm:p-5 animate-fade-in">
+      <CachedDataNotice data={data} />
       <div className="flex items-center gap-2 mb-4">
         <Calendar className="h-5 w-5 text-primary" />
         <h3 className="text-base font-display font-semibold">Próximos 15 Dias</h3>

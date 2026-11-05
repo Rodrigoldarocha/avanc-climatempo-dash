@@ -1,3 +1,4 @@
+import { CachedDataNotice } from "./CachedDataNotice";
 import { useQuery } from "@tanstack/react-query";
 import { getHistoricalData, ApiInvalidResponseError, type ApiError } from "@/services/climatempo";
 import { ApiErrorState } from "@/components/weather/ApiErrorState";
@@ -94,6 +95,7 @@ export const HistoricalChart = ({ location }: HistoricalChartProps) => {
 
   return (
     <div className="weather-card p-4 sm:p-6 animate-fade-in">
+      <CachedDataNotice data={data} />
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />

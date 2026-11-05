@@ -1,3 +1,4 @@
+import { CachedDataNotice } from "./CachedDataNotice";
 import { useQuery } from "@tanstack/react-query";
 import { get72HourForecast, ApiInvalidResponseError } from "@/services/climatempo";
 import { ApiErrorState } from "./ApiErrorState";
@@ -130,6 +131,7 @@ export const HourlyForecastCard = ({ location }: HourlyForecastCardProps) => {
 
   return (
     <div className="weather-card p-4 sm:p-5 animate-fade-in">
+      <CachedDataNotice data={data} />
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />

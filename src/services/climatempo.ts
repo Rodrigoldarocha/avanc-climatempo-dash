@@ -219,10 +219,65 @@ export interface HistoricalData {
 
 type ProxyEndpoint = "current" | "hours72" | "days15" | "history";
 
+// ---- Cache da última resposta válida (localStorage) ----
+const CACHE_PREFIX = "ct-cache:v1:";
+const cacheKey = (endpoint: string, code: number, fromDate?: string) =>
+  `${CACHE_PREFIX}${endpoint}:${code}${fromDate ? `:${fromDate}` : ""}`;
+
+export const writeCache = (key: string, data: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify({ savedAt: new Date().toISOString(), data }));
+  } catch {
+    /* armazenamento cheio ou indisponível */
+  }
+};
+
+export const readCache = (key: string): { savedAt: string; data: any } | null => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.data && parsed?.savedAt ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Horário da última atualização se o dado veio do cache; senão null. */
+export const getCachedAt = (data: unknown): string | null =>
+  (data && typeof data === "object" && (data as any).__cachedAt) || null;
+
 class ClimatempoHttpClient {
   private static readonly BASE_URL = "https://apiadvisor.climatempo.com.br/api/v1";
 
+  /**
+   * Consulta com cache: em sucesso salva a resposta com o horário; se a API
+   * falhar, devolve a última resposta salva marcada com `__cachedAt`.
+   */
   private static async makeRequest(
+    endpoint: ProxyEndpoint,
+    locationCode: number,
+    params?: Record<string, string>
+  ): Promise<any> {
+    const key = cacheKey(endpoint, locationCode, params?.fromDate);
+    try {
+      const data = await this.rawRequest(endpoint, locationCode, params);
+      if (data && typeof data === "object" && (data as any).__fallback) {
+        // Dado estimado: prefira a última previsão real salva.
+        const cached = readCache(key);
+        if (cached) return { ...cached.data, __cachedAt: cached.savedAt };
+        return data;
+      }
+      if (data && typeof data === "object") writeCache(key, data);
+      return data;
+    } catch (error) {
+      const cached = readCache(key);
+      if (cached) return { ...cached.data, __cachedAt: cached.savedAt };
+      throw error;
+    }
+  }
+
+  private static async rawRequest(
     endpoint: ProxyEndpoint,
     locationCode: number,
     params?: Record<string, string>
@@ -317,6 +372,7 @@ class ClimatempoHttpClient {
     switch (endpoint) {
       case "current": {
         return {
+          __fallback: true,
           id: locationCode,
           name: location.city,
           state: location.state,
@@ -453,7 +509,7 @@ class ClimatempoHttpClient {
       }
 
       if (upstream.status >= 500) {
-        return this.generateFallbackPayload(endpoint, locationCode, fromDate);
+        return { ...this.generateFallbackPayload(endpoint, locationCode, fromDate), __fallback: true };
       }
 
       throw new ApiUpstreamError(upstreamError, endpoint, upstream.status);

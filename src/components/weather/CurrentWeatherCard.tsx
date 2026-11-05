@@ -1,3 +1,4 @@
+import { CachedDataNotice } from "./CachedDataNotice";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -49,6 +50,7 @@ export const CurrentWeatherCard = ({ location }: CurrentWeatherCardProps) => {
       {/* Atmospheric glow */}
       <div className="absolute -top-20 -right-20 w-56 h-56 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
       <div className="relative z-10">
+        <CachedDataNotice data={data} />
         {/* Main Temperature Hero */}
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
